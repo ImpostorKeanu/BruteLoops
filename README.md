@@ -15,6 +15,10 @@ __See the [example](https://github.com/arch4ngel/brute_loops/wiki/A-Brief-Exampl
 - Attack Resumption - Inputs (usernames/passwords) are parsed and imported into a SQLite database, where each username has a `last_password_id` indicating the last password guessed. Assuming integrity of the database is maintained between attacks, this allows for attacks to resume where last interrupted.
 - Highly efficient execution (see [Efficient Algorithm](#Efficient-Algorithm))
 
+# Dependencies
+
+BruteLoops requires __Python3.7__ and [SQLAlchemy 1.3.0](https://www.sqlalchemy.org/), the latter of which can be obtained via pip and the requirements.txt file in this repository: `python3.7 -m pip install -r requirements.txt`
+
 # Efficient Algorithm
 
 Standard horizontal brute force techniques commonly rely on simple loops, imposing two significant inefficiencies when confronted with lockout policies:
