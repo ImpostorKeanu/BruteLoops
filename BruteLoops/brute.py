@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
-from brute_loops.logging import *
-from brute_loops.brute_time import BruteTime
-from brute_loops import sql
-from brute_loops.config import Config
-from brute_loops.helpers import *
+from BruteLoops.logging import *
+from BruteLoops.brute_time import BruteTime
+from BruteLoops import sql
+from BruteLoops.config import Config
+from BruteLoops.helpers import *
 from sqlalchemy.orm.session import close_all_sessions
 from multiprocessing.pool import Pool
 from pathlib import Path

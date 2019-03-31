@@ -1,6 +1,6 @@
-from brute_loops.jitter import Jitter
-from brute_loops.brute import Horizontal
-from brute_loops.config import Config
+from BruteLoops.jitter import Jitter
+from BruteLoops.brute import Horizontal
+from BruteLoops.config import Config
 
 # ========================
 # USER INTERFACE SHORTCUTS

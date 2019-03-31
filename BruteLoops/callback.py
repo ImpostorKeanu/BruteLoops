@@ -1,4 +1,4 @@
-from brute_loops.jitter import Jitter
+from BruteLoops.jitter import Jitter
 
 class Callback:
     '''
