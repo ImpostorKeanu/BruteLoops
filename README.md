@@ -1,6 +1,6 @@
 # BruteLoops
 
-A dead simple library to support protocol agnostic horizontal brute force attacks targeting authentication interfaces, commonly referred to as 'credential stuffing', by providing functions that handle efficient looping and timing logic. Logic involving authentication, such as making an HTTP request and analyzing the response, is left up to the program utilizing the library - thus providing a consistent and dependable platform to craft brute force attacks targeting new protocols and applications.
+A dead simple library to support protocol agnostic horizontal brute force attacks targeting authentication interfaces by providing functions that handle efficient looping and timing logic. Logic involving authentication, such as making an HTTP request and analyzing the response, is left up to the program utilizing the library - thus providing a consistent and dependable platform to craft brute force attacks targeting new protocols and applications.
 
 __See the [example](https://github.com/arch4ngel/brute_loops/wiki/A-Brief-Example) page in the wiki for a brief walkthrough.__
 
