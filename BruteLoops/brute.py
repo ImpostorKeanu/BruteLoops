@@ -300,6 +300,9 @@ class Horizontal(BruteForcer):
             # Set a sane default otherwise
             limit = 1
 
+        # Flag used to determine if sleep events should be logged
+          # triggered when no usernames are available for authentication
+        log_sleep = True
         while True:
 
             try:
@@ -322,13 +325,12 @@ class Horizontal(BruteForcer):
                     # future_time must be less than current time
                     # last_password_id cannot match the final_pid, otherwise all guesses
                         # for that user have been completed
-
                 usernames = self.main_db_sess.query(sql.Username).filter(
                     sql.Username.recovered != True,
                     sql.Username.future_time <= time(),
                     sql.Username.last_password_id != final_pid,
                 ).all()
-                
+
                 # =========================
                 # BRUTE FORCE EACH USERNAME
                 # =========================
@@ -404,9 +406,9 @@ class Horizontal(BruteForcer):
                             password.value
                         )
 
-                # ================================
+                # ============================================
                 # STOP ATTACK DUE TO STOP_ON_VALID_CREDENTIALS
-                # ================================
+                # ============================================
                 if self.config.stop_on_valid and (self.main_db_sess.query(
                     sql.Username).filter(sql.Username.recovered == True).first()):
                         self.logger.log(
@@ -476,7 +478,7 @@ class Horizontal(BruteForcer):
                 else:
 
                     self.logger.log(
-                        GENERAL_EVENT,
+                        GENERAL_EVENTS,
                         'Unhandled exception occurred. Shutting down attack '\
                         'and returning control to the caller.'
                     )
