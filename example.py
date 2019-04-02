@@ -1,6 +1,7 @@
 from BruteLoops.jitter import Jitter
 from BruteLoops.brute import Horizontal
 from BruteLoops.config import Config
+from BruteLoops.logging import GENERAL_EVENTS,logging
 
 # ========================
 # USER INTERFACE SHORTCUTS
@@ -96,13 +97,17 @@ config.exception_handlers={KeyboardInterrupt:handle_keyboard_interrupt}
 # Always validate the configuration.
 config.validate()
 
+logger = logging.getLogger('brute_logger')
+
 try:
 
-    print('Initializing attack')
+    logger.log(GENERAL_EVENTS,'Initializing attack')
     bf = Horizontal(config)
-    #bf.launch(usernames='testusers.txt',passwords='testpasswords.txt')
-    bf.launch(usernames=['admin','administrator','superadmin','newuser','administrator'],passwords=['P@ssw0rd'])
-    print('Brute force attack finished')
+    bf.launch(
+        usernames=['admin','administrator','superadmin','newuser','administrator'],
+        passwords=['P@ssw0rd','password','Password1','W1nter2019']
+    )
+    logger.log(GENERAL_EVENTS,'Attack complete')
     
 except Exception as e:
 
