@@ -13,7 +13,7 @@ class OWA2016:
         self.headers = headers
         self.verify_ssl = verify_ssl
 
-    def __call__(self,username,password):
+    def __call__(self,username,password,*args,**kwargs):
 
     
         # post data
