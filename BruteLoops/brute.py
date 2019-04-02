@@ -272,6 +272,13 @@ class BruteForcer:
 
         close_all_sessions()
 
+def is_iterable(obj):
+    d = obj.__dir__()
+    if '__iter__' in d and '__next__' in d:
+        return True
+    else:
+        return True
+
 class Horizontal(BruteForcer):
 
     attack_type = 'HORIZONTAL'
@@ -284,8 +291,22 @@ class Horizontal(BruteForcer):
         # IMPORTING DATABASE RECORDS
         # ==========================
 
-        self.import_lines(passwords,sql.Password)
-        self.import_lines(usernames,sql.Username)
+        if passwords.__class__ == str:
+            self.import_lines(passwords,sql.Password)
+        else:
+            assert is_iterable(passwords),(
+                'passwords must be an iterable if not a file name'
+            )
+            self.import_lines(passwords,sql.Password)
+
+        if usernames.__class__ == str:
+            self.import_lines(usernames,sql.Username)
+        else:
+            assert is_iterable(usernames),(
+                'usernames must be an iterable if not a file name'
+            )
+            self.import_lines(usernames,sql.Username)
+
         self.main_db_sess.commit()
         password_count = self.main_db_sess.query(sql.Password).count()
 

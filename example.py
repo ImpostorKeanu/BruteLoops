@@ -39,7 +39,7 @@ def handle_keyboard_interrupt(brute,exception):
 # Below is a fake authentication function. Note that it's configured to
 # receive a username and password argument. This is precisely how brute_loops
 # will make the authentication callback.
-def fake(username, password):
+def fake(username, password, *args, **kwargs):
     'Fake authentication function to serve as a basic example'
 
     if username == 'administrator' and password == 'P@ssw0rd':
@@ -100,7 +100,8 @@ try:
 
     print('Initializing attack')
     bf = Horizontal(config)
-    bf.launch(usernames='testusers.txt',passwords='testpasswords.txt')
+    #bf.launch(usernames='testusers.txt',passwords='testpasswords.txt')
+    bf.launch(usernames=['admin','administrator','superadmin','newuser','administrator'],passwords=['P@ssw0rd'])
     print('Brute force attack finished')
     
 except Exception as e:
