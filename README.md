@@ -18,4 +18,4 @@ BruteLoops requires __Python3.7__ and [SQLAlchemy 1.3.0](https://www.sqlalchemy.
   - `max_auth_jitter` - A range of time that must pass before attempting to authenticate a given username again
 - Logging (optional) - Log to a file, stderr, or stdout (or multiple) using a standard format. Logging is also __optional__, i.e. the developer can log successful authentication in the callback itself if desired.
 - Attack Resumption - Inputs (usernames/passwords) are parsed and imported into a SQLite database, where each username has a `last_password_id` indicating the last password guessed. Assuming integrity of the database is maintained between attacks, this allows for attacks to resume where last interrupted.
-- Efficient execution (see [Efficient Algorithm[https://github.com/arch4ngel/brute_loops/wiki/The-BruteLoops-Approach-to-a-Horizontal-Brute-Force-Attack]))
+- Efficient execution (see [Efficient Algorithm](https://github.com/arch4ngel/brute_loops/wiki/The-BruteLoops-Approach-to-a-Horizontal-Brute-Force-Attack]))
