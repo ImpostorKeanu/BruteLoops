@@ -11,11 +11,11 @@ BruteLoops requires __Python3.7__ and [SQLAlchemy 1.3.0](https://www.sqlalchemy.
 # Features
 
 - Protocol Agnostic - So long as a Python function or callable object can be written for a target protocol, this library provides the basic looping logic.
-- Though inputs are supplied via input files, an SQLite database is used to support all brute force attacks, allowing BruteLoops to use SQL while selecting usernames to target during execution of the brute force attack -- thus providing you the ability finely tune attacks
+- Though usernames and passwords are supplied via input files and/or lists, an SQLite database is used to support all brute force attacks, allowing BruteLoops to use SQL while selecting usernames to target during attack execution
 - Multiprocessing Support
-- Timing Configuration - BruteLoops currently provides two timing configurations to avoid locking user accounts:
+- Timing Configuration (optionial) - BruteLoops currently provides two timing configurations to avoid locking user accounts:
   - `authentication_jitter` - A range of time a given process will sleep between authentication attempts
   - `max_auth_jitter` - A range of time that must pass before attempting to authenticate a given username again
 - Logging (optional) - Log to a file, stderr, or stdout (or multiple) using a standard format. Logging is also __optional__, i.e. the developer can log successful authentication in the callback itself if desired.
 - Attack Resumption - Inputs (usernames/passwords) are parsed and imported into a SQLite database, where each username has a `last_password_id` indicating the last password guessed. Assuming integrity of the database is maintained between attacks, this allows for attacks to resume where last interrupted.
-- Highly efficient execution (see [Efficient Algorithm[https://github.com/arch4ngel/brute_loops/wiki/The-BruteLoops-Approach-to-a-Horizontal-Brute-Force-Attack]))
+- Efficient execution (see [Efficient Algorithm[https://github.com/arch4ngel/brute_loops/wiki/The-BruteLoops-Approach-to-a-Horizontal-Brute-Force-Attack]))
