@@ -14,7 +14,6 @@ class OWA2016:
         self.verify_ssl = verify_ssl
 
     def __call__(self,username,password,*args,**kwargs):
-
     
         # post data
         data = {
@@ -28,12 +27,12 @@ class OWA2016:
         }
     
         # make the request
-        resp = requests.post(url,
+        resp = requests.post(self.url,
                 data=data,
-                headers=headers,
+                headers=self.headers,
                 verify=self.verify_ssl,
                 allow_redirects=False,
-                proxies=proxies)
+                proxies=self.proxies)
     
         # verify credentials and return outcome
         if resp.status_code == 302 and resp.headers['Location'] and (
