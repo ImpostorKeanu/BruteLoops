@@ -19,3 +19,11 @@ BruteLoops requires __Python3.7__ and [SQLAlchemy 1.3.0](https://www.sqlalchemy.
 - Logging (optional) - Log to a file, stderr, or stdout (or multiple) using a standard format. Logging is also __optional__, i.e. the developer can log successful authentication in the callback itself if desired.
 - Attack Resumption - Inputs (usernames/passwords) are parsed and imported into a SQLite database, where each username has a `last_password_id` indicating the last password guessed. Assuming integrity of the database is maintained between attacks, this allows for attacks to resume where last interrupted.
 - Efficient execution (see [Efficient Algorithm](https://github.com/arch4ngel/brute_loops/wiki/The-BruteLoops-Approach-to-a-Horizontal-Brute-Force-Attack]))
+
+# TODO:
+
+- Handle blank username/password values
+    - Potentially a decorator added to the callable that replaces strings with a string literal of `''` should they match a specific pattern?
+    - May be easier to update the DB schema to accept a Null value which translates to a `''`
+- Handle multiple hosts for a given credential
+    - Should probably be handled at the callback....?
