@@ -7,6 +7,7 @@ import requests
 '''
 # SAMPLE REQUEST
 
+--------------------------------------------------------------------------------
 POST /global-protect/login.esp HTTP/1.1
 Host: x.x.x.x.
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101 Firefox/60.0
@@ -23,6 +24,35 @@ Upgrade-Insecure-Requests: 1
 
 
 prot=https%3A&server=x.x.x.x&inputStr=&action=getsoftware&user=secretusername&passwd=secretpassword&ok=Log+In
+--------------------------------------------------------------------------------
+
+## Notes
+
+- Requests UA must be changed to something innocuous
+- Requires 'Content-Type: application/x-www-form-urlencoded'
+- Requires real cookies from get request of same resource
+
+# SAMPLE RESPONSE
+
+--------------------------------------------------------------------------------
+HTTP/1.1 512 Custom error
+Date: Fri, 05 Apr 2019 17:25:47 GMT
+Content-Type: text/html
+Content-Length: 8450
+Connection: close
+ETag: "6f7fa-47a8-5c6247db"
+Pragma: no-cache
+Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0
+x-private-pan-globalprotect: auth-failed
+Expires: Thu, 19 Nov 1981 08:52:00 GMT
+X-FRAME-OPTIONS: DENY
+Set-Cookie: PHPSESSID=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx; path=/; secure; HttpOnly
+--------------------------------------------------------------------------------
+
+## Notes
+
+- Custom status code
+- Custom header: x-private-pan-globalprotect
 '''
 
 url_re = compile(
@@ -30,6 +60,14 @@ url_re = compile(
 )
 
 class GlobalProtect:
+    '''
+    Palo Alto Global Protect login example
+
+    url parameter should be the full path to the post resource, such as:
+        https://sub.domain.com/global-protect/login.esp. I've left this
+    flexible to compensate for any changes in the URL scheme due to unique
+    configurations.
+    '''
 
     def __init__(self, url, proxies={}, headers={}, verify_ssl=False):
 
