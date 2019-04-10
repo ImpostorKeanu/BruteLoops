@@ -11,6 +11,7 @@ from sys import stdout,stderr
 import inspect
 import logging
 
+
 class Config:
     '''
     Configuration object that is consumed by BruteForce objects. Configurations
@@ -91,23 +92,13 @@ class Config:
         self.log_stdout                 = log_stdout
         self.log_stderr                 = log_stderr
         self.exception_handlers         = exception_handlers
-        self.log_level = 90
-        self.validated = False
-
-        # Setting instance variables
-#        args = inspect.getargvalues(
-#            inspect.currentframe()
-#        )
-#
-#        for arg in args.args:
-#            self.__setattr__(arg,args.locals[arg])
-
+        self.log_level                  = 90
+        self.validated                  = False
 
     def configure_logging(self):
         'Configure a logger for the library'
         
         logger = logging.getLogger('brute_logger')
-
         if self.log_valid or self.log_invalid or self.log_general:
             
             if self.log_valid:   self.log_level = BL.VALID_CREDENTIALS
@@ -132,24 +123,6 @@ class Config:
                     handler.setLevel(self.log_level)
                     logger.addHandler(handler)
 
-#                if self.log_file:
-#                    fh = logging.FileHandler(self.log_file)
-#                    fh.setFormatter(BL.LOG_FORMAT)
-#                    fh.setLevel(self.log_level)
-#                    logger.addHandler(fh)
-#    
-#                if self.log_stdout:
-#                    sh = logging.StreamHandler(stdout)
-#                    sh.setFormatter(BL.LOG_FORMAT)
-#                    sh.setLevel(self.log_level)
-#                    logger.addHandler(sh)
-#    
-#                if self.log_stderr:
-#                    esh = logging.StreamHandler(stderr)
-#                    esh.setFormatter(BL.LOG_FORMAT)
-#                    esh.setLevel(self.log_level)
-#                    logger.addHandler(esh)
-
             else:
 
                 sh = logging.StreamHandler(stdout)
@@ -163,10 +136,19 @@ class Config:
             logger.setLevel(self.log_level)
 
     def validate(self):
-        #TODO: FINISH ALL VALIDATIONS
 
+        # ==========================
+        # ASSERT REQUIRED PARAMETERS
+        # ==========================
+        assert self.process_count, 'A Config object requires a process_count'
+        assert self.process_count.__class__ == int, (
+            'Process count must be an integer value'
+        )
         assert self.db_file, 'A path to a SQLite database is required. '\
             'Library will create one should the file itself not yet exist.'
+        assert self.authentication_callback, (
+            'A callback must be set on the Config object'
+        )
 
         if self.exception_handlers:
 
@@ -178,7 +160,9 @@ class Config:
                 f'Current type: {type(self.exception_handlers)}'
             )
 
-        # CONVERT THE CALLBACK FUNCTION TO A Callback()
+        # ===============================
+        # SET THE AUTHENTICATION_CALLBACK
+        # ===============================
         self.authentication_callback = Callback(
             self.authentication_callback,
             self.authentication_jitter
@@ -187,16 +171,15 @@ class Config:
         # =====================
         # SQLITE INITIALIZATION
         # =====================
-
         engine = create_engine('sqlite:///'+self.db_file)
         Session = sessionmaker()
         Session.configure(bind=engine)
 
         # Create the database if required
-        if not Path(self.db_file).exists(): sql.Base.metadata.create_all(engine)
+        if not Path(self.db_file).exists():
+            sql.Base.metadata.create_all(engine)
 
         self.session_maker = Session
-
         self.configure_logging()
 
         # UPDATE THE OBJECT TO REFLECT VALIDATED STATE

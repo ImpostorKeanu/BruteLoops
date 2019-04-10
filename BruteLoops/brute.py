@@ -284,46 +284,44 @@ class Horizontal(BruteForcer):
     attack_type = 'HORIZONTAL'
 
     def launch(self, usernames, passwords):
-        '''
-        DOCS HERE
-        '''
+        """Launch a horitontal brute force attack.
+
+        The argument to `usernames` and `passwords` are expected to
+        be either a string, tuple, or list object. Should a string be
+        provided, it should represent a path to a file containing
+        newline delimited values of the corresponding input. Should
+        a tuple or list be provided, each element should be a value
+        corrsponding to the appropriate input.
+        """
+
         # ==========================
         # IMPORTING DATABASE RECORDS
         # ==========================
 
-        if passwords.__class__ == str:
-            self.import_lines(passwords,sql.Password)
-        else:
-            assert is_iterable(passwords),(
-                'passwords must be an iterable if not a file name'
-            )
-            self.import_lines(passwords,sql.Password)
+        valid_types = [str,list,tuple]
+        assert passwords.__class__ in valid_types,(
+            'Password list must be a str, list, or tuple'
+        )
+        assert usernames.__class__ in valid_types,(
+            'Username list must be a str, list, or tuple'
+        )
 
-        if usernames.__class__ == str:
-            self.import_lines(usernames,sql.Username)
-        else:
-            assert is_iterable(usernames),(
-                'usernames must be an iterable if not a file name'
-            )
-            self.import_lines(usernames,sql.Username)
-
+        self.import_lines(passwords,sql.Password)
+        self.import_lines(usernames,sql.Username)
         self.main_db_sess.commit()
-        password_count = self.main_db_sess.query(sql.Password).count()
 
         # ========================
         # BEGIN BRUTE FORCE ATTACK
         # ========================
-
+        password_count = self.main_db_sess.query(sql.Password).count()
         if self.config.max_auth_tries:
             # Handle manually configured lockout threshold
             limit = self.config.max_auth_tries
         else:
             # Set a sane default otherwise
             limit = 1
-
-        # Flag used to determine if sleep events should be logged
-          # triggered when no usernames are available for authentication
-        log_sleep = True
+       
+        sleeping = False
         while True:
 
             try:
@@ -351,6 +349,21 @@ class Horizontal(BruteForcer):
                     sql.Username.future_time <= time(),
                     sql.Username.last_password_id != final_pid,
                 ).all()
+
+                # Logging sleep events
+                if not usernames and not sleeping:
+                    u = self.main_db_sess.query(sql.Username) \
+                        .filter(sql.Username.recovered == 0) \
+                        .order_by(sql.Username.future_time.desc()) \
+                        .first()
+                    sleeping = True
+                    if u:
+                        self.logger.log(
+                            GENERAL_EVENTS,
+                            f'Sleeping until {BruteTime.float_to_str(u.future_time)}'
+                        )
+                elif usernames and sleeping:
+                    sleeping = False
 
                 # =========================
                 # BRUTE FORCE EACH USERNAME
@@ -452,20 +465,11 @@ class Horizontal(BruteForcer):
                         outputs = self.monitor_processes()
                         self.handle_outputs(outputs)
 
-#                        self.logger.log(
-#                            GENERAL_EVENTS,
-#                            'No usernames currently available for brute '\
-#                            'forcing. Will resune once a duration of time'\
-#                            ' has elapsed comensurate to the '\
-#                            'max_auth_jitter configuration.')
-
-
                     sleep(.2)
                     continue
 
                 outputs = self.monitor_processes(ready_all=True)
                 self.handle_outputs(outputs)
-       
                 self.logger.log(GENERAL_EVENTS,'Attack finished')
     
                 # ========
