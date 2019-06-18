@@ -115,6 +115,7 @@ class BruteForcer:
         - `PASSWORD` - string value of the password
         '''
         # DETERMINE AND HANDLE VALID_CREDENTIALS CREDENTIALS
+        recovered = False
         for output in outputs:
 
             username = self.handler_db_sess \
@@ -135,6 +136,7 @@ class BruteForcer:
             # CREDENTIALS ARE VALID_CREDENTIALS
             if output[0]:
 
+                recovered = True
                 self.logger.log(VALID_CREDENTIALS,cred)
 
                 password = self.handler_db_sess \
@@ -151,6 +153,8 @@ class BruteForcer:
             else: 
 
                 self.logger.log(CREDENTIAL_EVENTS,cred)
+
+        return recovered
 
     def monitor_processes(self,ready_all=False):
         '''
@@ -202,27 +206,35 @@ class BruteForcer:
                 return outputs
 
 
-    def do_authentication_callback(self, *args):
+    def do_authentication_callback(self, username, password, stop_on_valid=False, 
+            *args, **kwargs):
         '''
         Call the authentication callback from a distinct process. Will monitor
         processes for completion if all are currently occupied with a pervious
         callback request.
         '''
+
+        recovered = False
         if len(self.presults) == self.config.process_count:
 
             # monitor result objects
             outputs = self.monitor_processes()
-            self.handle_outputs(outputs)
+            recovered = self.handle_outputs(outputs)
+
+        if recovered and stop_on_valid:
+            return recovered
 
         # initiate a brute in a process within the pool
         self.presults.append(
             self.pool.apply_async(
                 self.config.authentication_callback,
                 (
-                    args
+                    (username,password,)
                 )
             )
         )
+
+        return recovered
 
     def import_lines(self, container, model):
         '''
@@ -321,7 +333,8 @@ class Horizontal(BruteForcer):
             # Set a sane default otherwise
             limit = 1
        
-        sleeping = False
+        sleeping  = False # determine if the brute attack is sleeping
+        recovered = False # track if a valid credentials has been recovered
         while True:
 
             try:
@@ -435,19 +448,24 @@ class Horizontal(BruteForcer):
                         self.main_db_sess.commit()
 
                         # Do the authentication callback
-                        self.do_authentication_callback(
+                        recovered = self.do_authentication_callback(
                             username.value,
                             password.value
                         )
 
+                        if recovered and self.config.stop_on_valid:
+                            break
+
+                    if recovered and self.config.stop_on_valid:
+                        break
+
                 # ============================================
                 # STOP ATTACK DUE TO STOP_ON_VALID_CREDENTIALS
                 # ============================================
-                if self.config.stop_on_valid and (self.main_db_sess.query(
-                    sql.Username).filter(sql.Username.recovered == True).first()):
+                if recovered and self.config.stop_on_valid:
                         self.logger.log(
                             GENERAL_EVENTS,
-                            'Valid credentials recovered. Exiting per '\
+                            'Valid credentials recovered. Exiting per ' \
                             'stop_on_valid configuration.',
                         )
                         self.shutdown()

