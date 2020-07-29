@@ -137,8 +137,6 @@ class FTP():
         # VERIFY CREDENTIALS AND RETURN OUTCOME
         # =====================================
 
-        print(resp.text)
-
         if resp.text.find('Invalid') > -1:
             return (0, username, password)
         else:
