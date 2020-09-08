@@ -1,5 +1,5 @@
 from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey, func,
-        text, Boolean, Float, Enum)
+        text, Boolean, Float, Enum, UniqueConstraint)
 from sqlalchemy import create_engine
 from sqlalchemy.orm import relationship, backref, sessionmaker, close_all_sessions
 from sqlalchemy.ext.declarative import declarative_base
@@ -35,18 +35,28 @@ class Password(Base):
     id = Column(Integer, primary_key=True, doc='Password id')
     value = Column(String, nullable=False, unique=True,
         doc='Password value')
-#    usernames = relationship('Username',
-#        primaryjoin=(
-#            'and_(id == Username.last_password_id,'\
-#            'Username.recovered == True)'
-#        ),
-#        doc='Usernames associated with a given password',
-#        backref=('password')
-#    )
 
     def __repr__(self):
 
         return f'<Password(id={self.id}, value={self.value})>'
+
+class Credential(Base):
+    __tablename__ = 'credentials'
+    id = Column(Integer, primary_key=True, doc='Password id')
+    username = Column(String, nullable=False,
+        doc='Username value')
+    password = Column(String, nullable=False,
+        doc='Password value')
+    recovered = Column(Boolean, default=False,
+        doc='Determines if the credentials are valid')
+    guess_time = Column(Float, default=-1.0,
+        doc='Last time when username was targeted for authentication')
+    __table_args__ = (UniqueConstraint('username','password',
+        name='_credential_unique_constraint'),)
+
+    def __repr__(self):
+        return f'<Credential(id={self.id}, username={self.username}, ' \
+                'password={self.password})>'
 
 class Attack(Base):
     __tablename__ = 'attacks'

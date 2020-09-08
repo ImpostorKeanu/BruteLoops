@@ -13,10 +13,12 @@ from collections import namedtuple
 from copy import deepcopy
 from time import sleep,time
 from types import FunctionType, MethodType
+from io import StringIO
 import traceback
 import re
 import signal
 import logging
+import csv
 
 class BruteForcer:
     '''
@@ -210,8 +212,18 @@ class BruteForcer:
             *args, **kwargs):
         '''
         Call the authentication callback from a distinct process. Will monitor
-        processes for completion if all are currently occupied with a pervious
+        processes for completion if all are currently occupied with a previous
         callback request.
+        '''
+
+        '''
+        When the maximum number of processes have been engaged
+        to make authentication requests, call monitor_processes
+        to watch each process until authentication finishes.
+
+        Once completeds, the outputs are passed to handle_outputs,
+        which is responsible for logging the outcome of the authentication
+        request and updating the proper SQL record with the outcome.
         '''
 
         recovered = False
@@ -290,6 +302,121 @@ def is_iterable(obj):
         return True
     else:
         return True
+
+class Credential(BruteForcer):
+    attack_type = 'CREDENTIAL'
+
+    def merge_lines(self,container):
+        """Merge credential lines from an iterable container
+        into the target SQLite database.
+        """
+
+        for tup in container:
+            try:
+                with self.main_db_sess.begin_nested():
+                    self.main_db_sess.merge(
+                            sql.Credential(username=tup[0],
+                                password=tup[1]))
+            except Exception as e:
+                self.main_db_sess.rollback()
+
+    def import_lines(self,container,csv_delimiter=","):
+        """Import lines into a database from a CSV file.
+        """
+
+        # String values are associated with files on disk
+        if container.__class__ == str:
+            with open(container) as infile:
+                self.merge_lines(
+                    csv.reader(container,csv_delimiter)
+                )
+
+        # Anything else is considered an iterable
+        else:
+            self.merge_lines(
+                csv.reader(container,csv_delimiter)
+            )
+
+    def handle_outputs(self,outputs):
+        """Handle output from an authentication request by logging
+        the outcome and updating the target SQLite database record.
+        """
+
+        recovered = False
+        for output in outputs:
+
+            credential = self.handler_db_sess \
+                    .query(sql.Credential) \
+                    .filter(sql.Credential.username==output[1],
+                            sql.Credential.password==output[2]) \
+                    .first()
+
+            cred = f'{output[1]}:{output[2]}'
+
+            if output[0]:
+
+                recovered = True
+                self.logger.log(VALID_CREDENTIALS,cred)
+                credential.recovered=True
+                self.handler_db_sess.commit()
+
+            else:
+
+                self.logger.log(CREDENTIAL_EVENTS,cred)
+
+        return recovered
+
+    def launch(self, credentials):
+        """Launch the credential brute force attack.
+        """
+
+        # =======================
+        # IMPORT DATABASE RECORDS
+        # =======================
+
+        valid_types = [str,list,tuple]
+        assert credentials.__class__ in valid_types,(
+            'Password list must be a str, list, or tuple'
+        )
+
+        self.import_lines(credentials,sql.Credential)
+        self.main_db_sess.commit()
+
+        # ================
+        # START THE ATTACK
+        # ================
+
+        try:
+    
+            for credential in self.main_db_sess.query(sql.Credential) \
+                    .filter(sql.Credential.recovered==False,
+                            sql.Credential.guess_time==-1.0):
+                credential.guess_time = BruteTime.current_time()
+                recovered = self.do_authentication_callback(
+                        credential.username, credential.password,
+                        stop_on_valid=self.config.stop_on_valid)
+        
+            outputs = self.monitor_processes(ready_all=True)
+            self.handle_outputs(outputs)
+            self.logger.log(GENERAL_EVENTS,'Attack finished')
+            self.shutdown()
+
+        except Exception as e:
+
+            if e in self.config.exception_handlers:
+
+                self.config.exception_handlers[e](self)
+
+            else:
+
+                self.logger.log(
+                    GENERAL_EVENTS,
+                    'Unhandled exception occurred. Shutting down attack ' \
+                    'and returning control to the caller.'
+                )
+
+                self.shutdown()
+                raise e
 
 class Horizontal(BruteForcer):
 
@@ -423,7 +550,9 @@ class Horizontal(BruteForcer):
                         # DO THE AUTHENTICATION FOR EACH PASSWORD
                         # =======================================
                         # NOTE: Authentication jitter is handled in each disctinct
-                        # process, thus it is not expressly called here
+                        # process, thus it is not expressly called here. See logic
+                        # that sets the authentication callback in BruteLoops.config
+                        # for how this process works.
    
                         # Current time of authentication attempt
                         ctime = BruteTime.current_time()

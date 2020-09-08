@@ -3,7 +3,7 @@ from BruteLoops.jitter import Jitter
 class Callback:
     '''
     Callback object that is callable while also implementing authentication
-    jitter when required. This approach prevents the main from process from
+    jitter when required. This approach prevents the main process from
     blocking when authentication jitter is desired at the _process_ level
     instead of the main process.
     '''
