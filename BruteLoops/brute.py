@@ -324,11 +324,12 @@ class Credential(BruteForcer):
         """Import lines into a database from a CSV file.
         """
 
+
         # String values are associated with files on disk
         if container.__class__ == str:
-            with open(container) as infile:
+            with open(container) as container:
                 self.merge_lines(
-                    csv.reader(container,csv_delimiter)
+                    csv.reader(container,delimiter=csv_delimiter)
                 )
 
         # Anything else is considered an iterable
@@ -379,7 +380,7 @@ class Credential(BruteForcer):
             'Password list must be a str, list, or tuple'
         )
 
-        self.import_lines(credentials,sql.Credential)
+        self.import_lines(credentials)
         self.main_db_sess.commit()
 
         # ================
