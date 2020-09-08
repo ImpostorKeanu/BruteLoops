@@ -388,15 +388,31 @@ class Credential(BruteForcer):
         # ================
 
         try:
+
+            # =====================
+            # GUESS EACH CREDENTIAL
+            # =====================
     
             for credential in self.main_db_sess.query(sql.Credential) \
                     .filter(sql.Credential.recovered==False,
                             sql.Credential.guess_time==-1.0):
+
+                # Update the guess time
                 credential.guess_time = BruteTime.current_time()
+
+                # Guess the credentials
                 recovered = self.do_authentication_callback(
                         credential.username, credential.password,
                         stop_on_valid=self.config.stop_on_valid)
-        
+
+                # Stop on valid then needed
+                if credential.recovered and self.config.stop_on_valid:
+                    break
+
+            # =============================
+            # FINISHED. CLEAN UP THE ATTACK
+            # =============================
+            
             outputs = self.monitor_processes(ready_all=True)
             self.handle_outputs(outputs)
             self.logger.log(GENERAL_EVENTS,'Attack finished')
