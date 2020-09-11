@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
-from BruteLoops.jitter import Jitter
-from BruteLoops import sql
-from BruteLoops.callback import Callback
-from BruteLoops import logging as BL
+from .jitter import Jitter
+from . import sql
+from .callback import Callback
+from . import logging as BL
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from pathlib import Path

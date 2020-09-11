@@ -1,6 +1,6 @@
 import re
 import time
-from BruteLoops.brute_time import BruteTime
+from .brute_time import BruteTime
 from random import uniform
 
 class JitterTime(BruteTime):
