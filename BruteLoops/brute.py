@@ -13,7 +13,7 @@ from collections import namedtuple
 from copy import deepcopy
 from time import sleep,time
 from types import FunctionType, MethodType
-from io import StringIO
+from io import StringIO,TextIOWrapper
 import traceback
 import re
 import signal
@@ -248,7 +248,20 @@ class BruteForcer:
 
         return recovered
 
-    def import_lines(self, container, model):
+    def merge_lines(self,container,model):
+
+        is_file = container.__class__ == TextIOWrapper 
+
+        for line in container:
+            if is_file: line = strip_newline(line)
+            try:
+                with self.main_db_sess.begin_nested():
+                    self.main_db_sess.merge(model(value=line))
+            except Exception as e:
+                self.main_db_sess.rollback()
+        self.main_db_sess.commit()
+
+    def import_lines(self, container, model, is_file=False):
         '''
         Import lines into the database.
         '''
@@ -257,21 +270,11 @@ class BruteForcer:
 
         # TODO: Make this not suck.
 
-        # HANDLE INPUT FILES
-        if container.__class__ == str:
-            with open(container) as infile:
-                container = [strip_newline(line) for line in infile]
-
-        # INSERT NEW RECORDS
-        for line in container:
-            try:
-                with self.main_db_sess.begin_nested():
-                    self.main_db_sess.merge(model(value=line))
-            except Exception as e:
-                self.main_db_sess.rollback()
-
-        self.main_db_sess.commit()
-
+        if is_file:
+            with open(container) as container:
+                self.merge_lines(container, model)
+        else:
+            self.merge_lines(container,model)
 
     def shutdown(self):
         '''
@@ -439,7 +442,8 @@ class Horizontal(BruteForcer):
 
     attack_type = 'HORIZONTAL'
 
-    def launch(self, usernames, passwords):
+    def launch(self, usernames=None, passwords=None,
+            username_files=None, password_files=None):
         """Launch a horitontal brute force attack.
 
         The argument to `usernames` and `passwords` are expected to
@@ -454,16 +458,27 @@ class Horizontal(BruteForcer):
         # IMPORTING DATABASE RECORDS
         # ==========================
 
-        valid_types = [str,list,tuple]
-        assert passwords.__class__ in valid_types,(
-            'Password list must be a str, list, or tuple'
-        )
-        assert usernames.__class__ in valid_types,(
-            'Username list must be a str, list, or tuple'
-        )
+        for v in [usernames,passwords,username_files,password_files]:
+            if is_iterable(v): continue
+            raise ValueError(
+                    'Username/Password arguments must be iterable values ' \
+                    'populated with string records or file names'
+                )
 
-        self.import_lines(passwords,sql.Password)
-        self.import_lines(usernames,sql.Username)
+        if passwords:
+            self.import_lines(passwords,sql.Password)
+
+        if usernames:
+            self.import_lines(usernames,sql.Username)
+
+        if username_files:
+            for f in username_files:
+                self.import_lines(f,sql.Username,True)
+
+        if password_files:
+            for f in password_files:
+                self.import_lines(f,sql.Password,True)
+
         self.main_db_sess.commit()
 
         # ========================
