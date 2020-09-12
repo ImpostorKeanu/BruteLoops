@@ -4,7 +4,6 @@ from .logging import *
 from .brute_time import BruteTime
 from . import sql
 from .config import Config
-from .helpers import *
 from sqlalchemy.orm.session import close_all_sessions
 from multiprocessing.pool import Pool
 from pathlib import Path
@@ -18,16 +17,57 @@ import traceback
 import re
 import signal
 import logging
-import csv
+
+def strip_newline(s):
+    '''Strips the final character from a string via list comprehension.
+    Useful when ```str.strip()``` might pull a legitimate whitespace
+    character from a password.
+    '''
+
+    if s[-1] == '\n':
+
+        return s[:len(s)-1]
+
+    else:
+
+        return s
+
+def is_iterable(obj):
+    '''Check if an object has the `__iter__` and `__next__` attributes,
+    suggesting it is an iterable object.
+    '''
+
+    d = obj.__dir__()
+    if '__iter__' in d and '__next__' in d:
+        return True
+    else:
+        return True
+
+def csv_split(s,delimiter=','):
+    '''Split a string on the first instance of a delimiter value.
+    A tuple in the form of `(s_head,s_tail)` is returned, otherwise
+    a tuple of `(None,None)` if the delimiter is not observed.
+    '''
+
+    ind=s.find(delimiter)
+    if ind == -1:
+        return (None,None,)
+
+    return (s[:ind],s[ind+1:],)
 
 class BruteForcer:
-    '''
-    DOCS HERE
+    '''Base object from which all other brute forcers will inherit.
+    Provides all basic functionality, less brute force logic.
     '''
 
     attack_type = 'DEFAULT'
 
     def __init__(self, config):
+        '''Initialize the BruteForcer object, including processes.
+
+        - config - A BruteLoops.config.Config object providing all
+        configuration parameters to proceed with the attack.
+        '''
 
         if not config.validated: config.validate()
 
@@ -39,11 +79,11 @@ class BruteForcer:
         # BASIC CONFIGURATION PARAMETERS
         # ==============================
 
-        self.config = config            # Config object
+        self.config   = config            # Config object
         self.presults = []              # Process results
-        self.pool = None                # Process pool (initialized by method)
-        self.attack = None
-        self.logger = logging.getLogger('brute_logger')
+        self.pool     = None                # Process pool (initialized by method)
+        self.attack   = None
+        self.logger   = logging.getLogger('brute_logger')
         
         self.logger.log(
             GENERAL_EVENTS,
@@ -53,8 +93,20 @@ class BruteForcer:
         # =============================================================
         # REASSIGN DEFAULT SIGNAL HANDLER AND INITIALIZE A PROCESS POOL
         # =============================================================
+
         original_sigint_handler = signal.signal(signal.SIGINT,signal.SIG_IGN)
         self.pool = Pool(processes=config.process_count)
+
+        if not KeyboardInterrupt in self.config.exception_handlers:
+
+            def handler(sig,exception):
+                print('SIGINT Captured -- Shutting down ' \
+                      'attack\n')
+                self.shutdown()
+                print('Exiting')
+                exit(sig)
+
+            self.config.exception_handlers[KeyboardInterrupt] = handler
 
         if KeyboardInterrupt in self.config.exception_handlers:
 
@@ -76,6 +128,7 @@ class BruteForcer:
 
             signal.signal(signal.SIGINT, sigint_handler)
 
+
         else: signal.signal(signal.SIGINT, original_sigint_handler)
 
         # =================
@@ -83,9 +136,11 @@ class BruteForcer:
         # =================
         
         current_time = BruteTime.current_time(format=str)
-        self.logger.log(GENERAL_EVENTS,f'Beginning attack: {current_time}')
+        self.logger.log(GENERAL_EVENTS,
+                f'Beginning attack: {current_time}')
         
-        # NOTE: Unused at the moment. Will likely be used when additional attack types are added.
+        # NOTE: Unused at the moment. Will likely be used when
+        # additional attack types are added.
         self.attack_type = self.__class__.attack_type
 
         # CREATE A NEW ATTACK
@@ -97,8 +152,7 @@ class BruteForcer:
         self.config = config
 
     def handle_outputs(self, outputs):
-        '''
-        Handle outputs from the authentication callback. It expects a list of
+        '''Handle outputs from the authentication callback. It expects a list of
         tuples/lists conforming to the following format:
 
         ```
@@ -116,7 +170,11 @@ class BruteForcer:
         - `USERNAME` - string value of the username
         - `PASSWORD` - string value of the password
         '''
+
+        # ==================================================
         # DETERMINE AND HANDLE VALID_CREDENTIALS CREDENTIALS
+        # ==================================================
+
         recovered = False
         for output in outputs:
 
@@ -126,8 +184,24 @@ class BruteForcer:
                     sql.Username.recovered==False) \
                 .first()
 
+            # =======================================================
             # COMPENSATE USERNAME RECENTLY BEING UPDATED TO RECOVERED
+            # =======================================================
+
             if not username: continue
+
+            password = self.handler_db_sess \
+                .query(sql.Password) \
+                .filter(sql.Password.value==output[2]) \
+                .first()
+
+            credential = self.handler_db_sess \
+                .query(sql.Credential) \
+                .filter(sql.Credential.username_id==username.id,
+                        sql.Credential.password_id==password.id) \
+                .first()
+
+            credential.guessed=True
 
             # ======================
             # HANDLE THE CREDENTIALS
@@ -135,38 +209,42 @@ class BruteForcer:
 
             cred = f'{output[1]}:{output[2]}'
 
-            # CREDENTIALS ARE VALID_CREDENTIALS
+            # Handle valid credentials
             if output[0]:
 
                 recovered = True
                 self.logger.log(VALID_CREDENTIALS,cred)
 
-                password = self.handler_db_sess \
-                    .query(sql.Password) \
-                    .filter(sql.Password.value==output[2]) \
-                    .first()
-
-                # UPDATE USERNAME TO BE RECOVERED
+                # Update username to "recovered"
                 username.recovered=True
                 username.last_password_id=password.id
-                self.handler_db_sess.commit()
 
-            # CREDENTIALS ARE CREDENTIAL_EVENTS
+                # Update the credential to valid
+                credential.valid=True
+
+            # Credentials are no good
             else: 
 
+                # Update the credential to invalid
+                credential.valid=False
                 self.logger.log(CREDENTIAL_EVENTS,cred)
+
+
+        # Commit the changes
+        self.handler_db_sess.commit()
 
         return recovered
 
     def monitor_processes(self,ready_all=False):
-        '''
-        Iterate over each process in ```self.presults``` and wait for a process to
-        complete execution. ```ready_all``` indciates that monitoring will continue
-        looping until all processes complete execution, otherwise a list of outputs
+        '''Iterate over each process in ```self.presults``` and wait
+        for a process to complete execution. ```ready_all```
+        indciates that monitoring will continue looping until all
+        processes complete execution, otherwise a list of outputs
         will be returned after a single process is finished.
 
-        Returns a list of output objects from the ```self.authentication_callback``` function
-        and the first three elements should follow the pattern below:
+        Returns a list of output objects from the
+        ```self.authentication_callback``` function and the first
+        three elements should follow the pattern below:
 
         ```
         output = [
@@ -248,37 +326,87 @@ class BruteForcer:
 
         return recovered
 
-    def merge_lines(self,container,model):
+    def add_credential(self, csv_line, csv_delimiter=','):
+        '''Parse a CSV line and add the username and passwrd
+        values to the database, followed by adding the IDs to
+        those values to the credential_joins table.
+        '''
+
+        username, password=csv_split(csv_line,csv_delimiter)
+        # Ignore improperly formatted records
+        if not username or not password:
+            return None
+
+        else:
+
+            # Add each value to the proper table
+            self.merge_lines([username],sql.Username)
+            self.merge_lines([password],sql.Password)
+
+            # Get record ids
+            username = self.main_db_sess.query(sql.Username).filter(
+                    sql.Username.value==username) \
+                    .first() \
+
+            password = self.main_db_sess.query(sql.Password).filter(
+                    sql.Password.value==password) \
+                    .first() \
+
+            # Add the password to the username to form a
+            # a credential relationship
+            try:
+
+                username.passwords.append(password)
+            except Exception as e:
+                self.main_db_sess.rollback()
+
+    def merge_lines(self, container, model, is_credentials=False,
+            csv_delimiter=','):
+        '''Merge values from the container into the target model. If
+        `is_credentials` is not `False`, then the value will be treated
+        as a CSV value.
+        '''
 
         is_file = container.__class__ == TextIOWrapper 
 
         for line in container:
+
+            # Strip newlines from files
             if is_file: line = strip_newline(line)
+
+            # Parse credentials as CSV line
+            if is_credentials:
+
+                self.add_credential(line)
+                continue
+
             try:
+
                 with self.main_db_sess.begin_nested():
+
                     self.main_db_sess.merge(model(value=line))
+
             except Exception as e:
+
                 self.main_db_sess.rollback()
+
         self.main_db_sess.commit()
 
-    def import_lines(self, container, model, is_file=False):
-        '''
-        Import lines into the database.
+    def import_lines(self, container, model, is_file=False,
+            is_credentials=False,csv_delimiter=','):
+        '''Import lines into the database.
         '''
         # source for Session.begin_nested():
         #   https://docs.sqlalchemy.org/en/latest/orm/session_transaction.html
 
-        # TODO: Make this not suck.
-
         if is_file:
             with open(container) as container:
-                self.merge_lines(container, model)
+                self.merge_lines(container, model, is_credentials)
         else:
-            self.merge_lines(container,model)
+            self.merge_lines(container, model, is_credentials)
 
     def shutdown(self):
-        '''
-        Close & join the process pool, followed by closing input/output files.
+        '''Close & join the process pool, followed by closing input/output files.
         '''
 
         # =====================
@@ -299,151 +427,79 @@ class BruteForcer:
 
         close_all_sessions()
 
-def is_iterable(obj):
-    d = obj.__dir__()
-    if '__iter__' in d and '__next__' in d:
-        return True
-    else:
-        return True
+    def import_values(self, usernames=None, passwords=None,
+            username_files=None, password_files=None,
+            credentials=None, credential_files=None,
+            csv_delimiter=','):
+        '''Check each supplied value to determine if it's iterable
+        and proceed to import each record of the container into
+        the brute force database.
+        '''
 
-class Credential(BruteForcer):
-    attack_type = 'CREDENTIAL'
+        # ===============
+        # VALIDATE INPUTS
+        # ===============
 
-    def merge_lines(self,container):
-        """Merge credential lines from an iterable container
-        into the target SQLite database.
-        """
-
-        for tup in container:
-            try:
-                with self.main_db_sess.begin_nested():
-                    self.main_db_sess.merge(
-                            sql.Credential(username=tup[0],
-                                password=tup[1]))
-            except Exception as e:
-                self.main_db_sess.rollback()
-
-    def import_lines(self,container,csv_delimiter=","):
-        """Import lines into a database from a CSV file.
-        """
-
-
-        # String values are associated with files on disk
-        if container.__class__ == str:
-            with open(container) as container:
-                self.merge_lines(
-                    csv.reader(container,delimiter=csv_delimiter)
+        for v in [usernames,passwords,username_files,password_files,
+                credentials,credential_files]:
+            if is_iterable(v): continue
+            raise ValueError(
+                    'Username/Password arguments must be iterable values ' \
+                    'populated with string records or file names'
                 )
 
-        # Anything else is considered an iterable
-        else:
-            self.merge_lines(
-                csv.reader(container,csv_delimiter)
-            )
+        # =================
+        # IMPORT THE VALUES
+        # =================
 
-    def handle_outputs(self,outputs):
-        """Handle output from an authentication request by logging
-        the outcome and updating the target SQLite database record.
-        """
+        if passwords:
+            self.import_lines(passwords,sql.Password)
 
-        recovered = False
-        for output in outputs:
+        if usernames:
+            self.import_lines(usernames,sql.Username)
 
-            credential = self.handler_db_sess \
-                    .query(sql.Credential) \
-                    .filter(sql.Credential.username==output[1],
-                            sql.Credential.password==output[2]) \
-                    .first()
+        if credentials:
+            self.import_lines(credentials,None,False,True,csv_delimiter)
 
-            cred = f'{output[1]}:{output[2]}'
+        if username_files:
+            for f in username_files:
+                self.import_lines(f,sql.Username,True)
 
-            if output[0]:
+        if password_files:
+            for f in password_files:
+                self.import_lines(f,sql.Password,True)
 
-                recovered = True
-                self.logger.log(VALID_CREDENTIALS,cred)
-                credential.recovered=True
-                self.handler_db_sess.commit()
+        if credential_files:
+            for f in credential_files:
+                self.import_lines(f,None,True,True,csv_delimiter)
 
-            else:
-
-                self.logger.log(CREDENTIAL_EVENTS,cred)
-
-        return recovered
-
-    def launch(self, credentials):
-        """Launch the credential brute force attack.
-        """
-
-        # =======================
-        # IMPORT DATABASE RECORDS
-        # =======================
-
-        valid_types = [str,list,tuple]
-        assert credentials.__class__ in valid_types,(
-            'Password list must be a str, list, or tuple'
-        )
-
-        self.import_lines(credentials)
         self.main_db_sess.commit()
 
-        # ================
-        # START THE ATTACK
-        # ================
 
-        try:
+class Spray(BruteForcer):
 
-            # =====================
-            # GUESS EACH CREDENTIAL
-            # =====================
-    
-            for credential in self.main_db_sess.query(sql.Credential) \
-                    .filter(sql.Credential.recovered==False,
-                            sql.Credential.guess_time==-1.0):
+    attack_type = 'SPRAY'
 
-                # Update the guess time
-                credential.guess_time = BruteTime.current_time()
+    def import_values(self, *args, **kwargs):
 
-                # Guess the credentials
-                recovered = self.do_authentication_callback(
-                        credential.username, credential.password,
-                        stop_on_valid=self.config.stop_on_valid)
+        # =========================================
+        # IMPORT VALUES INTO THE DATABASE VIA SUPER
+        # =========================================
 
-                # Stop on valid then needed
-                if credential.recovered and self.config.stop_on_valid:
-                    break
+        super().import_values(*args, **kwargs)
 
-            # =============================
-            # FINISHED. CLEAN UP THE ATTACK
-            # =============================
-            
-            outputs = self.monitor_processes(ready_all=True)
-            self.handle_outputs(outputs)
-            self.logger.log(GENERAL_EVENTS,'Attack finished')
-            self.shutdown()
+        # ====================================================
+        # CREATE A CREDENTIAL FOR EACH USERNAME:PASSWORD COMBO
+        # ====================================================
 
-        except Exception as e:
-
-            if e in self.config.exception_handlers:
-
-                self.config.exception_handlers[e](self)
-
-            else:
-
-                self.logger.log(
-                    GENERAL_EVENTS,
-                    'Unhandled exception occurred. Shutting down attack ' \
-                    'and returning control to the caller.'
-                )
-
-                self.shutdown()
-                raise e
-
-class Horizontal(BruteForcer):
-
-    attack_type = 'HORIZONTAL'
+        passwords = self.main_db_sess.query(sql.Password).all()
+        for u in self.main_db_sess.query(sql.Username).all():
+            u.passwords=passwords
 
     def launch(self, usernames=None, passwords=None,
-            username_files=None, password_files=None):
+            username_files=None, password_files=None,
+            credentials=None, credential_files=None,
+            csv_delimiter=','):
         """Launch a horitontal brute force attack.
 
         The argument to `usernames` and `passwords` are expected to
@@ -457,29 +513,12 @@ class Horizontal(BruteForcer):
         # ==========================
         # IMPORTING DATABASE RECORDS
         # ==========================
-
-        for v in [usernames,passwords,username_files,password_files]:
-            if is_iterable(v): continue
-            raise ValueError(
-                    'Username/Password arguments must be iterable values ' \
-                    'populated with string records or file names'
-                )
-
-        if passwords:
-            self.import_lines(passwords,sql.Password)
-
-        if usernames:
-            self.import_lines(usernames,sql.Username)
-
-        if username_files:
-            for f in username_files:
-                self.import_lines(f,sql.Username,True)
-
-        if password_files:
-            for f in password_files:
-                self.import_lines(f,sql.Password,True)
-
-        self.main_db_sess.commit()
+        
+        self.import_values(usernames=usernames,
+                passwords=passwords, username_files=username_files,
+                password_files=password_files, credentials=credentials,
+                credential_files=credential_files,
+                csv_delimiter=csv_delimiter)
 
         # ========================
         # BEGIN BRUTE FORCE ATTACK
@@ -491,7 +530,7 @@ class Horizontal(BruteForcer):
         else:
             # Set a sane default otherwise
             limit = 1
-       
+      
         sleeping  = False # determine if the brute attack is sleeping
         recovered = False # track if a valid credentials has been recovered
         while True:
@@ -502,25 +541,18 @@ class Horizontal(BruteForcer):
                 # GET GUESSABLE USERNAMES
                 # =======================
                
-                # Get the ID of the last password in the database
-                    # Used to determine if all passwords have been guessed for a
-                    # given username
-                final_pid = self.main_db_sess.query(sql.Password) \
-                    .order_by(sql.Password.id.desc()) \
-                    .limit(1) \
-                    .first() \
-                    .id
-
                 # Get a list of usernames to target
                     # must not have already been recovered during an earlier attack
                     # future_time must be less than current time
                     # last_password_id cannot match the final_pid, otherwise all guesses
                         # for that user have been completed
-                usernames = self.main_db_sess.query(sql.Username).filter(
-                    sql.Username.recovered != True,
-                    sql.Username.future_time <= time(),
-                    sql.Username.last_password_id != final_pid,
-                ).all()
+                usernames = self.main_db_sess.query(sql.Username) \
+                    .join(sql.Credential) \
+                    .filter(
+                        sql.Username.recovered == False,
+                        sql.Username.future_time <= time(),
+                        sql.Credential.guessed == False,) \
+                    .all()
 
                 # Logging sleep events
                 if not usernames and not sleeping:
@@ -544,33 +576,25 @@ class Horizontal(BruteForcer):
                 # Current limit will be used to calculate the limit of the current query
                  # used to assure that the limit remains lesser than the greatest password
                  # id
-                current_limit = limit
                 for username in usernames:
     
                     # ========================
                     # GET A CHUNK OF PASSWORDS
                     # ========================
     
-                    # Offset represents the password id which should be targeted for the password
-                    # chunk.
-                    offset = username.last_password_id
-
-                    if offset >= final_pid:
-                        offset = final_pid
-                        current_limit = 1
-    
-                    passwords = self.main_db_sess.query(sql.Password) \
-                        .order_by(sql.Password.id) \
-                        .offset(offset) \
-                        .limit(current_limit) \
-                        .all()
+                    credentials = self.main_db_sess \
+                            .query(sql.Credential) \
+                            .filter(sql.Credential.username_id==username.id,
+                                    sql.Credential.guessed==False) \
+                            .limit(limit) \
+                            .all()
 
                     # Avoid race condition
                         # It's possible that the distinct process identified a valid username between
                         # the time that the username query was executed and the passwords were gathered
                     if username.recovered: continue 
     
-                    for password in passwords:
+                    for credential in credentials:
                         # NOTE: Perhaps it'd be more efficient to move the chunked password checking
                             # to the secondary process entirely? Maybe create a different method
                             # that expects a series of passwords to attempt? Maybe even send a
@@ -603,15 +627,15 @@ class Horizontal(BruteForcer):
                         if username.recovered: break
 
                         # Update the Username object with relevant attributes and commit
-                        username.last_password_id = password.id
-                        username.last_time=ctime
-                        username.future_time=ftime
+                        credential.username.last_password_id = credential.password.id
+                        credential.username.last_time=ctime
+                        credential.username.future_time=ftime
                         self.main_db_sess.commit()
 
                         # Do the authentication callback
                         recovered = self.do_authentication_callback(
-                            username.value,
-                            password.value
+                            credential.username.value,
+                            credential.password.value
                         )
 
                         if recovered and self.config.stop_on_valid:
@@ -632,13 +656,17 @@ class Horizontal(BruteForcer):
                         self.shutdown()
                         break
 
-                # Assure that not all guesses have been made, based on final password id
+                # ===============================================
+                # CONTINUE LOOPING UNTIL ALL GUESSES ARE FINISHED
+                # ===============================================
+
+
                 if self.main_db_sess \
                     .query(sql.Username) \
-                    .filter(
-                        sql.Username.last_password_id < final_pid,
-                        sql.Username.recovered != True
-                    ).first():
+                    .join(sql.Credential) \
+                    .filter(sql.Username.recovered == False,
+                            sql.Credential.guessed == False) \
+                    .first():
 
                     if len(self.presults):
                         outputs = self.monitor_processes()
@@ -646,6 +674,10 @@ class Horizontal(BruteForcer):
 
                     sleep(.2)
                     continue
+
+                # =======================================
+                # GUESSES FINISHED; CLEAN REMINING OUTPUT
+                # =======================================
 
                 outputs = self.monitor_processes(ready_all=True)
                 self.handle_outputs(outputs)
@@ -689,3 +721,44 @@ class Horizontal(BruteForcer):
 
                     self.shutdown()
                     raise e
+
+class Credential(Spray):
+    '''Perform a credential style brute force attack. Only credentials
+    supplied in the form of CSV delimited records will be attempted.
+    Logic to perform the overall attack is inherited from `Spray`
+    since it now uses a distinct table to track `Credential` objects.
+    This class overrides the `import_values` method and overrides it
+    to limit the creation of `Credential` objects to only the records
+    that appear in the `credential` and `credential_files` arguments.
+    '''
+
+    attack_type = 'CREDENTIAL'
+
+    def import_values(self, credentials=None, credential_files=None,
+            csv_delimiter=',', *args, **kwargs):
+        '''Import credential records into the target database. A
+        one-to-many relationship is established between each user
+        and their corressponding passwords.
+
+        - credentials - A list of CSV delimited values, i.e. `username,
+        password`
+        - credential_files - A list of string values associated with
+        file names on the local filesystem to be parsed into CSV records
+        - csv_delimiter - The CSV separator value used to split each
+        value of `credentials` or `credential_files`.
+        '''
+
+        if args or [v for k,v in kwargs.items() if v != None]:
+            raise ValueError(
+                'Credential attack accepts only credentials or ' \
+                'credential_file arguments to assure that each ' \
+                'username value is associated with specific ' \
+                'password values'
+            )
+
+        # TODO: super kept confusing me here so I just tapped right into
+        # __mro__ so I can move on with my fucking life
+        Credential.__mro__[2].import_values(self,
+                credentials=credentials,
+                credential_files=credential_files,
+                csv_delimiter=csv_delimiter)

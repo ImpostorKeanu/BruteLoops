@@ -203,7 +203,7 @@ ug = username_group = ip.add_argument_group('Username Configurations',
 ug.add_argument('--usernames','-us',
         nargs='+',
         help=USERNAMES)
-ug.add_argument('--username-files','-uf',
+ug.add_argument('--username-files','-ufs',
         nargs='+',
         help=USERNAME_FILES)
 
@@ -215,3 +215,41 @@ pg.add_argument('--passwords','-ps',
 pg.add_argument('--password-files','-pfs',
         nargs='+',
         help=PASSWORD_FILES)
+
+# =================
+# CREDENTIAL PARSER
+# =================
+
+CREDENTIAL_DESCRIPTION = \
+'''
+Each of the following values is options, though
+there must be values in the SQLited atabase to target for
+attack. When used in a Spray attack, all passwords will
+be used against all accounts during the brute force. When
+used in a credential attack, only the matched records will
+be attempted.
+'''
+
+CREDENTIALS = \
+'''
+Space delimited list of credential values to brute force.
+'''
+
+CREDENTIAL_FILES = \
+'''
+Space delimited list of files containing newline separated
+CSV credential records to brute force.
+'''
+
+cp = credential_parser = argparse.ArgumentParser(add_help=False)
+
+cg = credential_group = cp.add_argument_group(
+        'Credential Configurations',
+        'Credential record and credential file configurations.')
+
+cg.add_argument('--credentials','-cs',
+        nargs='+',
+        help=CREDENTIALS)
+cg.add_argument('--credential-files','-cfs',
+        nargs='+',
+        help=CREDENTIAL_FILES)

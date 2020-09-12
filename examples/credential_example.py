@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from BruteLoops.jitter import Jitter
-from BruteLoops.brute import Horizontal,Credential
+from BruteLoops.brute import Credential
 from BruteLoops.config import Config
 from BruteLoops.logging import GENERAL_EVENTS,logging
 
@@ -106,7 +106,7 @@ except Exception as e:
     print()
     print('Unhandled exception occurred.\n')
     print(e)
-    print(e.with_traceback())
+    print(e.with_traceback(e.__traceback__))
     print(e.__traceback__.__dir__())
     print(e.__traceback__.tb_lineno)
     print()
