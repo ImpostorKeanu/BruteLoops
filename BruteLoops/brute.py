@@ -326,7 +326,7 @@ class BruteForcer:
 
         return recovered
 
-    def add_credential(self, csv_line, csv_delimiter=','):
+    def add_credential(self, csv_line, csv_delimiter=':'):
         '''Parse a CSV line and add the username and passwrd
         values to the database, followed by adding the IDs to
         those values to the credential_joins table.
@@ -361,7 +361,7 @@ class BruteForcer:
                 self.main_db_sess.rollback()
 
     def merge_lines(self, container, model, is_credentials=False,
-            csv_delimiter=','):
+            csv_delimiter=':'):
         '''Merge values from the container into the target model. If
         `is_credentials` is not `False`, then the value will be treated
         as a CSV value.
@@ -393,7 +393,7 @@ class BruteForcer:
         self.main_db_sess.commit()
 
     def import_lines(self, container, model, is_file=False,
-            is_credentials=False,csv_delimiter=','):
+            is_credentials=False,csv_delimiter=':'):
         '''Import lines into the database.
         '''
         # source for Session.begin_nested():
@@ -430,7 +430,7 @@ class BruteForcer:
     def import_values(self, usernames=None, passwords=None,
             username_files=None, password_files=None,
             credentials=None, credential_files=None,
-            csv_delimiter=','):
+            csv_delimiter=':'):
         '''Check each supplied value to determine if it's iterable
         and proceed to import each record of the container into
         the brute force database.
@@ -499,7 +499,7 @@ class Spray(BruteForcer):
     def launch(self, usernames=None, passwords=None,
             username_files=None, password_files=None,
             credentials=None, credential_files=None,
-            csv_delimiter=','):
+            csv_delimiter=':'):
         """Launch a horitontal brute force attack.
 
         The argument to `usernames` and `passwords` are expected to
@@ -735,7 +735,7 @@ class Credential(Spray):
     attack_type = 'CREDENTIAL'
 
     def import_values(self, credentials=None, credential_files=None,
-            csv_delimiter=',', *args, **kwargs):
+            csv_delimiter=':', *args, **kwargs):
         '''Import credential records into the target database. A
         one-to-many relationship is established between each user
         and their corressponding passwords.

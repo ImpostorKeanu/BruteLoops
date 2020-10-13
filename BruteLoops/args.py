@@ -238,7 +238,7 @@ Space delimited list of credential values to brute force.
 CREDENTIAL_FILES = \
 '''
 Space delimited list of files containing newline separated
-CSV credential records to brute force.
+: credential records to brute force.
 '''
 
 cp = credential_parser = argparse.ArgumentParser(add_help=False)
