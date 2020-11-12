@@ -6,7 +6,7 @@ __See the [example](https://github.com/arch4ngel/brute_loops/wiki/A-Brief-Exampl
 
 # Dependencies
 
-BruteLoops requires __Python3.7__ and [SQLAlchemy 1.3.0](https://www.sqlalchemy.org/), the latter of which can be obtained via pip and the requirements.txt file in this repository: `python3.7 -m pip install -r requirements.txt`
+BruteLoops requires __Python3.7 or newer__ and [SQLAlchemy 1.3.0](https://www.sqlalchemy.org/), the latter of which can be obtained via pip and the requirements.txt file in this repository: `python3.7 -m pip install -r requirements.txt`
 
 # Features
 
