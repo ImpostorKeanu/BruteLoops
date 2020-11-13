@@ -100,8 +100,10 @@ try:
     bf = Spray(config)
     bf.launch(
         usernames=['admin','administrator','super-admin'],
+#        username_files=['filename.txt'],
         passwords=['Password1','Password#1','Password1!','Password123',
-            'Spring2019!','Summer2019!','Winter2018!']
+            'Spring2019!','Summer2019!','Winter2018!'],
+#        password_files=['passwords.txt'],
     )
     logger.log(GENERAL_EVENTS,'Attack complete')
     

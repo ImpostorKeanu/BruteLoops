@@ -9,6 +9,26 @@ class OWA2010:
     def __init__(self, url, flags=0,
             forcedownlevel=0,trusted=0, isUtf8=1,
             proxies={}, headers={}, verify_ssl=False):
+        '''
+        Arguments:
+
+        - url: string - The URL that credentials will be POSTed to
+        - proxies: dict - Proxies configuration passed to requests
+        - headers: dict - headers configuration passed to requests
+        - verify_ssl: bool - determine if ssl certificate should be verified
+
+        POST parameter arguments:
+
+        These parameters are observed in the POST request sent to the
+        server.
+
+        You can get these values by inspecting the request via Burp.
+
+        - flags: int
+        - forcedownlevel: int
+        - trusted: int
+        - isUtf8: int
+        '''
 
         self.url = url
         self.flags = flags
@@ -23,7 +43,7 @@ class OWA2010:
     
         # post data
         data = {
-            'destination':url,
+            'destination':self.url,
             'flags':self.flags,
             'forcedownlevel':self.forcedownlevel,
             'trusted':self.trusted,
