@@ -1,4 +1,5 @@
 
+# NOTE: This module relies on the pysmb package
 from smb.SMBConnection import SMBConnection
 import re
 import string
@@ -57,7 +58,7 @@ class SMB:
         original_username = username
     
         if re.search(r'@',username):
-            username, domain = username.split('@',username)
+            username, domain = username.split('@')
         elif re.search(r'/',username) or re.search(r'\\|\\',username):
             domain, username = re.split(r'/|\\',username)
         else:
