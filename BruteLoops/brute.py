@@ -176,6 +176,9 @@ class BruteForcer:
 
         self.config = config
 
+        # Realign future jitter times with the current configuration
+        self.realign_future_time()
+
     def handle_outputs(self, outputs):
         '''Handle outputs from the authentication callback. It expects a list of
         tuples/lists conforming to the following format:
@@ -260,9 +263,35 @@ class BruteForcer:
 
         return recovered
 
-    # TODO: Manage exclusion items
-    def manage_input_exclusions(self):
-        pass
+    def realign_future_time(self):
+        '''Iterate over each imported username value and rejitter
+        the future time based on the current max_authentication_jitter
+        '''
+        
+        # Get all relevant username values
+        usernames = self.main_db_sess.query(sql.Username) \
+                .filter(
+                    sql.Username.recovered == False,
+                    sql.Username.last_time > -1.0,
+                )
+
+        # Iterate over each username
+        for username in usernames:
+
+            # If there's a max_auth_jitter configuration
+            if self.config.max_auth_jitter:
+
+                # Generate a new jitter value
+                username.future_time = \
+                    self.config.max_auth_jitter.get_jitter_future(
+                                current_time=username.last_time
+                            )
+
+            # Otherwise, set it to the default value of -1.0
+            else: username.future_time = -1.0
+
+        # Commit the changes to the database
+        self.main_db_sess.commit()
 
     def monitor_processes(self,ready_all=False):
         '''Iterate over each process in ```self.presults``` and wait
@@ -548,6 +577,10 @@ class Spray(BruteForcer):
                 password_files=password_files, credentials=credentials,
                 credential_files=credential_files,
                 csv_delimiter=csv_delimiter)
+
+        # ===========================
+        # REALIGN FUTURE JITTER TIMES
+        # ===========================
 
         # ========================
         # BEGIN BRUTE FORCE ATTACK

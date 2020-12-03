@@ -130,7 +130,9 @@ class Jitter:
 
         return uniform(self.min, self.max)
 
-    def get_jitter_future(self):
+    def get_jitter_future(self,current_time=None):
+        
+        current_time = current_time or BruteTime.current_time()
 
-        return BruteTime.current_time() + self.get_jitter_duration()
+        return current_time + self.get_jitter_duration()
 
