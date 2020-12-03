@@ -87,12 +87,11 @@ class Jitter:
        
         # VALIDATE INPUTS
         min_match = JitterTime.validate_time(min)
-        max_match = JitterTime.validate_time(max)
-
         assert min_match, (
             'Jitter minimum is an invalid format'
         )
 
+        max_match = JitterTime.validate_time(max)
         assert max_match, (
             'Jitter max is an invalid format'
         )
@@ -107,6 +106,10 @@ class Jitter:
         assert self.min <= self.max, (
             f'Jitter minimum must be less or equal to maximum ({self.min} <= {self.max})'
         )
+
+    def __str__(self):
+
+        return f'<Jitter(min="{self.orig_min}", max="{self.orig_max}")>'
 
     def sleep(self):
         '''

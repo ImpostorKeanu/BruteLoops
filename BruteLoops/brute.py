@@ -90,6 +90,31 @@ class BruteForcer:
             f'Initializing {config.process_count} process'
         )
         
+        # ===================================
+        # LOG ATTACK CONFIGURATION PARAMETERS
+        # ===================================
+
+        self.logger.log(GENERAL_EVENTS,
+                'Logging attack configuration parameters')
+
+        config_attrs = [
+                'authentication_jitter',
+                'max_auth_jitter',
+                'max_auth_tries',
+                'stop_on_valid',
+                'db_file',
+        ]
+
+        for attr in config_attrs:
+            self.logger.log(GENERAL_EVENTS,
+                    f'Config Parameter -- {attr}: '+str(getattr(self.config,attr)))
+
+        if hasattr(self.config.authentication_callback, 'callback_name'):
+            self.logger.log(GENERAL_EVENTS,
+                    f'Config Parameter -- callback_name: '+ \
+                            getattr(self.config.authentication_callback,
+                                'callback_name'))
+            
         # =============================================================
         # REASSIGN DEFAULT SIGNAL HANDLER AND INITIALIZE A PROCESS POOL
         # =============================================================
@@ -234,6 +259,10 @@ class BruteForcer:
         self.handler_db_sess.commit()
 
         return recovered
+
+    # TODO: Manage exclusion items
+    def manage_input_exclusions(self):
+        pass
 
     def monitor_processes(self,ready_all=False):
         '''Iterate over each process in ```self.presults``` and wait

@@ -26,6 +26,11 @@ class Callback:
         self.callback = callback
         self.authentication_jitter = authentication_jitter
 
+        # Setting a callback name attribute for logging purposes
+        if hasattr(callback,'callback_name'):
+            self.callback_name = getattr(callback,'callback_name')
+        else: None
+
     def __call__(self,*args,**kwargs):
         'Call the callback, jitter if desired, and return the output'
 
