@@ -79,8 +79,8 @@ class BruteForcer:
         # BASIC CONFIGURATION PARAMETERS
         # ==============================
 
-        self.config   = config            # Config object
-        self.presults = []              # Process results
+        self.config   = config              # Config object
+        self.presults = []                  # Process results
         self.pool     = None                # Process pool (initialized by method)
         self.attack   = None
         self.logger   = logging.getLogger('brute_logger')
@@ -577,10 +577,6 @@ class Spray(BruteForcer):
                 password_files=password_files, credentials=credentials,
                 credential_files=credential_files,
                 csv_delimiter=csv_delimiter)
-
-        # ===========================
-        # REALIGN FUTURE JITTER TIMES
-        # ===========================
 
         # ========================
         # BEGIN BRUTE FORCE ATTACK
