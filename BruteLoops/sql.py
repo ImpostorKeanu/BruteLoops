@@ -13,9 +13,6 @@ class Username(Base):
         doc='Username id')
     value = Column(String, nullable=False, unique=True,
         doc='Username value')
-    last_password_id = Column(Integer, ForeignKey('passwords.id'),
-        default=0,
-        doc='Password associated with a given username')
     recovered = Column(Boolean, default=False,
         doc='Determines if a valid password has been recovered')
     last_time = Column(Float, default=-1.0,
@@ -28,10 +25,8 @@ class Username(Base):
     def __repr__(self):
 
         return f'<Username(id={self.id}, value={self.value}, '\
-            f'last_password_id={self.last_password_id} recovered='\
-            f'{self.recovered} last_time={self.last_time} '\
-            f'future_time={self.future_time}'\
-            ')>'
+            f'recovered={self.recovered} last_time={self.last_time} '\
+            f'future_time={self.future_time})>'
 
 class Password(Base):
     __tablename__ = 'passwords'

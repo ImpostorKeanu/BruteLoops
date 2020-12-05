@@ -6,9 +6,8 @@ VALID_CREDENTIALS       = 80
 CREDENTIAL_EVENTS       = 70
 GENERAL_EVENTS          = 60
 
-LOG_FORMAT = logging.Formatter(
-    '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+FORMAT='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+LOG_FORMAT = logging.Formatter(FORMAT)
 
 logging.addLevelName(SLEEP_EVENTS,'SLEEP_EVENT')
 logging.addLevelName(VALID_CREDENTIALS,'VALID')

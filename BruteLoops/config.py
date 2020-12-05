@@ -4,13 +4,11 @@ from .jitter import Jitter
 from . import sql
 from .callback import Callback
 from . import logging as BL
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 from pathlib import Path
 from sys import stdout,stderr
+from .db_manager import Session
 import inspect
 import logging
-
 
 class Config:
     '''
@@ -171,15 +169,7 @@ class Config:
         # =====================
         # SQLITE INITIALIZATION
         # =====================
-        engine = create_engine('sqlite:///'+self.db_file)
-        Session = sessionmaker()
-        Session.configure(bind=engine)
-
-        # Create the database if required
-        if not Path(self.db_file).exists():
-            sql.Base.metadata.create_all(engine)
-
-        self.session_maker = Session
+        self.session_maker = Session(self.db_file)
         self.configure_logging()
 
         # UPDATE THE OBJECT TO REFLECT VALIDATED STATE

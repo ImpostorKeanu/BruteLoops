@@ -4,6 +4,7 @@ from .logging import *
 from .brute_time import BruteTime
 from . import sql
 from .config import Config
+from .db_manager import *
 from sqlalchemy.orm.session import close_all_sessions
 from multiprocessing.pool import Pool
 from pathlib import Path
@@ -12,48 +13,10 @@ from collections import namedtuple
 from copy import deepcopy
 from time import sleep,time
 from types import FunctionType, MethodType
-from io import StringIO,TextIOWrapper
 import traceback
 import re
 import signal
 import logging
-
-def strip_newline(s):
-    '''Strips the final character from a string via list comprehension.
-    Useful when ```str.strip()``` might pull a legitimate whitespace
-    character from a password.
-    '''
-
-    if s[-1] == '\n':
-
-        return s[:len(s)-1]
-
-    else:
-
-        return s
-
-def is_iterable(obj):
-    '''Check if an object has the `__iter__` and `__next__` attributes,
-    suggesting it is an iterable object.
-    '''
-
-    d = obj.__dir__()
-    if '__iter__' in d and '__next__' in d:
-        return True
-    else:
-        return True
-
-def csv_split(s,delimiter=','):
-    '''Split a string on the first instance of a delimiter value.
-    A tuple in the form of `(s_head,s_tail)` is returned, otherwise
-    a tuple of `(None,None)` if the delimiter is not observed.
-    '''
-
-    ind=s.find(delimiter)
-    if ind == -1:
-        return (None,None,)
-
-    return (s[:ind],s[ind+1:],)
 
 class BruteForcer:
     '''Base object from which all other brute forcers will inherit.
@@ -72,8 +35,8 @@ class BruteForcer:
         if not config.validated: config.validate()
 
         # DB SESSION FOR MAIN PROCESS
-        self.main_db_sess = config.session_maker()
-        self.handler_db_sess = config.session_maker()
+        self.main_db_sess = config.session_maker.new()
+        self.handler_db_sess = config.session_maker.new()
 
         # ==============================
         # BASIC CONFIGURATION PARAMETERS
@@ -245,7 +208,6 @@ class BruteForcer:
 
                 # Update username to "recovered"
                 username.recovered=True
-                username.last_password_id=password.id
 
                 # Update the credential to valid
                 credential.valid=True
@@ -384,85 +346,6 @@ class BruteForcer:
 
         return recovered
 
-    def add_credential(self, csv_line, csv_delimiter=':'):
-        '''Parse a CSV line and add the username and passwrd
-        values to the database, followed by adding the IDs to
-        those values to the credential_joins table.
-        '''
-
-        username, password=csv_split(csv_line,csv_delimiter)
-        # Ignore improperly formatted records
-        if not username or not password:
-            return None
-
-        else:
-
-            # Add each value to the proper table
-            self.merge_lines([username],sql.Username)
-            self.merge_lines([password],sql.Password)
-
-            # Get record ids
-            username = self.main_db_sess.query(sql.Username).filter(
-                    sql.Username.value==username) \
-                    .first() \
-
-            password = self.main_db_sess.query(sql.Password).filter(
-                    sql.Password.value==password) \
-                    .first() \
-
-            # Add the password to the username to form a
-            # a credential relationship
-            try:
-
-                username.passwords.append(password)
-            except Exception as e:
-                self.main_db_sess.rollback()
-
-    def merge_lines(self, container, model, is_credentials=False,
-            csv_delimiter=':'):
-        '''Merge values from the container into the target model. If
-        `is_credentials` is not `False`, then the value will be treated
-        as a CSV value.
-        '''
-
-        is_file = container.__class__ == TextIOWrapper 
-
-        for line in container:
-
-            # Strip newlines from files
-            if is_file: line = strip_newline(line)
-
-            # Parse credentials as CSV line
-            if is_credentials:
-
-                self.add_credential(line)
-                continue
-
-            try:
-
-                with self.main_db_sess.begin_nested():
-
-                    self.main_db_sess.merge(model(value=line))
-
-            except Exception as e:
-
-                self.main_db_sess.rollback()
-
-        self.main_db_sess.commit()
-
-    def import_lines(self, container, model, is_file=False,
-            is_credentials=False,csv_delimiter=':'):
-        '''Import lines into the database.
-        '''
-        # source for Session.begin_nested():
-        #   https://docs.sqlalchemy.org/en/latest/orm/session_transaction.html
-
-        if is_file:
-            with open(container) as container:
-                self.merge_lines(container, model, is_credentials)
-        else:
-            self.merge_lines(container, model, is_credentials)
-
     def shutdown(self):
         '''Close & join the process pool, followed by closing input/output files.
         '''
@@ -485,79 +368,28 @@ class BruteForcer:
 
         close_all_sessions()
 
-    def import_values(self, usernames=None, passwords=None,
-            username_files=None, password_files=None,
-            credentials=None, credential_files=None,
-            csv_delimiter=':'):
-        '''Check each supplied value to determine if it's iterable
-        and proceed to import each record of the container into
-        the brute force database.
-        '''
-
-        # ===============
-        # VALIDATE INPUTS
-        # ===============
-
-        for v in [usernames,passwords,username_files,password_files,
-                credentials,credential_files]:
-            if is_iterable(v): continue
-            raise ValueError(
-                    'Username/Password arguments must be iterable values ' \
-                    'populated with string records or file names'
-                )
-
-        # =================
-        # IMPORT THE VALUES
-        # =================
-
-        if passwords:
-            self.import_lines(passwords,sql.Password)
-
-        if usernames:
-            self.import_lines(usernames,sql.Username)
-
-        if credentials:
-            self.import_lines(credentials,None,False,True,csv_delimiter)
-
-        if username_files:
-            for f in username_files:
-                self.import_lines(f,sql.Username,True)
-
-        if password_files:
-            for f in password_files:
-                self.import_lines(f,sql.Password,True)
-
-        if credential_files:
-            for f in credential_files:
-                self.import_lines(f,None,True,True,csv_delimiter)
-
-        self.main_db_sess.commit()
-
 
 class Spray(BruteForcer):
 
     attack_type = 'SPRAY'
 
-    def import_values(self, *args, **kwargs):
+#    def import_values(self, *args, **kwargs):
+#
+#        # =========================================
+#        # IMPORT VALUES INTO THE DATABASE VIA SUPER
+#        # =========================================
+#
+#        super().import_values(*args, **kwargs)
+#
+#        # ====================================================
+#        # CREATE A CREDENTIAL FOR EACH USERNAME:PASSWORD COMBO
+#        # ====================================================
+#
+#        passwords = self.main_db_sess.query(sql.Password).all()
+#        for u in self.main_db_sess.query(sql.Username).all():
+#            u.passwords=passwords
 
-        # =========================================
-        # IMPORT VALUES INTO THE DATABASE VIA SUPER
-        # =========================================
-
-        super().import_values(*args, **kwargs)
-
-        # ====================================================
-        # CREATE A CREDENTIAL FOR EACH USERNAME:PASSWORD COMBO
-        # ====================================================
-
-        passwords = self.main_db_sess.query(sql.Password).all()
-        for u in self.main_db_sess.query(sql.Username).all():
-            u.passwords=passwords
-
-    def launch(self, usernames=None, passwords=None,
-            username_files=None, password_files=None,
-            credentials=None, credential_files=None,
-            csv_delimiter=':'):
+    def launch(self):
         """Launch a horitontal brute force attack.
 
         The argument to `usernames` and `passwords` are expected to
@@ -572,16 +404,16 @@ class Spray(BruteForcer):
         # IMPORTING DATABASE RECORDS
         # ==========================
         
-        self.import_values(usernames=usernames,
-                passwords=passwords, username_files=username_files,
-                password_files=password_files, credentials=credentials,
-                credential_files=credential_files,
-                csv_delimiter=csv_delimiter)
+#        self.import_values(usernames=usernames,
+#                passwords=passwords, username_files=username_files,
+#                password_files=password_files, credentials=credentials,
+#                credential_files=credential_files,
+#                csv_delimiter=csv_delimiter)
 
         # ========================
         # BEGIN BRUTE FORCE ATTACK
         # ========================
-        password_count = self.main_db_sess.query(sql.Password).count()
+        #password_count = self.main_db_sess.query(sql.Password).count()
         if self.config.max_auth_tries:
             # Handle manually configured lockout threshold
             limit = self.config.max_auth_tries
@@ -602,7 +434,6 @@ class Spray(BruteForcer):
                 # Get a list of usernames to target
                     # must not have already been recovered during an earlier attack
                     # future_time must be less than current time
-                    # last_password_id cannot match the final_pid, otherwise all guesses
                         # for that user have been completed
                 usernames = self.main_db_sess.query(sql.Username) \
                     .join(sql.Credential) \
@@ -685,7 +516,6 @@ class Spray(BruteForcer):
                         if username.recovered: break
 
                         # Update the Username object with relevant attributes and commit
-                        credential.username.last_password_id = credential.password.id
                         credential.username.last_time=ctime
                         credential.username.future_time=ftime
                         self.main_db_sess.commit()
@@ -792,31 +622,31 @@ class Credential(Spray):
 
     attack_type = 'CREDENTIAL'
 
-    def import_values(self, credentials=None, credential_files=None,
-            csv_delimiter=':', *args, **kwargs):
-        '''Import credential records into the target database. A
-        one-to-many relationship is established between each user
-        and their corressponding passwords.
-
-        - credentials - A list of CSV delimited values, i.e. `username,
-        password`
-        - credential_files - A list of string values associated with
-        file names on the local filesystem to be parsed into CSV records
-        - csv_delimiter - The CSV separator value used to split each
-        value of `credentials` or `credential_files`.
-        '''
-
-        if args or [v for k,v in kwargs.items() if v != None]:
-            raise ValueError(
-                'Credential attack accepts only credentials or ' \
-                'credential_file arguments to assure that each ' \
-                'username value is associated with specific ' \
-                'password values'
-            )
-
-        # TODO: super kept confusing me here so I just tapped right into
-        # __mro__ so I can move on with my fucking life
-        Credential.__mro__[2].import_values(self,
-                credentials=credentials,
-                credential_files=credential_files,
-                csv_delimiter=csv_delimiter)
+#    def import_values(self, credentials=None, credential_files=None,
+#            csv_delimiter=':', *args, **kwargs):
+#        '''Import credential records into the target database. A
+#        one-to-many relationship is established between each user
+#        and their corressponding passwords.
+#
+#        - credentials - A list of CSV delimited values, i.e. `username,
+#        password`
+#        - credential_files - A list of string values associated with
+#        file names on the local filesystem to be parsed into CSV records
+#        - csv_delimiter - The CSV separator value used to split each
+#        value of `credentials` or `credential_files`.
+#        '''
+#
+#        if args or [v for k,v in kwargs.items() if v != None]:
+#            raise ValueError(
+#                'Credential attack accepts only credentials or ' \
+#                'credential_file arguments to assure that each ' \
+#                'username value is associated with specific ' \
+#                'password values'
+#            )
+#
+#        # TODO: super kept confusing me here so I just tapped right into
+#        # __mro__ so I can move on with my fucking life
+#        Credential.__mro__[2].import_values(self,
+#                credentials=credentials,
+#                credential_files=credential_files,
+#                csv_delimiter=csv_delimiter)

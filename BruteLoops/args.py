@@ -1,6 +1,5 @@
 import argparse
 
-bp = brute_parser = argparse.ArgumentParser(add_help=False)
 
 # ==================
 # GENERAL PARAMETERS
@@ -26,7 +25,8 @@ Stop the brute force attack when valid credentials are recovered.
 Default: %(default)s
 '''
 
-gg = general_group = bp.add_argument_group('General Parameters',
+gp = general_parser = argparse.ArgumentParser(add_help=False)
+gg = general_group = gp.add_argument_group('General Parameters',
         'Options used to configure general attack parameters')
 gg.add_argument('--parallel-guess-count','-pgc',
         type=int,
@@ -82,7 +82,8 @@ after meeting the authentication threshold for a given user, as
 specified by the --auth-threshold argument. Default: %(default)s
 '''
 
-jg = jitter_group = bp.add_argument_group('Jitter Parameters',
+jp = jitter_parser = argparse.ArgumentParser(add_help=False)
+jg = jitter_group = jp.add_argument_group('Jitter Parameters',
         JITTER_DESCRIPTION)
 jg.add_argument('--auth-jitter-min','-ajmin',
         default='1s',
@@ -120,7 +121,8 @@ Issue this flag to disable printing log records to STDOUT along
 with the log file. Default: %(default)s
 '''
 
-og = output_group = bp.add_argument_group('Output Parameters',
+op = output_parser = argparse.ArgumentParser(add_help=False)
+og = output_group = op.add_argument_group('Output Parameters',
         'Options related to output and logging targets')
 og.add_argument('--db-file','-dbf',
         required=True,
@@ -151,7 +153,8 @@ LOG_INVALID = \
 Disable logging of invalid credentials.
 '''
 
-lg = logging_group = bp.add_argument_group('Logging Parameters',
+lp = logging_parser = argparse.ArgumentParser(add_help=False)
+lg = logging_group = lp.add_argument_group('Logging Parameters',
         'Options related to logging')
 lg.add_argument('--no-log-general','-nlg',
         action='store_false',
@@ -197,7 +200,6 @@ records of password values to guess.
 '''
 
 ip = input_parser = argparse.ArgumentParser(add_help=False)
-
 ug = username_group = ip.add_argument_group('Username Configurations',
         'Username value and file parameters')
 ug.add_argument('--usernames','-us',
@@ -253,3 +255,5 @@ cg.add_argument('--credentials','-cs',
 cg.add_argument('--credential-files','-cfs',
         nargs='+',
         help=CREDENTIAL_FILES)
+
+bp = brute_parser = argparse.ArgumentParser(parents=[gp,jp,op,lp,ip,cp])
