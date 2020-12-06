@@ -6,7 +6,7 @@ from sys import stderr
 from pathlib import Path
 
 # Configure logging
-logging.basicConfig(format=FORMAT, level=logging.INFO, stream=stderr)
+logging.basicConfig(format=FORMAT, level=logging.DEBUG, stream=stderr)
 
 # ================
 # GLOBAL VARIABLES
@@ -40,20 +40,38 @@ def dump_valid():
 
     logger.info('Credentials dumped')
 
+def dump_strict_credentials():
+    '''
+    '''
+
+    logger.info('Dumping static credentials')
+    credentials = manager.get_strict_credentials(args.credential_delimiter)
+
+    if len(credentials) == 0:
+        logger.info('No static credentials in database')
+        return
+    else:
+        logger.info(f'Count of static credentials: {len(credentials)}')
+
+    for r in credentials:
+        print(f'{r.username.value}{args.credential_delimiter}' \
+              f'{r.password}')
+
+    logger.info('Strict credentials dumped')
+
+
 def handle_values():
     '''Insert or delete values from the database.
     '''
 
-    new_args = {'as_credentials':args.as_credentials}
+    new_args = {'as_credentials':args.as_credentials,
+            'insert':args.action == 'insert'}
 
     for handle in ['usernames','passwords','credentials',
             'username_files','password_files','credential_files']:
         if hasattr(args,handle): new_args[handle] = getattr(args,handle) 
 
-    if args.action == 'insert':
-        manager.insert_values(**new_args)
-    else:
-        manager.delete_values(**new_args)
+    manager.manage_db_values(**new_args)
 
 if __name__ == '__main__':
 
@@ -61,25 +79,13 @@ if __name__ == '__main__':
     # BUILD THE INTERFACE
     # ===================
 
-    # Base argument parser that will be received by all
-    # subcommands
-    base = argparse.ArgumentParser(add_help=False)
-
-    # Database file argument
-    base.add_argument('--dbfile',
-            required=True,
-            help='Database file to manipulate')
-
-    # Base credential delimiter argument 
-    base.add_argument('--credential-delimiter',
-            default=':',
-            help='Character separating the username from password ' \
-                'when parsing credentials.')
-
     # Default parser
     parser = argparse.ArgumentParser(
             description='Manage BruteLoops input databases')
-    parser.set_defaults(cmd=handle_values,dbfile=None,action=None)
+    parser.add_argument('dbfile',
+            help='Database file to manipulate')
+
+    parser.set_defaults(cmd=handle_values,action=None)
     subparsers = parser.add_subparsers(help='SUBCOMMANDS:')
 
     # =================================
@@ -88,9 +94,31 @@ if __name__ == '__main__':
 
     parser_dump_valid = subparsers.add_parser('dump-valid',
             description='Dump valid credentials from the database',
-            help='Dump valid credentials from the database',
-            parents=[base])
+            help='Dump valid credentials from the database')
     parser_dump_valid.set_defaults(cmd=dump_valid)
+
+    # ==================================
+    # DUMP STRICT CREDENTIALS SUBCOMMAND
+    # ==================================
+
+    parser_dump_strict_credentials = subparsers.add_parser(
+            'dump-credentials',
+            description='Dump scrict credentials, regardless of ' \
+                    'of status from the database. This is a mean' \
+                    's of identifying which static values have b' \
+                    'een imported and can be used to obtain a li' \
+                    'st of values to be deleted from the attack.' \
+                    ' Use the dump_valid subcommand to dump vali' \
+                    'values, including strict records, from the ' \
+                    'database.',
+            help='Dump all credential values from the database')
+    parser_dump_strict_credentials.add_argument(
+            '--credential-delimiter',
+            default=':',
+            help='Character delimiting the username to password valu' \
+                 'e. Default: ":"')
+    parser_dump_strict_credentials.set_defaults(
+            cmd=dump_strict_credentials)
 
     # ========================
     # IMPORT VALUES SUBCOMMAND
@@ -107,8 +135,8 @@ if __name__ == '__main__':
                         'at will be paired individualy in the dat' \
                         'base.',
                 help='Import values into the target database',
-                parents=[base,blargs.input_parser,blargs.credential_parser])
-    parser_import_values.set_defaults(as_credentials=False,action='insert')
+                parents=[blargs.input_parser,blargs.credential_parser])
+    parser_import_values.set_defaults(as_credentials=False, action='insert')
     
     # =============================
     # IMPORT CREDENTIALS SUBCOMMAND
@@ -119,14 +147,14 @@ if __name__ == '__main__':
             'import-credentials',
             description='Import credential values into the target' \
                     ' database. The username to password relations' \
-                    'hip is maintained in the database, meaning t' \
+                    'hip is maintained in the data meaning t' \
                     'hat individual guesses for the username to p' \
                     'assword combination will be scheduled. No ad' \
                     'ditional guesses will be made for the userna' \
                     'me and the password will not be used for gue' \
                     'sses targeting other usernames.',
             help='Import credential pairs into the target database',
-            parents=[base,blargs.credential_parser])
+            parents=[blargs.credential_parser])
     parser_import_credentials.set_defaults(as_credentials=True,
             action='insert')
 
@@ -145,8 +173,8 @@ if __name__ == '__main__':
                         'tials subcommand if you wish to delete c' \
                         'redential records',
                 help='Delete values from the target database',
-                parents=[base,blargs.input_parser,blargs.credential_parser])
-    parser_delete_values.set_defaults(as_credentials=False,action='delete')
+                parents=[blargs.input_parser,blargs.credential_parser])
+    parser_delete_values.set_defaults(as_credentials=False, action='delete')
     
     # =============================
     # DELETE CREDENTIALS SUBCOMMAND
@@ -163,7 +191,7 @@ if __name__ == '__main__':
                     'ture guesses after the associations have bee' \
                     'n removed',
             help='Delete credential pairs from the target database',
-            parents=[base,blargs.credential_parser])
+            parents=[blargs.credential_parser])
     parser_delete_credentials.set_defaults(as_credentials=True,
             action='delete')
 
@@ -204,6 +232,9 @@ if __name__ == '__main__':
             logger.info('Database not found. Exiting')
             exit()
 
+        print()
+        logger.info(f'Creating database file: {args.dbfile}')
+
     # ======================
     # INITIALIZE THE MANAGER
     # ======================
@@ -214,18 +245,10 @@ if __name__ == '__main__':
         logger.info('Failed to initialize the database manager')
         raise e
 
-    _globals = globals()
-    cmd = handle_values
-    if args.cmd in _globals:
-        cmd = _globals[args.cmd]
-
     # ======================
     # EXECUTE THE SUBCOMMAND
     # ======================
 
     logger.info(f'Executing command')
-    cmd()
+    args.cmd()
     logger.info('Execution finished. Exiting.')
-
-    from IPython import embed
-    embed()

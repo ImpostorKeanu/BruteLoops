@@ -20,7 +20,9 @@ class Username(Base):
     future_time = Column(Float, default=-1.0,
         doc='Time when username can be targeted for authentication again')
     passwords = relationship("Password", secondary="credentials")
-    credentials = relationship("Credential")
+    strict_credentials = relationship("StrictCredential", cascade="all, delete")
+    credentials = relationship("Credential", cascade="all, delete")
+    __mapper_args__ = {'confirm_deleted_rows': False}
 
     def __repr__(self):
 
@@ -34,7 +36,8 @@ class Password(Base):
     value = Column(String, nullable=False, unique=True,
         doc='Password value')
     usernames = relationship("Username", secondary="credentials")
-    credentials = relationship("Credential")
+    credentials = relationship("Credential", cascade="all, delete")
+    __mapper_args__ = {'confirm_deleted_rows': False}
 
     def __repr__(self):
 
@@ -55,6 +58,7 @@ class Credential(Base):
         doc='Determines if the credentials are valid')
     guessed = Column(Boolean, default=False,
         doc='Determines if the credentials have been guessed')
+    __mapper_args__ = {'confirm_deleted_rows': False}
     __table_args__ = (
             UniqueConstraint('username_id','password_id',
                 name='_credential_unique_constraint'),
@@ -62,6 +66,25 @@ class Credential(Base):
 
     def __repr__(self):
         return f'<Credential(id={self.id})>'
+
+class StrictCredential(Base):
+    __tablename__ = 'strict_credentials'
+    id = Column(Integer, doc='Strict credential id',
+            autoincrement="auto", primary_key=True)
+    username_id = Column(Integer, ForeignKey('usernames.id',
+        ondelete='CASCADE', onupdate='CASCADE'), 
+            doc='Username id',nullable=False)
+    username = relationship("Username", back_populates="strict_credentials")
+    password = Column(String, nullable=False, doc="Password value")
+    valid = Column(Boolean, default=False,
+        doc='Determines if the credentials are valid')
+    guessed = Column(Boolean, default=False,
+        doc='Determines if the credentials have been guessed')
+    __mapper_args__ = {'confirm_deleted_rows': False}
+    __table_args__ = (
+            UniqueConstraint('username_id','password',
+                name='_credential_unique_constraint'),
+            )
 
 class Attack(Base):
     __tablename__ = 'attacks'

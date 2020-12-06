@@ -243,6 +243,21 @@ Space delimited list of files containing newline separated
 : credential records to brute force.
 '''
 
+AS_CREDENTIALS = \
+'''
+Flag determining if the input values should be treated as
+credential records in the database, not as spray values. This
+means that only a single guess will be made using this password
+and it will target the supplied username.
+'''
+
+CREDENTIAL_DELIMITER = \
+'''
+The character value that delimits the username and password values
+of a given credential, for instance ":" would be the proper delimiter
+for a given credential "administrator:password123". Default: ":"
+'''
+
 cp = credential_parser = argparse.ArgumentParser(add_help=False)
 
 cg = credential_group = cp.add_argument_group(
@@ -255,5 +270,11 @@ cg.add_argument('--credentials','-cs',
 cg.add_argument('--credential-files','-cfs',
         nargs='+',
         help=CREDENTIAL_FILES)
+#cg.add_argument('--as-credentials',
+#        action='store_true',
+#        help=AS_CREDENTIALS)
+cg.add_argument('--credential-delimiter',
+        default=':',
+        help=CREDENTIAL_DELIMITER)
 
 bp = brute_parser = argparse.ArgumentParser(parents=[gp,jp,op,lp,ip,cp])

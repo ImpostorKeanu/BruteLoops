@@ -5,8 +5,10 @@ import logging
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from io import StringIO,TextIOWrapper
+from sys import stderr
 
 # Components needed to manage usenames and passwords in database files
+logging.basicConfig(format=FORMAT, level=logging.DEBUG, stream=stderr)
 
 '''
 # Purpose
@@ -66,8 +68,7 @@ def csv_split(s,delimiter=','):
 
 class DBMixin:
 
-    def merge_lines(self, container, model, is_credentials=False,
-            csv_delimiter=':'):
+    def merge_lines(self, container, model):
         '''Merge values from the container into the target model. If
         `is_credentials` is not `False`, then the value will be treated
         as a CSV value.
@@ -80,11 +81,7 @@ class DBMixin:
             # Strip newlines from files
             if is_file: line = strip_newline(line)
 
-            # Parse credentials as CSV line
-            if is_credentials:
-
-                self.add_credential(line, csv_delimiter)
-                continue
+            self.logger.debug(f'Adding value to database: {line}')
 
             try:
 
@@ -98,34 +95,7 @@ class DBMixin:
 
         self.main_db_sess.commit()
 
-    def import_records(self, container, model, is_file=False,
-            is_credentials=False, csv_delimiter=':'):
-        '''Import lines into the database.
-        '''
-        # source for Session.begin_nested():
-        #   https://docs.sqlalchemy.org/en/latest/orm/session_transaction.html
-
-        if is_file:
-            with open(container) as container:
-                self.merge_lines(container, model, is_credentials,
-                        csv_delimiter)
-        else:
-            self.merge_lines(container, model, is_credentials,
-                    csv_delimiter)
-
-    def delete_records(self, container, model, is_file=False,
-            is_credentials=False, csv_delimiter=':'):
-
-        if is_file:
-            with open(container) as container:
-                self.delete_lines(container, model, is_credentials,
-                        csv_delimiter)
-        else:
-            self.delete_lines(container, model, is_credentials,
-                    csv_delimiter)
-
-    def delete_lines(self, container, model, is_credentials=False,
-            csv_delimiter=':'):
+    def delete_lines(self, container, model):
         '''Delete lines from `container`.
         '''
 
@@ -136,10 +106,8 @@ class DBMixin:
             # Strip newlines from file values
             if is_file: line = strip_newline(line)
 
-            # Call delete_credential on credential records
-            if is_credentials:
-                self.delete_credential(line, csv_delimiter)
-                continue
+            self.logger.debug(
+                    f'Deleting value from database: {line}')
 
             try:
 
@@ -151,65 +119,270 @@ class DBMixin:
                 if value: self.main_db_sess.delete(value)
 
             except Exception as e:
-                self.logger.log(GENERAL_EVENTS, e)
-                pass
-                #self.main_db_sess.rollback()
+                
+                self.main_db_sess.rollback()
 
         self.main_db_sess.commit()
 
-    def delete_credential(self, csv_line, csv_delimiter=':'):
-        '''Parse a credential `csv_line` and delete both the username
-        and password values.
+    def manage_values(self, model, container, is_file=False, insert=True):
+        '''Manage username values by iterating over a target container.
+        The action taken for the container is indicated by the `insert`
+        parameter, which is set to `True` by default. Setting this
+        value to `False` results in each username being deleted from
+        the database.
         '''
 
-        username, password = csv_split(csv_line,csv_delimiter)
+        # Derive the target method to call based on action
+        method = ('insert' if insert else 'delete') + '_' + \
+                ('username' if model == sql.Username else 'password') +\
+                '_records'
+        
+        # Call the proper method
+        if is_file:
+            for f in container:
+                with open(f) as container:
+                    getattr(self, method)(container)
+        else: getattr(self, method)(container)
 
-        if not username or not password:
-            return None
+    # ===========================
+    # USERNAME MANAGEMENT METHODS
+    # ===========================
 
-        self.delete_lines([username],sql.Username)
-        self.delete_lines([password],sql.Password)
-
-    def add_credential(self, csv_line, csv_delimiter=':'):
-        '''Parse a CSV line and add the username and passwrd
-        values to the database, followed by adding the IDs to
-        those values to the credential_joins table.
+    def insert_username_records(self, container):
+        '''Insert each username value in the container into the target
+        database. Duplicates will not be inserted.
         '''
 
-        username, password=csv_split(csv_line,csv_delimiter)
-        # Ignore improperly formatted records
-        if not username or not password: return None
+        self.merge_lines(container, sql.Username)
+        
 
+    def delete_username_records(self, container):
+        '''Delete each username value in the container from the target
+        database. Values that do not exist in the database are ignored.
+        '''
 
-        # Add each value to the proper table
-        self.merge_lines([username],sql.Username)
-        self.merge_lines([password],sql.Password)
+        self.delete_lines(container, sql.Username)
 
-        # Get record ids
-        username = self.main_db_sess.query(sql.Username).filter(
-                sql.Username.value==username) \
-                .first() \
+    # ===========================
+    # PASSWORD MANAGEMENT METHODS
+    # ===========================
 
-        password = self.main_db_sess.query(sql.Password).filter(
-                sql.Password.value==password) \
-                .first() \
+    def insert_password_records(self, container):
+        '''Insert individual password records. Additional processing must
+        occur on individual passwords in order to make the associations
+        with username values.
 
-        # Add the password to the username to form a
-        # a credential relationship
-        try:
+        Warning: This method assumes that the container has spray records,
+        resulting in each password being associated with each username in
+        the form of a potential credential.
+        '''
 
-            username.passwords.append(password)
-        except Exception as e:
-            self.main_db_sess.rollback()
+        # Add all the new passwords
+        self.merge_lines(container, sql.Password)
 
-    def insert_values(self, usernames=None, passwords=None,
-            username_files=None, password_files=None,
+        self.main_db_sess.commit()
+
+    def delete_password_records(self, container):
+        '''Delete each password value in the ocntainer from the target
+        database. Values that do not exist in the database are ignored.
+        '''
+
+        self.delete_lines(container, sql.Password)
+
+    # =============================
+    # CREDENTIAL MANAGEMENT RECORDS
+    # =============================
+
+    def manage_credentials(self, container, is_file=False,
+            as_credentials=False, insert=True):
+        '''Manage credential values. This logic is distinct because inputs
+        can be treated as individual username or password values for
+        spray attacks, or as individual credential records -- the latter
+        meaning that the username and password will each be inserted into
+        the proper tables BUT will result in only a single credential record
+        in credentials table.
+
+        as_credentials indicates if each record is considered a credential.
+        When False, the record is considered an individual username and
+        password value and will be used in the form of a spray. When True,
+        it is imported as a strict credential as described above.
+        '''
+        # Derive the target method to call based on action
+        method = ('insert' if insert else 'delete') + '_credential_records'
+    
+        # Caall the proper method
+        if is_file:
+            for f in container:
+                with open(f) as container:
+                    getattr(self, method)(container, as_credentials)
+        else: getattr(self, method)(container, as_credentials)
+
+    def insert_credential_records(self, container, as_credentials=False,
+            credential_delimiter=':'):
+        '''Insert credential records into the database. If as_credentials
+        is True, then only StrictCredential records will be created
+        for each username to password value. Records will otherwise be
+        treated as spray values, resulting in each supplied password being
+        set for guess across all usernames.
+        '''
+
+        is_file = container.__class__ == TextIOWrapper
+        
+        for line in container:
+
+            # Strip newlines if we're working with a file
+            if is_file: line = strip_newline(line)
+
+            self.logger.debug(
+                    f'Inserting credential into database: {line}')
+
+            # Break out the username and password value from the csv
+            # delimiter value
+            username, password = csv_split(line, credential_delimiter)
+
+            if as_credentials:
+
+                # ===========================
+                # CREATE THE STRICTCREDENTIAL
+                # ===========================
+
+                # Get or create the target username
+                username = self.goc(sql.Username, username)
+
+                # Create a new strict credential record
+                scred = sql.StrictCredential(username=username,
+                        password=password)
+
+                # Try to save the credential record
+                try:
+                    self.main_db_sess.add(scred)
+                    self.main_db_sess.commit()
+                except Exception as e:
+                    # Assume the record already exists
+                    self.main_db_sess.rollback()
+
+                # =============================
+                # REMOVE MATCHING SPRAY RECORDS
+                # =============================
+                '''
+                We do this because BruteLoops will favor StrictCredentials
+                over normal Credentials.                
+                '''
+
+                password = self.main_db_sess.query(sql.Password) \
+                        .filter(sql.Password.value == password) \
+                        .first()
+
+                if password:
+
+                    cred = self.main_db_sess.query(sql.Credential) \
+                        .filter(sql.Username == username,
+                                sql.Password == password) \
+                        .first()
+
+                    if cred: self.main_db_sess.delete(cred)
+
+            else:
+
+                # ==============================
+                # INSERT THE VALUES FOR SPRAYING
+                # ==============================
+
+                self.insert_username_records([username])
+                self.insert_password_records([password])
+
+    def delete_credential_records(self, container, as_credentials=False,
+            credential_delimiter=':'):
+        '''Delete credential records from the target database.
+        '''
+
+        is_file = container.__class__ == TextIOWrapper
+        
+        for line in container:
+
+            if is_file: line = strip_newline(line)
+
+            self.logger.debug(
+                    f'Deleting credential from database: {line}')
+
+            username, password = csv_split(line, credential_delimiter)
+
+            # ==================================
+            # GET THE USERNAME FROM THE DATABASE
+            # ==================================
+
+            username = self.main_db_sess.query(sql.Username) \
+                    .filter(sql.Username.value == username) \
+                    .first()
+
+            if not username:
+                self.logger.debug(
+                        f'Username not found in database: {username}')
+                continue
+
+            # ===============================
+            # HANDLE STRICT CREDENTIAL RECORD
+            # ===============================
+
+            if as_credentials:
+
+                # Query for the strict credential
+                scred = self.main_db_sess.query(sql.StrictCredential) \
+                        .filter(
+                            sql.StrictCredential.username == username,
+                            sql.StrictCredential.password == password) \
+                        .first()
+
+                # Manage the static credential
+                if scred:
+
+                    if len(scred.username.credentials) == 0:
+
+                        # Remove the username entirely if no additional
+                        # guesses are available
+                        self.main_db_sess.delete(scred.username)
+
+                    else:
+
+                        self.main_db_sess.delete(scred)
+
+                    self.main_db_sess.commit()
+
+            # ===================
+            # HANDLE SPRAY VALUES
+            # ===================
+
+            else:
+
+                self.delete_username_records([username])
+                self.delete_password_records([password])
+
+    def get_or_create(self, model, value):
+        '''Get or create an individual database instance, the return
+        value.
+        '''
+
+        instance = self.main_db_sess.query(model) \
+                .filter(model.value == value) \
+                .first()
+
+        if instance: return instance
+        else:
+            instance = model(value=value)
+            self.main_db_sess.add(instance)
+            self.main_db_sess.commit()
+            return instance
+
+    def goc(self, *args, **kwargs):
+        '''Shortcut to get_or_create.
+        '''
+
+        return self.get_or_create(*args, **kwargs)
+
+    def manage_db_values(self, insert=True, usernames=None,
+            passwords=None, username_files=None, password_files=None,
             credentials=None, credential_files=None,
-            csv_delimiter=':', as_credentials=False):
-        '''Check each supplied value to determine if it's iterable
-        and proceed to import each record of the container into
-        the brute force database.
-        '''
+            credential_delimiter=':', as_credentials=False):
 
         # ===============
         # VALIDATE INPUTS
@@ -233,82 +406,68 @@ class DBMixin:
             if usernames or passwords or username_files or \
                     password_files: raise ValueError(msg)
 
-        # =================
-        # IMPORT THE VALUES
-        # =================
+        if not usernames and not username_files and \
+                not passwords and not password_files and \
+                not credentials and not credential_files:
+            self.logger.debug('No values to manage supplied to db manager')
+            return
 
-        # Record the last username and password ids for future use
-        last_pass = self.main_db_sess.query(sql.Password) \
-                .order_by(sql.Password.id.desc()).first()
+        # ===============
+        # BEGIN EXECUTION
+        # ===============
 
-        last_user = self.main_db_sess.query(sql.Username) \
-                .order_by(sql.Username.id.desc()).first()
+        self.logger.debug(f'Starting db management. Action: ' + \
+                ('INSERT' if insert else 'DELETE'))
 
-        if last_pass: last_pass = last_pass.id
-        else: last_pass = 0
+        # ===================
+        # HANDLE SPRAY VALUES
+        # ===================
 
-        if last_user: last_user = last_user.id
-        else: last_user = 0
-
-        # import passwords from list
-        if passwords:
-            self.import_records(passwords,sql.Password)
-
-        # import usernames from list
         if usernames:
-            self.import_records(usernames,sql.Username)
+            self.logger.debug(f'Managing usernames: {usernames}')
+            self.manage_values(sql.Username, usernames, insert=insert)
+        if passwords:
+            self.logger.debug(f'Managing passwords: {passwords}')
+            self.manage_values(sql.Password, passwords, insert=insert)
 
-        # import usernames from files
         if username_files:
-            for f in username_files:
-                self.import_records(f,sql.Username,True)
-
-        # import passwords from files
+            self.logger.debug(f'Managing username files: {username_files}')
+            self.manage_values(sql.Username, username_files,
+                    is_file=True, insert=insert)
         if password_files:
-            for f in password_files:
-                self.import_records(f,sql.Password,True)
+            self.logger.debug(f'Managing password files: {password_files}')
+            self.manage_values(sql.Password, password_files,
+                    is_file=True, insert=insert)
 
-        # import credentials from list
+        # ========================
+        # HANDLE CREDENTIAL VALUES
+        # ========================
+
         if credentials:
-            self.import_records(credentials,None,False,True,csv_delimiter)
+            self.logger.debug(f'Managing credentials: {credentials}')
+            self.manage_credentials(credentials,
+                    as_credentials=as_credentials, insert=insert)
 
-        # import credentials from files
         if credential_files:
-            for f in credential_files:
-                self.import_records(f,None,True,True,csv_delimiter)
+            self.logger.debug(
+                    f'Managing credential files: {credential_files}')
+            self.manage_credentials(credential_files,
+                    is_file=True, as_credentials=as_credentials,
+                    insert=insert)
 
-        self.main_db_sess.commit()
+        # ==========================================
+        # REASSOCIATE SPRAY PASSWORDS WITH USERNAMES
+        # ==========================================
 
-        # ============================
-        # PREPARE DB FOR SPRAY ATTACKS
-        # ============================
-        '''Spray attacks associate each provided password with each
-        username, where credential attacks maintain a record of username
-        to password association based on input.
-        '''
+        # Get all passwords
+        passwords = self.main_db_sess.query(sql.Password).all()
 
-        # Associate all new usernames to new passwords if we're importing
-        # for a spray attack
-        if not as_credentials:
+        # Associate the passwords with each user
+        for u in self.main_db_sess.query(sql.Username) \
+                .filter(sql.Username.recovered != True) \
+                .all():
 
-            # Handle new database case
-            if last_pass == 0 and last_user == 0:
-
-                passwords = self.main_db_sess.query(sql.Password).all()
-                for u in self.main_db_sess.query(sql.Username).all():
-                    u.passwords = passwords
-
-            else:
-
-                passwords = self.main_db_sess.query(sql.Password) \
-                        .filter(sql.Password.id > last_pass) \
-                        .all()
-
-                for u in self.main_db_sess.query(sql.Username) \
-                        .filter(sql.Username.id > last_user) \
-                        .all():
-
-                    u.passwords = passwords
+            u.passwords = passwords
 
         self.main_db_sess.commit()
 
@@ -316,80 +475,30 @@ class DBMixin:
         '''Return valid credentials
         '''
 
-        return self.main_db_sess.query(sql.Credential) \
+        # Normal credentials
+        valids = self.main_db_sess.query(sql.Credential) \
                 .filter(sql.Credential.valid == True) \
                 .all()
 
-    def delete_values(self, usernames=None, passwords=None,
-            username_files=None, password_files=None,
-            credentials=None, credential_files=None,
-            csv_delimiter=':', as_credentials=False):
-        '''Check each supplied value to determine if it's iterable
-        and proceed to import each record of the container into
-        the brute force database.
+        # Static credentials
+        valids += self.main_db_sess.query(sql.StaticCredential) \
+                .filter(sql.StaticCredential.valid == True) \
+                .all()
+
+        return valids
+
+    def get_strict_credentials(self,credential_delimiter=':'):
+        '''Return strict credential records
         '''
 
-        # ===============
-        # VALIDATE INPUTS
-        # ===============
-
-        for v in [usernames,passwords,username_files,password_files,
-                credentials,credential_files]:
-            if is_iterable(v): continue
-            raise ValueError(
-                    'Username/Password arguments must be iterable values ' \
-                    'populated with string records or file names'
-                )
-
-        # Make sure that only credential inputs are allowed when the
-        # as_credentials flag is set to true
-        if as_credentials:
-            
-            msg = 'Only credentials or credential_files can be supplied ' \
-                  'when using the as_credentials flag is set to True'
-            
-            if usernames or passwords or username_files or \
-                    password_files: raise ValueError(msg)
-
-        # =================
-        # DELETE THE VALUES
-        # =================
-
-        # import passwords from list
-        if passwords:
-            self.delete_records(passwords,sql.Password)
-
-        # import usernames from list
-        if usernames:
-            self.delete_records(usernames,sql.Username)
-
-        # import usernames from files
-        if username_files:
-            for f in username_files:
-                self.delete_records(f,sql.Username,True)
-
-        # import passwords from files
-        if password_files:
-            for f in password_files:
-                self.delete_records(f,sql.Password,True)
-
-        # import credentials from list
-        if credentials:
-            self.delete_records(credentials,None,False,True,csv_delimiter)
-
-        # import credentials from files
-        if credential_files:
-            for f in credential_files:
-                self.delete_records(f,None,True,True,csv_delimiter)
-
-        self.main_db_sess.commit()
+        return self.main_db_sess.query(sql.StrictCredential).all()
 
 class Manager(DBMixin):
 
     def __init__(self, db_file):
         self.session_maker = Session(db_file)
         self.main_db_sess = self.session_maker.new()
-        self.logger = logging.getLogger('brute_logger')
+        self.logger = logging.getLogger('DBMANAGER')
         
 class Session:
     # TODO: This will replace the session creation logic in BruteLoops.config.validate
@@ -401,6 +510,7 @@ class Session:
         # =====================
         # SQLITE INITIALIZATION
         # =====================
+
         engine = create_engine('sqlite:///'+db_file)
         Session = sessionmaker()
         Session.configure(bind=engine)
