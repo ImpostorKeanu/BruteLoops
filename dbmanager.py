@@ -226,3 +226,6 @@ if __name__ == '__main__':
     logger.info(f'Executing command')
     cmd()
     logger.info('Execution finished. Exiting.')
+
+    from IPython import embed
+    embed()

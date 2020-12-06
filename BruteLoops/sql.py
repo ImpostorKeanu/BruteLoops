@@ -1,5 +1,5 @@
 from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey, func,
-        text, Boolean, Float, Enum, UniqueConstraint, Table)
+        text, Boolean, Float, Enum, UniqueConstraint, ForeignKeyConstraint, Table)
 from sqlalchemy import create_engine
 from sqlalchemy.orm import relationship, backref, sessionmaker, close_all_sessions
 from sqlalchemy.ext.declarative import declarative_base
@@ -44,7 +44,8 @@ class Credential(Base):
     __tablename__ = 'credentials'
     id = Column(Integer, doc='Credential id',
             autoincrement="auto", primary_key=True)
-    username_id = Column(Integer, ForeignKey('usernames.id'), 
+    username_id = Column(Integer, ForeignKey('usernames.id',
+        ondelete='CASCADE', onupdate='CASCADE'), 
             doc='Username id',nullable=False)
     password_id = Column(Integer, ForeignKey('passwords.id'),
             doc='Password id',nullable=False)
@@ -54,8 +55,10 @@ class Credential(Base):
         doc='Determines if the credentials are valid')
     guessed = Column(Boolean, default=False,
         doc='Determines if the credentials have been guessed')
-    __table_args__ = (UniqueConstraint('username_id','password_id',
-        name='_credential_unique_constraint'),)
+    __table_args__ = (
+            UniqueConstraint('username_id','password_id',
+                name='_credential_unique_constraint'),
+            )
 
     def __repr__(self):
         return f'<Credential(id={self.id})>'
