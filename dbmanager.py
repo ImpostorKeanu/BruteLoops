@@ -5,9 +5,6 @@ import argparse
 from sys import stderr
 from pathlib import Path
 
-# Configure logging
-logging.basicConfig(format=FORMAT, level=logging.DEBUG, stream=stderr)
-
 # ================
 # GLOBAL VARIABLES
 # ================

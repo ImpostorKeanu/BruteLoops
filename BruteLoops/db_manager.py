@@ -8,7 +8,9 @@ from io import StringIO,TextIOWrapper
 from sys import stderr
 
 # Components needed to manage usenames and passwords in database files
-logging.basicConfig(format=FORMAT, level=logging.DEBUG, stream=stderr)
+logging.basicConfig(format=FORMAT,
+        level=logging.DEBUG,
+        stream=stderr)
 
 '''
 # Purpose
