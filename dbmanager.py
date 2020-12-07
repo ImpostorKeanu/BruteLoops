@@ -41,7 +41,7 @@ def dump_valid():
     logger.info('Credentials dumped')
 
 def dump_strict_credentials():
-    '''
+    '''Dump strict credentials from the database to stdout
     '''
 
     logger.info('Dumping static credentials')
@@ -209,7 +209,7 @@ if __name__ == '__main__':
     # CONFIGURE LOGGING
     # =================
 
-    logger = logging.getLogger('DBMANAGER')
+    logger = logging.getLogger('dbmanager.py')
     logger.info('Initializing database manager')
 
     # =======================

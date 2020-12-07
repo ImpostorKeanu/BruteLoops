@@ -96,7 +96,6 @@ class Config:
     def configure_logging(self):
         'Configure a logger for the library'
         
-        logger = logging.getLogger('brute_logger')
         if self.log_valid or self.log_invalid or self.log_general:
             
             if self.log_valid:   self.log_level = BL.VALID_CREDENTIALS
@@ -116,22 +115,23 @@ class Config:
                 if self.log_stderr:
                     handlers.append(logging.StreamHandler(stderr))
 
-                for handler in handlers:
-                    handler.setFormatter(BL.LOG_FORMAT)
-                    handler.setLevel(self.log_level)
-                    logger.addHandler(handler)
+
+                logging.basicConfig(format=BL.LOG_FORMAT,
+                        handlers=handlers,
+                        level=self.log_level)
 
             else:
 
                 sh = logging.StreamHandler(stdout)
-                sh.setFormatter(BL.LOG_FORMAT)
-                logger.addHandler(sh)
-
-            logger.setLevel(self.log_level)
+                logging.basicConfig(format=BL.LOG_FORMAT,
+                        handlers=[sh],
+                        level=self.log_level)
 
         else:
-        # DISABLE LOGGING
-            logger.setLevel(self.log_level)
+
+            # DISABLE LOGGING
+            logging.basicConfig(format=BL.LOG_FORMAT,
+                    level=self.log_level)
 
     def validate(self):
 

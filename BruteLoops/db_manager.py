@@ -498,7 +498,7 @@ class Manager(DBMixin):
     def __init__(self, db_file):
         self.session_maker = Session(db_file)
         self.main_db_sess = self.session_maker.new()
-        self.logger = logging.getLogger('DBMANAGER')
+        self.logger = logging.getLogger('BruteLoops.db_manager')
         
 class Session:
     # TODO: This will replace the session creation logic in BruteLoops.config.validate

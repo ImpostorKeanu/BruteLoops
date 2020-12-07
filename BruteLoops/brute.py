@@ -46,7 +46,7 @@ class BruteForcer:
         self.presults = []                  # Process results
         self.pool     = None                # Process pool (initialized by method)
         self.attack   = None
-        self.logger   = logging.getLogger('brute_logger')
+        self.logger   = logging.getLogger('BruteForcer')
         
         self.logger.log(
             GENERAL_EVENTS,
@@ -132,8 +132,7 @@ class BruteForcer:
         self.attack_type = self.__class__.attack_type
 
         # CREATE A NEW ATTACK
-        self.attack = sql.Attack(type=self.attack_type,
-            start_time=BruteTime.current_time())
+        self.attack = sql.Attack(start_time=BruteTime.current_time())
         self.main_db_sess.add(self.attack)
         self.main_db_sess.commit()
 
@@ -181,16 +180,26 @@ class BruteForcer:
 
             if not username: continue
 
-            password = self.handler_db_sess \
-                .query(sql.Password) \
-                .filter(sql.Password.value==output[2]) \
-                .first()
-
+            # Try for strict credentials first
             credential = self.handler_db_sess \
-                .query(sql.Credential) \
-                .filter(sql.Credential.username_id==username.id,
-                        sql.Credential.password_id==password.id) \
-                .first()
+                    .query(sql.StrictCredential) \
+                    .filter(
+                        sql.StrictCredential.username == username,
+                        sql.StrictCredential.password == output[2]
+                    ).first()
+
+            if not credential:
+
+                password = self.handler_db_sess \
+                    .query(sql.Password) \
+                    .filter(sql.Password.value==output[2]) \
+                    .first()
+
+                credential = self.handler_db_sess \
+                    .query(sql.Credential) \
+                    .filter(sql.Credential.username_id==username.id,
+                            sql.Credential.password_id==password.id) \
+                    .first()
 
             credential.guessed=True
 
@@ -369,26 +378,6 @@ class BruteForcer:
         close_all_sessions()
 
 
-class Spray(BruteForcer):
-
-    attack_type = 'SPRAY'
-
-#    def import_values(self, *args, **kwargs):
-#
-#        # =========================================
-#        # IMPORT VALUES INTO THE DATABASE VIA SUPER
-#        # =========================================
-#
-#        super().import_values(*args, **kwargs)
-#
-#        # ====================================================
-#        # CREATE A CREDENTIAL FOR EACH USERNAME:PASSWORD COMBO
-#        # ====================================================
-#
-#        passwords = self.main_db_sess.query(sql.Password).all()
-#        for u in self.main_db_sess.query(sql.Username).all():
-#            u.passwords=passwords
-
     def launch(self):
         """Launch a horitontal brute force attack.
 
@@ -400,20 +389,10 @@ class Spray(BruteForcer):
         corrsponding to the appropriate input.
         """
 
-        # ==========================
-        # IMPORTING DATABASE RECORDS
-        # ==========================
-        
-#        self.import_values(usernames=usernames,
-#                passwords=passwords, username_files=username_files,
-#                password_files=password_files, credentials=credentials,
-#                credential_files=credential_files,
-#                csv_delimiter=csv_delimiter)
-
         # ========================
         # BEGIN BRUTE FORCE ATTACK
         # ========================
-        #password_count = self.main_db_sess.query(sql.Password).count()
+
         if self.config.max_auth_tries:
             # Handle manually configured lockout threshold
             limit = self.config.max_auth_tries
@@ -423,6 +402,7 @@ class Spray(BruteForcer):
       
         sleeping  = False # determine if the brute attack is sleeping
         recovered = False # track if a valid credentials has been recovered
+
         while True:
 
             try:
@@ -458,6 +438,7 @@ class Spray(BruteForcer):
                 elif usernames and sleeping:
                     sleeping = False
 
+
                 # =========================
                 # BRUTE FORCE EACH USERNAME
                 # =========================
@@ -466,16 +447,47 @@ class Spray(BruteForcer):
                  # used to assure that the limit remains lesser than the greatest password
                  # id
                 for username in usernames:
-    
-                    # ========================
-                    # GET A CHUNK OF PASSWORDS
-                    # ========================
-    
+
+                    credentials = []
+
+                    # Get strict credentials for a given username
                     credentials = self.main_db_sess \
-                            .query(sql.Credential) \
-                            .filter(sql.Credential.username_id==username.id,
-                                    sql.Credential.guessed==False) \
+                            .query(sql.StrictCredential) \
+                            .filter(sql.StrictCredential \
+                                        .username_id==username.id,
+                                    sql.StrictCredential \
+                                        .guessed==False) \
                             .limit(limit) \
+                            .all()
+
+                    # Try to pull the maximum number of credentials for the username relative
+                    # to the assigned limit
+                    credlen = len(credentials)
+
+                    # When no strict credentials have been provided, we just pull all normal
+                    # credentials
+                    if credlen == 0:
+    
+                        credentials = self.main_db_sess \
+                            .query(sql.Credential) \
+                            .filter(sql.Credential \
+                                        .username_id==username.id,
+                                    sql.Credential \
+                                        .guessed==False) \
+                            .limit(limit) \
+                            .all()
+
+                    # When only a partial maximum has been pulled from StrictCredentials,
+                    # populate with normal credentials
+                    elif credlen > 0 and credlen < limit:
+
+                        credentials += self.main_db_sess \
+                            .query(sql.Credential) \
+                            .filter(sql.Credential \
+                                        .username_id==username.id,
+                                   sql.Credential \
+                                        .guessed==False) \
+                            .limit(limit-credlen) \
                             .all()
 
                     # Avoid race condition
@@ -498,6 +510,15 @@ class Spray(BruteForcer):
                         # process, thus it is not expressly called here. See logic
                         # that sets the authentication callback in BruteLoops.config
                         # for how this process works.
+
+                        if credential.__class__ == sql.StrictCredential:
+                            password_value = credential.password
+                        else:
+                            import pdb
+                            try:
+                                password_value = credential.password.value
+                            except Exception as e:
+                                pdb.set_trace()
    
                         # Current time of authentication attempt
                         ctime = BruteTime.current_time()
@@ -523,7 +544,7 @@ class Spray(BruteForcer):
                         # Do the authentication callback
                         recovered = self.do_authentication_callback(
                             credential.username.value,
-                            credential.password.value
+                            password_value
                         )
 
                         if recovered and self.config.stop_on_valid:
@@ -548,13 +569,24 @@ class Spray(BruteForcer):
                 # CONTINUE LOOPING UNTIL ALL GUESSES ARE FINISHED
                 # ===============================================
 
-
-                if self.main_db_sess \
+                # Check if a normal credentials remains
+                sample_remaining = self.main_db_sess \
                     .query(sql.Username) \
                     .join(sql.Credential) \
                     .filter(sql.Username.recovered == False,
                             sql.Credential.guessed == False) \
-                    .first():
+                    .first()
+
+                if not sample_remaining:
+                    # Check if a static credential remains
+                    sample_remaining = self.main_db_sess \
+                    .query(sql.Username) \
+                    .join(sql.StrictCredential) \
+                    .filter(sql.Username.recovered == False,
+                            sql.StrictCredential.guessed == False) \
+                    .first()
+
+                if sample_remaining:
 
                     if len(self.presults):
                         outputs = self.monitor_processes()
@@ -609,44 +641,3 @@ class Spray(BruteForcer):
 
                     self.shutdown()
                     raise e
-
-class Credential(Spray):
-    '''Perform a credential style brute force attack. Only credentials
-    supplied in the form of CSV delimited records will be attempted.
-    Logic to perform the overall attack is inherited from `Spray`
-    since it now uses a distinct table to track `Credential` objects.
-    This class overrides the `import_values` method and overrides it
-    to limit the creation of `Credential` objects to only the records
-    that appear in the `credential` and `credential_files` arguments.
-    '''
-
-    attack_type = 'CREDENTIAL'
-
-#    def import_values(self, credentials=None, credential_files=None,
-#            csv_delimiter=':', *args, **kwargs):
-#        '''Import credential records into the target database. A
-#        one-to-many relationship is established between each user
-#        and their corressponding passwords.
-#
-#        - credentials - A list of CSV delimited values, i.e. `username,
-#        password`
-#        - credential_files - A list of string values associated with
-#        file names on the local filesystem to be parsed into CSV records
-#        - csv_delimiter - The CSV separator value used to split each
-#        value of `credentials` or `credential_files`.
-#        '''
-#
-#        if args or [v for k,v in kwargs.items() if v != None]:
-#            raise ValueError(
-#                'Credential attack accepts only credentials or ' \
-#                'credential_file arguments to assure that each ' \
-#                'username value is associated with specific ' \
-#                'password values'
-#            )
-#
-#        # TODO: super kept confusing me here so I just tapped right into
-#        # __mro__ so I can move on with my fucking life
-#        Credential.__mro__[2].import_values(self,
-#                credentials=credentials,
-#                credential_files=credential_files,
-#                csv_delimiter=csv_delimiter)

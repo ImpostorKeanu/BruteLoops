@@ -95,8 +95,6 @@ class Attack(Base):
     end_time = Column(Float, nullable=True, doc='Time of attack end')
     complete = Column(Boolean, default=False,
         doc='Determines if the attack completed')
-    type = Column(String, nullable=False,
-        doc='Type of attack')
 
     def __repr__(self):
 
