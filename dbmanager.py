@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from BruteLoops.logging import *
 from BruteLoops.db_manager import *
 from BruteLoops import args as blargs
