@@ -1,29 +1,72 @@
 # BruteLoops
 
-A dead simple library to support protocol agnostic horizontal brute force attacks targeting authentication interfaces by providing functions that handle efficient looping and timing logic. Logic involving authentication, such as making an HTTP request and analyzing the response, is left up to the program utilizing the library - thus providing a consistent and dependable platform to craft brute force attacks targeting new protocols and applications.
+A dead simple library providing the foundational logic for
+efficient password brute force attacks against authentication
+interfaces.
 
-__See the [example](https://github.com/arch4ngel/brute_loops/wiki/A-Brief-Example) page in the wiki for a brief walkthrough.__
+A "modular" example is included with the library that
+demonstrates how to use this package. It's fully functional
+and provides multiple brute force modules. Below is a sample
+of its capabilities:
+
+```
+http.accellion_ftp  Accellion FTP HTTP interface login module
+http.basic_digest   Generic HTTP basic digest auth
+http.basic_ntlm     Generic HTTP basic NTLM authentication
+http.global_protect
+                    Global Protect web interface
+http.mattermost     Mattermost login web interface
+http.netwrix        Netwrix web login
+http.okta           Okta JSON API
+http.owa2010        OWA 2010 web interface
+http.owa2016        OWA 2016 web interface
+smb.smb             Target a single SMB server
+testing.fake        Fake authentication module for training/testing
+```
+
+# Key Features
+
+- *Protocol agnostic* - If a callback can be written in Python,
+BruteLoops can be used to attack it
+- *SQLite support* - All usernames, passwords, and credentials
+are maintained in an SQLite database.
+  - A companion utility (`dbmanager.py`) that creates and manages
+  input databases accompanies BruteLoops
+- *Spray and Stuffing Attacks in One Tool* - BruteLoops supports both
+spray and stuffing attacks in the same attack logic and database, meaning
+that you can configure a single database and run the attack without heavy
+reconfiguration and confusion.
+- *Guess scheduling* - Each username in the SQLite database is configured
+  with a timestamp that is updated after each authentication event. This
+  means we can significantly reduce likelihood of locking accounts by
+  scheduling each authentication event with precision.
+- *Fine-grained configurability to avoid lockout events* - Microsoft's
+lockout policies can be matched 1-to-1 using BruteLoop's parameters:
+  - `auth_threshold` = Lockout Threshold
+  - `max_auth_jitter` = Lockout Observation Window
+  - Timestampes associated with each authentication event are tracked
+  in BruteLoops' SQLite database. Each username receives a distinct
+  timestamp to assure that authentication events are highly controlled.
+- *Attack resumption* - Stopping and resuming an attack is possible
+  without worrying about losing your place in the attack or locking accounts.
+- *Multiprocessing* - Speed up attacks using multiprocessing! By configuring
+  the`parallel guess count, you're effectively telling BruteLoops how many
+  usernames to guess in parallel.
+- *Logging* - Each authentication event can optionally logged to disk.
+  This information can be useful during red teams by providing customers
+  with a detailed attack timeline that can be mapped back to logged events.
 
 # Dependencies
 
-BruteLoops requires __Python3.7 or newer__ and [SQLAlchemy 1.3.0](https://www.sqlalchemy.org/), the latter of which can be obtained via pip and the requirements.txt file in this repository: `python3.7 -m pip install -r requirements.txt`
+BruteLoops requires __Python3.7 or newer__ and
+[SQLAlchemy 1.3.0](https://www.sqlalchemy.org/), the latter of
+which can be obtained via pip and the requirements.txt file in
+this repository: `python3.7 -m pip install -r requirements.txt`
 
-# Features
+# Installation
 
-- Protocol Agnostic - So long as a Python function or callable object can be written for a target protocol, this library provides the basic looping logic.
-- Though usernames and passwords are supplied via input files and/or lists, an SQLite database is used to support all brute force attacks, allowing BruteLoops to use SQL while selecting usernames to target during attack execution
-- Multiprocessing Support
-- Timing Configuration (optionial) - BruteLoops currently provides two timing configurations to avoid locking user accounts:
-  - `authentication_jitter` - A range of time a given process will sleep between authentication attempts
-  - `max_auth_jitter` - A range of time that must pass before attempting to authenticate a given username again
-- Logging (optional) - Log to a file, stderr, or stdout (or multiple) using a standard format. Logging is also __optional__, i.e. the developer can log successful authentication in the callback itself if desired.
-- Attack Resumption - Inputs (usernames/passwords) are parsed and imported into a SQLite database, where each username has a `last_password_id` indicating the last password guessed. Assuming integrity of the database is maintained between attacks, this allows for attacks to resume where last interrupted.
-- Efficient execution (see [Efficient Algorithm](https://github.com/arch4ngel/brute_loops/wiki/The-BruteLoops-Approach-to-a-Horizontal-Brute-Force-Attack]))
-
-# TODO:
-
-- Handle blank username/password values
-    - Potentially a decorator added to the callable that replaces strings with a string literal of `''` should they match a specific pattern?
-    - May be easier to update the DB schema to accept a Null value which translates to a `''`
-- Handle multiple hosts for a given credential
-    - Should probably be handled at the callback....?
+```
+git clone https://github.com/arch4ngel/bruteloops
+cd bruteloops
+python3 -m pip -install -r requirements.txt
+```
