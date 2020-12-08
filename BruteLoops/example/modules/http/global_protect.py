@@ -3,6 +3,8 @@ import warnings
 warnings.filterwarnings('ignore')
 from re import search,match,compile
 import requests
+from BruteLoops.example.module import Module as BLModule
+
 
 '''
 # SAMPLE REQUEST
@@ -59,7 +61,7 @@ url_re = compile(
     '^(?P<prot>https?:)//(?P<server>.+?)(?P<port>:[1-9]{1}[0-9]{,4})?/'
 )
 
-class GlobalProtect:
+class Module(BLModule):
     '''
     Palo Alto Global Protect login example
 
@@ -69,7 +71,13 @@ class GlobalProtect:
     configurations.
     '''
 
-    def __init__(self, url, proxies={}, headers={}, verify_ssl=False):
+    name = 'http.global_protect'
+    description = brief_description = 'Global Protect web interface'
+
+    def __init__(self, url:'required:True,type:str,help:URL to target',
+            proxies:'required:False,type:str,help:HTTP proxies'={},
+            headers:'required:False,type:str,help:HTTP headers'={},
+            verify_ssl:'required:False,type:bool,help:Verify SSL'=False):
 
         m = match(url_re,url)
 

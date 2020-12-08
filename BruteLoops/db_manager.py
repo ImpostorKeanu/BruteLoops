@@ -12,34 +12,6 @@ logging.basicConfig(format=FORMAT,
         level=logging.DEBUG,
         stream=stderr)
 
-'''
-# Purpose
-
-This enables us to move away from the original approach of having
-the attack, in terms of importing and exporting users and passwords,
-manage database records.
-
-# Questions
-
-- Can a distinct script read and write to a database while an attack
-is underway?
-  - What issues will this cause?
-  - It'd be nice to be able to just allow an attack to continue while
-    managing the underlying records.
-
-# Capabilities
-
-- Create database
-- Insert
-  - usernames
-  - passwords
-  - credentials
-- Delete
-  - usernames
-  - passwords
-  - credentials
-'''
-
 def strip_newline(s):
     '''Strips the final character from a string via list comprehension.
     Useful when ```str.strip()``` might pull a legitimate whitespace

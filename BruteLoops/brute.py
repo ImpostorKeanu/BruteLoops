@@ -17,13 +17,12 @@ import traceback
 import re
 import signal
 import logging
+from time import time
 
 class BruteForcer:
     '''Base object from which all other brute forcers will inherit.
     Provides all basic functionality, less brute force logic.
     '''
-
-    attack_type = 'DEFAULT'
 
     def __init__(self, config):
         '''Initialize the BruteForcer object, including processes.
@@ -126,10 +125,6 @@ class BruteForcer:
         current_time = BruteTime.current_time(format=str)
         self.logger.log(GENERAL_EVENTS,
                 f'Beginning attack: {current_time}')
-        
-        # NOTE: Unused at the moment. Will likely be used when
-        # additional attack types are added.
-        self.attack_type = self.__class__.attack_type
 
         # CREATE A NEW ATTACK
         self.attack = sql.Attack(start_time=BruteTime.current_time())
@@ -430,7 +425,7 @@ class BruteForcer:
                         .order_by(sql.Username.future_time.desc()) \
                         .first()
                     sleeping = True
-                    if u:
+                    if u and u.future_time > 60+time():
                         self.logger.log(
                             GENERAL_EVENTS,
                             f'Sleeping until {BruteTime.float_to_str(u.future_time)}'
@@ -447,8 +442,6 @@ class BruteForcer:
                  # used to assure that the limit remains lesser than the greatest password
                  # id
                 for username in usernames:
-
-                    credentials = []
 
                     # Get strict credentials for a given username
                     credentials = self.main_db_sess \

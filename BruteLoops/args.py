@@ -102,13 +102,6 @@ jg.add_argument('--threshold-jitter-max','-tjmax',
 # OUTPUT CONFIGURATIONS
 # =====================
 
-DB_FILE = \
-'''
-Name of the SQLite database file to store records associated
-with the brute force attack. A new file will be created should
-it not exist.
-'''
-
 LOG_FILE = \
 '''
 Name of the log file to store events stemming from the brute
@@ -124,15 +117,13 @@ with the log file. Default: %(default)s
 op = output_parser = argparse.ArgumentParser(add_help=False)
 og = output_group = op.add_argument_group('Output Parameters',
         'Options related to output and logging targets')
-og.add_argument('--db-file','-dbf',
-        required=True,
-        help=DB_FILE)
 og.add_argument('--log-file','-lf',
         default='brute_log.txt',
         help=LOG_FILE)
 og.add_argument('--no-log-stdout','-nlso',
         action='store_false',
-        help=LOG_STDOUT)
+        help=LOG_STDOUT,
+        dest='log_stdout')
 
 # ==============
 # LOGGING LEVELS
@@ -158,13 +149,16 @@ lg = logging_group = lp.add_argument_group('Logging Parameters',
         'Options related to logging')
 lg.add_argument('--no-log-general','-nlg',
         action='store_false',
-        help=LOG_GENERAL)
+        help=LOG_GENERAL,
+        dest='log_general')
 lg.add_argument('--no-log-valid','-nlv',
         action='store_false',
-        help=LOG_VALID)
+        help=LOG_VALID,
+        dest='log_valid')
 lg.add_argument('--no-log-invalid','-nliv',
         action='store_false',
-        help=LOG_INVALID)
+        help=LOG_INVALID,
+        dest='log_invalid')
 
 # ============
 # INPUT PARSER

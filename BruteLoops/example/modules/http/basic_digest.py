@@ -4,14 +4,21 @@ warnings.filterwarnings('ignore')
 from re import search
 import requests
 from requests.auth import HTTPDigestAuth as HDA
+from BruteLoops.example.module import Module as BLModule
 
-class BasicDigest:
+class Module(BLModule):
 
     # String found to match any of those inserted here will be
     # replaced with a string literal value of ''
     blank_signatures = []
 
-    def __init__(self, url, proxies={}, headers={}, verify_ssl=False):
+    name = 'http.basic_digest'
+    description = brief_description = 'Generic HTTP basic digest auth'
+
+    def __init__(self, url:'required:True,type:str,help:URL to target',
+            proxies:'required:False,type:str,help:Proxies to use'={},
+            headers:'required:False,type:str,help:Static HTTP headers'={},
+            verify_ssl:'required:False,type:bool,help:Verify SSL cert'=False):
 
         self.url = url
         self.proxies = proxies

@@ -3,30 +3,10 @@
 import requests
 import re
 import warnings
+import pdb
+from BruteLoops.example.module import Module as BLModule
+
 warnings.filterwarnings('ignore')
-
-'''
-# Notes
-
-## Example Post Payload
-
-The `fc` parameter is a value embedded from initial resolution of
-the DEFAULT_LANDING. Must be parsed accordingly.
-
-```
-user=testo%40wc.com&password=presto&fc=w418-O1LolQa3sNuhib5s18kwLD33f7f3YulC0B3cftanOcg%5E
-```
-
-Input field from the landing HTML
-
-<input type="hidden" id="flogin" name="flogin" value="w418-O1LolQa3sNuhib5s18kwLD33f7f3YulC0B3cftanOcg^">
-
-## Invalid Credential Response
-
-```
-0||1||Invalid Username/Password.
-```
-'''
 
 # Default user agent
 DEFAULT_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) ' \
@@ -36,23 +16,27 @@ DEFAULT_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) ' \
 # Path to default landing page
 #   - Assigns CRSF cookie
 #   - Provides value to fc POST parameter (unknown use)
-DEFAULT_LANDING = '/courier/web/1000@/wmLogin.html?'
+DEFAULT_LANDING = '/PM/default.asp'
 
 # Path to where the form is posted
-DEFAULT_LOGIN   = '/courier/web/1000@/wmUtils.api'
+DEFAULT_LOGIN   = '/PM/enroll_verify.asp'
 
-RE_FLOGIN = re.compile('name="flogin" value="(?P<flogin>.+)"><input '\
-        'type="hidden" id="logRes"')
-
-class FTP():
+class Module(BLModule):
     '''Callable FTP class for the Accellion FTP web interface.
     '''
 
-    def __init__(self, origin,
-            landing_path=DEFAULT_LANDING,
-            login_path=DEFAULT_LOGIN,
-            user_agent=DEFAULT_UA,
-            verify_ssl=False,
+    name = 'http.netwrix'
+    description = brief_description = 'Netwrix web login'
+
+    def __init__(self, origin:'required:True,type:str,help:String origin URL',
+            domain:'required:True,type:str,help:Domain to supply',
+            landing_path:'required:False,type:str,help:Path to resource that ' \
+                    'issues cookies'=DEFAULT_LANDING,
+            login_path:'required:False,type:str,help:Path to where the form ' \
+                    'is submitted'=DEFAULT_LOGIN,
+            user_agent:'required:False,type:str,help:User agent string'= \
+                    DEFAULT_UA,
+            verify_ssl:'required:False,type:bool,help:Verify SSL'=False,
             *args, **kwargs):
         '''Initialize an FTP object. Parameters:
 
@@ -64,6 +48,7 @@ class FTP():
         '''
 
         self.origin=origin
+        self.domain=domain
         self.landing_path=landing_path
         self.login_path=login_path
         self.landing_url=f'{origin}{landing_path}'
@@ -97,47 +82,31 @@ class FTP():
             raise Exception(
                     f'Server responded with non 200: {resp.status_code}')
 
-        # Get the flogin line from the response text content
-        target=None
-        for line in resp.text.split('\n'):
-            if line.find('name="flogin"') > 0:
-                target=line
-                break
-
-        # Get the fc value for the POST request
-        if target: match = re.search(RE_FLOGIN,target)
-
-        if target == None or match == None:
-            raise Exception(
-                    'Failed to acquire flogin token from response body')
-
         # ======================
         # ATTEMPT AUTHENTICATION
         # ======================
 
+        data={"user_name":username,"password":password,"x":0,"y":0,"domain":self.domain}
+
+        # Encode the password
+        data["user_nameU"]="FEFF;"+";".join([str(v) for v in username.encode('utf')])
+        data["passwordU"]="FEFF;"+";".join([str(v) for v in password.encode('utf')])
+
         resp = sess.post(
                 self.auth_url,
-                data={'username':username,
-                    'password':password,
-                    'fc':match.groups()[0]},
+                data=data,
+                verify=self.verify_ssl,
                 headers={
-                        'Referer':self.landing_url,
-                        'CSRF-TOKEN':resp.cookies['CSRF-TOKEN'],
-                        'User-Agent':self.user_agent
-                    },
-                verify=self.verify_ssl
+                    'User-Agent':self.user_agent
+                }
             )
-
-        if 'Content-Type' not in resp.headers or \
-                resp.headers['Content-Type'].find('text') == -1:
-            raise Exception(
-                    'Unknown response after authentication attempt')
 
         # =====================================
         # VERIFY CREDENTIALS AND RETURN OUTCOME
         # =====================================
 
-        if resp.text.find('Invalid') > -1:
+        if resp.text.find('Logon failed') > -1:
             return (0, username, password)
         else:
+            print(resp.text)
             return (1, username, password)

@@ -3,12 +3,22 @@ import warnings
 warnings.filterwarnings('ignore')
 from re import search
 import requests
+from BruteLoops.example.module import Module as BLModule
 
-class OWA2010:
+class Module(BLModule):
 
-    def __init__(self, url, flags=0,
-            forcedownlevel=0,trusted=0, isUtf8=1,
-            proxies={}, headers={}, verify_ssl=False):
+    name = 'http.owa2010'
+    description = brief_description = 'OWA 2010 web interface'
+
+    def __init__(self, url:'required:True,type:str,help:URL to target',
+            flags:'required:False,type:int,help:Flags POST parameter value'=0,
+            forcedownlevel:'required:False,type:int,help:forcedownlevel POST ' \
+                    'parameter value'=0,
+            trusted:'required:False,type:int,help:trusted POST parameter value'=0,
+            isUtf8:'required:False,type:int,help:isUTF8 POST parameter value'=1,
+            proxies:'required:False,type:str,help:HTTP proxies'={},
+            headers:'required:False,type:str,help:HTTP headers'={},
+            verify_ssl:'required:False,type:str,help:Verify SSL'=False):
         '''
         Arguments:
 

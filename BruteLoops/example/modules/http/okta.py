@@ -3,14 +3,23 @@ import warnings
 warnings.filterwarnings('ignore')
 from re import search
 import requests
+from BruteLoops.example.module import Module as BLModule
 
 FAIL_VALUE = '"errorCode":"E0000004","errorSummary":"Authentication ' \
         'failed"' 
 
-class Okta:
+class Module(BLModule):
 
-    def __init__(self, url, cookies_url, referer_url=None,
-            proxies={}, headers={}, verify_ssl=False):
+    name = 'http.okta'
+    description = brief_description = 'Okta JSON API'
+
+    def __init__(self, url:'required:True,type:str,help:URL to target',
+            cookies_url:'required:True,type:str,help:URL that issues cookies',
+            referer_url:'required:False,type:str,help:URL to embed in the ' \
+                    'referer header'=None,
+            proxies:'required:False,type:str,help:HTTP proxies'={},
+            headers:'required:False,type:str,help:HTTP headers'={},
+            verify_ssl:'required:False,type:bool,help:Verify SSL'=False):
         '''
         # Notes
 

@@ -4,6 +4,7 @@ import requests
 import warnings
 import urllib
 warnings.filterwarnings('ignore')
+from BruteLoops.example.module import Module as BLModule
 
 '''
 # Notes
@@ -41,9 +42,15 @@ Vary: Accept-Encoding
 {"id":"api.user.login.invalid_credentials_email_username","message":"Enter a valid email or username and/or password.","detailed_error":"","request_id":"n69gxwj1spyapey6h4mnxshtgc","status_code":401}
 '''
 
-class Mattermost():
+class Module(BLModule):
 
-    def __init__(self,url,headers={},proxies={},verify_ssl=False):
+    name='http.mattermost'
+    description = brief_description = 'Mattermost login web interface'
+
+    def __init__(self,url:'required:True,type:str,help:URL to target',
+            headers:'required:False,type:str,help:HTTP headers'={},
+            proxies:'required:False,type:str,help:HTTP proxies'={},
+            verify_ssl:'required:False,type:bool,help:Verify SSL'=False):
 
         # Align headers to avoid issues
         if not 'Sec-Fetch-Dest' in headers:

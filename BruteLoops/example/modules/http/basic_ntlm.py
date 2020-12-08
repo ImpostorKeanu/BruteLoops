@@ -4,10 +4,19 @@ warnings.filterwarnings('ignore')
 from re import search
 import requests
 from requests_ntlm import HttpNtlmAuth
+from BruteLoops.example.module import Module as BLModule
 
-class BasicNTLM:
+class Module(BLModule):
 
-    def __init__(self, url, proxies={}, headers={}, verify_ssl=False):
+    name = 'http.basicntlm'
+    description = 'This module allows one to brute force web ' \
+            'applicaitons using basic NTLM authentication.'
+    brief_description = 'Generic HTTP basic NTLM authentication'
+
+    def __init__(self, url:'required:True,type:str,help:Target URL',
+            proxies:'required:False,type:str,help:Upstream proxies'={},
+            headers:'required:False,type:str,help:HTTP headers'={},
+            verify_ssl:'required:False,type:bool,help:Verify SSL'=False):
 
         self.url = url
         self.proxies = proxies
