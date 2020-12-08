@@ -26,33 +26,33 @@ testing.fake        Fake authentication module for training/testing
 
 # Key Features
 
-- *Protocol agnostic* - If a callback can be written in Python,
+- **Protocol agnostic** - If a callback can be written in Python,
 BruteLoops can be used to attack it
-- *SQLite support* - All usernames, passwords, and credentials
+- **SQLite support** - All usernames, passwords, and credentials
 are maintained in an SQLite database.
   - A companion utility (`dbmanager.py`) that creates and manages
   input databases accompanies BruteLoops
-- *Spray and Stuffing Attacks in One Tool* - BruteLoops supports both
+- **Spray and Stuffing Attacks in One Tool** - BruteLoops supports both
 spray and stuffing attacks in the same attack logic and database, meaning
 that you can configure a single database and run the attack without heavy
 reconfiguration and confusion.
-- *Guess scheduling* - Each username in the SQLite database is configured
+- **Guess scheduling** - Each username in the SQLite database is configured
   with a timestamp that is updated after each authentication event. This
   means we can significantly reduce likelihood of locking accounts by
   scheduling each authentication event with precision.
-- *Fine-grained configurability to avoid lockout events* - Microsoft's
+- **Fine-grained configurability to avoid lockout events** - Microsoft's
 lockout policies can be matched 1-to-1 using BruteLoop's parameters:
   - `auth_threshold` = Lockout Threshold
   - `max_auth_jitter` = Lockout Observation Window
   - Timestampes associated with each authentication event are tracked
   in BruteLoops' SQLite database. Each username receives a distinct
   timestamp to assure that authentication events are highly controlled.
-- *Attack resumption* - Stopping and resuming an attack is possible
+- **Attack resumption** - Stopping and resuming an attack is possible
   without worrying about losing your place in the attack or locking accounts.
-- *Multiprocessing* - Speed up attacks using multiprocessing! By configuring
+- **Multiprocessing** - Speed up attacks using multiprocessing! By configuring
   the`parallel guess count, you're effectively telling BruteLoops how many
   usernames to guess in parallel.
-- *Logging* - Each authentication event can optionally logged to disk.
+- **Logging** - Each authentication event can optionally logged to disk.
   This information can be useful during red teams by providing customers
   with a detailed attack timeline that can be mapped back to logged events.
 
