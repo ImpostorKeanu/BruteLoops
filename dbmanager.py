@@ -101,7 +101,7 @@ if __name__ == '__main__':
     # ==================================
 
     parser_dump_strict_credentials = subparsers.add_parser(
-            'dump-credentials',
+            'dump-credential-values',
             description='Dump scrict credentials, regardless of ' \
                     'of status from the database. This is a mean' \
                     's of identifying which static values have b' \
@@ -123,7 +123,7 @@ if __name__ == '__main__':
     # IMPORT VALUES SUBCOMMAND
     # ========================
 
-    parser_import_values = subparsers.add_parser('import-values',
+    parser_import_values = subparsers.add_parser('import-spray-values',
                 description='Import username and password values ' \
                         'into the target database. NOTE: if crede' \
                         'ntial inputs are provided, they will be ' \
@@ -143,7 +143,7 @@ if __name__ == '__main__':
     # TODO: TEST ME
 
     parser_import_credentials = subparsers.add_parser(
-            'import-credentials',
+            'import-credential-values',
             description='Import credential values into the target' \
                     ' database. The username to password relations' \
                     'hip is maintained in the data meaning t' \
@@ -163,7 +163,7 @@ if __name__ == '__main__':
     # TODO: TEST ME; PAY ATTENTION TO CASCADING DELETIONS
     # THEYRE FUCKING TERRIBLE IN SQLALCHEMY
 
-    parser_delete_values = subparsers.add_parser('delete-values',
+    parser_delete_values = subparsers.add_parser('delete-spray-values',
                 description='Delete username and password values ' \
                         'from the target database. NOTE: if crede' \
                         'ntials are supplied, then the username a' \
