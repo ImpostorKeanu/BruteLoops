@@ -4,6 +4,9 @@ A dead simple library providing the foundational logic for
 efficient password brute force attacks against authentication
 interfaces.
 
+See various [Wiki](https://github.com/arch4ngel/BruteLoops/wiki) sections
+for more information.
+
 A "modular" example is included with the library that
 demonstrates how to use this package. It's fully functional
 and provides multiple brute force modules. Below is a sample
@@ -70,3 +73,22 @@ git clone https://github.com/arch4ngel/bruteloops
 cd bruteloops
 python3 -m pip -install -r requirements.txt
 ```
+
+# How do I use this Damn Thing?
+
+Jeez, alright already...we can break an attack down into a few steps:
+
+0. Find an attackable service
+0. If one isn't already available in the `example.py`\[[1]\] directory,
+build a callback
+0. Find some usernames, passwords, and credentials
+0. Construct a database by passing the authentication data to
+`dbmanager.py`\[[2]\]
+0. If relevant, Enumerate or request the AD lockout policy to intelligently
+configure the attack
+0. Execute the attack in alignment with the target lockout policy\[[1]\]\[[3]\]\[[4]\]
+
+[1]:https://github.com/arch4ngel/BruteLoops/wiki/Using-example.py-to-Execute-Brute-Force-Attacks
+[2]:https://github.com/arch4ngel/BruteLoops/wiki/Using-dbmanager.py-To-Manage-Databases
+[3]:https://github.com/arch4ngel/BruteLoops/wiki/Explanation-of-Configuration-Parameters
+[4]:https://github.com/arch4ngel/BruteLoops/wiki/Jitter-Time-Format-Specification
