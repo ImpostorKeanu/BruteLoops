@@ -20,7 +20,7 @@ parser = argparse.ArgumentParser(
                 'Select a brute force module and input database to ' \
                 'perform a highly configurable brute force attack a'
                 'gainst a target service.',
-        parents=[gp,jp,op,lp])
+        parents=[gp,stp,jp,op,lp])
 
 # Add a default database argument (positional)
 parser.add_argument('dbfile', help='Input database file')

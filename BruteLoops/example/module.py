@@ -211,6 +211,8 @@ class Module:
             dct['help']= ('required' if dct['required'] else 'optional') + \
                 f' - {dct["type"]} - {dct["help"]}'
             del(dct['type'])
+
+            if 'default' in dct: dct['help']+= f' Default: {dct["default"]}'
         
             # Add the argument to the parser
             parser.add_argument(f'--{arg.replace("_","-")}', **dct)
