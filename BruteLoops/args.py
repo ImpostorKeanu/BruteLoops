@@ -6,23 +6,30 @@ import argparse
 # ==================
 
 PARALLEL_GUESS_COUNT = \
-'''
-Number of processes to use during the attack, determinining the
+'''Number of processes to use during the attack, determinining the
 count of parallel authentication attempts that are performed.
 Default: %(default)s.
 '''
 
 AUTH_THRESHOLD = \
-'''
-Inclusive number of passwords to guess for a given username before
+'''Inclusive number of passwords to guess for a given username before
 jittering for a time falling within the bounds of the values
 specified for "Threshold Jitter". Default: %(default)s
 '''
 
 STOP_ON_VALID = \
-'''
-Stop the brute force attack when valid credentials are recovered.
+'''Stop the brute force attack when valid credentials are recovered.
 Default: %(default)s
+'''
+
+PRIORITY_USERNAMES = \
+'''Usernames to prioritize over all others when guessing, moving
+them to the front of the guess queue.
+'''
+
+PRIORITY_PASSWORDS = \
+'''Passwords to prioritize over all others when guessing, moving
+them to the front of the guess queue.
 '''
 
 gp = general_parser = argparse.ArgumentParser(add_help=False)
@@ -42,6 +49,22 @@ gg.add_argument('--stop-on-valid','-sov',
         action='store_true',
         help=STOP_ON_VALID)
 
+# ===============================
+# SCHEDULING TWEAK CONFIGURATIONS
+# ===============================
+
+stp = scheduling_tweaks_parser = argparse.ArgumentParser(
+        add_help=False)
+stg = scheduling_tweaks_group = stp.add_argument_group(
+        'Scheduling Tweak Parameters',
+        'Options used to prioritize username or password values')
+stg.add_argument('--priority-usernames','-pu',
+        nargs='+',
+        help=PRIORITY_USERNAMES)
+stg.add_argument('--priority-passwords','-pp',
+        nargs='+',
+        help=PRIORITY_PASSWORDS)
+
 # =====================
 # JITTER CONFIGURATIONS
 # =====================
@@ -49,35 +72,30 @@ gg.add_argument('--stop-on-valid','-sov',
 JITTER_URL = 'https://github.com/arch4ngel/brute_loops/wiki/'
 
 JITTER_DESCRIPTION = \
-f'''
-Options used to configure jitter between authentication attempts.
+f'''Options used to configure jitter between authentication attempts.
 Expects each value expects a specially formatted value like their
 defaults. Please see the "Jitter Time Format Specification" section
 of the Wiki URL for more information on this format: {JITTER_URL}
 '''
 
 AUTH_JITTER_MINIMUM = \
-'''
-Minimum length of time to sleep between password guesses for
+'''Minimum length of time to sleep between password guesses for
 a given username. Default: %(default)s
 '''
 
 AUTH_JITTER_MAXIMUM = \
-'''
-Maximum length of time to sleep between password guesses for
+'''Maximum length of time to sleep between password guesses for
 a given username. Default: %(default)s
 '''
 
 THRESHOLD_JITTER_MINIMUM = \
-'''
-Minimum length of time to to wait before guessing anymore passwords
+'''Minimum length of time to to wait before guessing anymore passwords
 after meeting the authentication threshold for a given user, as
 specified by the --auth-threshold argument. Default: %(default)s
 '''
 
 THRESHOLD_JITTER_MAXIMUM = \
-'''
-Maximum length of time to to wait before guessing anymore passwords
+'''Maximum length of time to to wait before guessing anymore passwords
 after meeting the authentication threshold for a given user, as
 specified by the --auth-threshold argument. Default: %(default)s
 '''
@@ -103,14 +121,12 @@ jg.add_argument('--threshold-jitter-max','-tjmax',
 # =====================
 
 LOG_FILE = \
-'''
-Name of the log file to store events stemming from the brute
+'''Name of the log file to store events stemming from the brute
 force attack. Default: %(default)s 
 '''
 
 LOG_STDOUT = \
-'''
-Issue this flag to disable printing log records to STDOUT along
+'''Issue this flag to disable printing log records to STDOUT along
 with the log file. Default: %(default)s
 '''
 
@@ -130,18 +146,15 @@ og.add_argument('--no-log-stdout','-nlso',
 # ==============
 
 LOG_GENERAL = \
-'''
-Disable logging of general events.
+'''Disable logging of general events.
 '''
 
 LOG_VALID = \
-'''
-Disable logging of valid credentials. LIKELY UNDESIRABLE.
+'''Disable logging of valid credentials. LIKELY UNDESIRABLE.
 '''
 
 LOG_INVALID = \
-'''
-Disable logging of invalid credentials.
+'''Disable logging of invalid credentials.
 '''
 
 lp = logging_parser = argparse.ArgumentParser(add_help=False)
@@ -165,26 +178,22 @@ lg.add_argument('--no-log-invalid','-nliv',
 # ============
 
 INPUT_DESCRIPTION = \
-'''
-Each of the following values is optional, though there must
+'''Each of the following values is optional, though there must
 be values in the SQLite database to target for attack. Also,
 any combination of these values can be combined, as well.
 '''
 
 USERNAMES = \
-'''
-Space delimited list of username values to brute force.
+'''Space delimited list of username values to brute force.
 '''
 
 USERNAME_FILES = \
-'''
-Space delimited list of files containing newline separated
+'''Space delimited list of files containing newline separated
 records of username values to brute force.
 '''
 
 PASSWORDS = \
-'''
-Space delimited list of password values to guess.
+'''Space delimited list of password values to guess.
 '''
 
 PASSWORD_FILES = \
@@ -217,8 +226,7 @@ pg.add_argument('--password-files','-pfs',
 # =================
 
 CREDENTIAL_DESCRIPTION = \
-'''
-Each of the following values is options, though
+'''Each of the following values is options, though
 there must be values in the SQLited atabase to target for
 attack. When used in a Spray attack, all passwords will
 be used against all accounts during the brute force. When
@@ -227,27 +235,23 @@ be attempted.
 '''
 
 CREDENTIALS = \
-'''
-Space delimited list of credential values to brute force.
+'''Space delimited list of credential values to brute force.
 '''
 
 CREDENTIAL_FILES = \
-'''
-Space delimited list of files containing newline separated
+'''Space delimited list of files containing newline separated
 : credential records to brute force.
 '''
 
 AS_CREDENTIALS = \
-'''
-Flag determining if the input values should be treated as
+'''Flag determining if the input values should be treated as
 credential records in the database, not as spray values. This
 means that only a single guess will be made using this password
 and it will target the supplied username.
 '''
 
 CREDENTIAL_DELIMITER = \
-'''
-The character value that delimits the username and password values
+'''The character value that delimits the username and password values
 of a given credential, for instance ":" would be the proper delimiter
 for a given credential "administrator:password123". Default: ":"
 '''
@@ -264,9 +268,6 @@ cg.add_argument('--credentials','-cs',
 cg.add_argument('--credential-files','-cfs',
         nargs='+',
         help=CREDENTIAL_FILES)
-#cg.add_argument('--as-credentials',
-#        action='store_true',
-#        help=AS_CREDENTIALS)
 cg.add_argument('--credential-delimiter',
         default=':',
         help=CREDENTIAL_DELIMITER)

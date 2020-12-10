@@ -74,7 +74,9 @@ class Config:
             log_file=False,                 # FILE TO RECEIVE ADDITIONAL LOGS
             log_stdout=False,               # LOG EVENTS TO STDOUT
             log_stderr=False,               # LOG EVENTS TO STDERR
-            exception_handlers={}):         # DICTIONARY OF EXCEPTION HANDLERS: {class:exception_handler}
+            exception_handlers=None,        # DICTIONARY OF EXCEPTION HANDLERS: {class:exception_handler}
+            priority_usernames=None,        # Prioritize these usernames above all others
+            priority_passwords=None):       # Prioritize these passwords above all others
 
         self.process_count              = process_count
         self.authentication_callback    = authentication_callback
@@ -89,9 +91,14 @@ class Config:
         self.log_file                   = log_file
         self.log_stdout                 = log_stdout
         self.log_stderr                 = log_stderr
-        self.exception_handlers         = exception_handlers
+        self.exception_handlers         = exception_handlers if \
+                exception_handlers else {}
         self.log_level                  = 90
         self.validated                  = False
+        self.priority_usernames         = set(priority_usernames) if \
+                priority_usernames else []
+        self.priority_passwords         = set(priority_passwords) if \
+                priority_passwords else []
 
     def configure_logging(self):
         'Configure a logger for the library'

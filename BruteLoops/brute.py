@@ -19,6 +19,20 @@ import signal
 import logging
 from time import time
 
+UNKNOWN_PRIORITIZED_USERNAME_MSG = \
+    'Prioritized username value supplied ' \
+    'during configuration that does not a' \
+    'ppear in the database. Insert this v' \
+    'alue or remove it from the configura' \
+    'tion: {username}'
+
+UNKNOWN_PRIORITIZED_PASSWORD_MSG = \
+    'Prioritized password value supplied ' \
+    'during configuration that does not a' \
+    'ppear in the database. Insert this v' \
+    'alue or remove it from the configura' \
+    'tion: {password}'
+
 class BruteForcer:
     '''Base object from which all other brute forcers will inherit.
     Provides all basic functionality, less brute force logic.
@@ -65,6 +79,8 @@ class BruteForcer:
                 'max_auth_tries',
                 'stop_on_valid',
                 'db_file',
+                'priority_usernames',
+                'priority_passwords'
         ]
 
         for attr in config_attrs:
@@ -384,10 +400,6 @@ class BruteForcer:
         corrsponding to the appropriate input.
         """
 
-        # ========================
-        # BEGIN BRUTE FORCE ATTACK
-        # ========================
-
         if self.config.max_auth_tries:
             # Handle manually configured lockout threshold
             limit = self.config.max_auth_tries
@@ -397,6 +409,57 @@ class BruteForcer:
       
         sleeping  = False # determine if the brute attack is sleeping
         recovered = False # track if a valid credentials has been recovered
+
+        # =============================================
+        # ENSURE PRIORITIZED VALUES ARE IN THE DATABASE
+        # =============================================
+        '''Logic iterates through each prioritized username
+        and password value and determines if it resides in
+        the database. A ValueError is raised if it doesn't
+        exist in the database.
+
+        Note that the password value is checked for both normal
+        passwords and credentials. No error is raised so long
+        as the value resides in one of the two tables.
+        '''
+
+        # Check prioritized usernames
+        for username in self.config.priority_usernames:
+
+            record = self.main_db_sess.query(sql.Username) \
+                    .filter(sql.Username.value == username) \
+                    .first()
+
+            if not record:
+
+                raise ValueError(
+                        UNKNOWN_PRIORITIZED_USERNAME_MSG.format(
+                            username=username)
+                    )
+
+        # Check prioritized passwords
+        for password in self.config.priority_passwords:
+
+            record = self.main_db_sess.query(sql.Password) \
+                    .filter(sql.Password.value == password) \
+                    .first()
+
+            if not record:
+
+                record = self.main_db_sess.query(sql.StrictCredential) \
+                            .filter(sql.StrictCredential.password == password) \
+                        .first()
+
+            if not record:
+
+                raise ValueError(
+                        UNKNOWN_PRIORITIZED_PASSWORD_MSG.format(
+                            password=password)
+                    )
+
+        # ========================
+        # BEGIN BRUTE FORCE ATTACK
+        # ========================
 
         while True:
 
@@ -410,13 +473,38 @@ class BruteForcer:
                     # must not have already been recovered during an earlier attack
                     # future_time must be less than current time
                         # for that user have been completed
-                usernames = self.main_db_sess.query(sql.Username) \
+
+                # Get prioritized usernames
+                usernames = []
+                for username in self.config.priority_usernames:
+
+                    record = \
+                        self.main_db_sess.query(sql.Username) \
+                            .filter(
+                                sql.Username.recovered == False,
+                                sql.Username.future_time <= time(),
+                                sql.Username.value == username,) \
+                            .first()
+
+                    usernames.append(record)
+
+                # Prioritize strict credentials over sprays
+                usernames += self.main_db_sess.query(sql.Username) \
+                    .join(sql.StrictCredential) \
+                    .filter(
+                        sql.Username.recovered == False,
+                        sql.Username.future_time <= time(),
+                        sql.StrictCredential.guessed == False,) \
+                    .all()
+
+                # Append spray usernames
+                usernames += [u for u in self.main_db_sess.query(sql.Username) \
                     .join(sql.Credential) \
                     .filter(
                         sql.Username.recovered == False,
                         sql.Username.future_time <= time(),
                         sql.Credential.guessed == False,) \
-                    .all()
+                    .all() if u and not u in usernames]
 
                 # Logging sleep events
                 if not usernames and not sleeping:
@@ -433,7 +521,6 @@ class BruteForcer:
                 elif usernames and sleeping:
                     sleeping = False
 
-
                 # =========================
                 # BRUTE FORCE EACH USERNAME
                 # =========================
@@ -443,19 +530,57 @@ class BruteForcer:
                  # id
                 for username in usernames:
 
-                    # Get strict credentials for a given username
-                    credentials = self.main_db_sess \
-                            .query(sql.StrictCredential) \
-                            .filter(sql.StrictCredential \
-                                        .username_id==username.id,
-                                    sql.StrictCredential \
-                                        .guessed==False) \
-                            .limit(limit) \
-                            .all()
+                    # ================================
+                    # GET CREDENTIALS FOR THE USERNAME
+                    # ================================
 
-                    # Try to pull the maximum number of credentials for the username relative
-                    # to the assigned limit
-                    credlen = len(credentials)
+                    credentials, credlen = [], 0
+
+                    # Get prioritized strict credentials based on
+                    # password
+                    for password in self.config.priority_passwords:
+
+                        # Check for strict credentials first
+                        record = \
+                            self.main_db_sess.query(sql.StrictCredential) \
+                                .filter(sql.Username == username,
+                                    sql.StrictCredential.password == password,
+                                    sql.StrictCredential.guessed == False) \
+                                .first()            
+
+                        if record:
+                            credentials.append(record)
+                            credlen += 1
+                            if credlen == limit: break
+                            continue
+
+                        # Check for spray passwords now
+                        record = \
+                            self.main_db_sess.query(sql.Credential) \
+                                .join(sql.Password) \
+                                .filter(
+                                    sql.Credential.username == username,
+                                    sql.Password.value == password,
+                                    sql.Credential.guessed == False) \
+                                .first()
+
+                        if record:
+                            credentials.append(record)
+                            credlen += 1
+                            if credlen == limit: break
+
+                    # Get more strict credentials if the limit wasn't
+                    # met while pulling prioritized values
+                    if credlen != limit:
+
+                        # Get strict credentials for a given username
+                        credentials += self.main_db_sess \
+                                .query(sql.StrictCredential) \
+                                .filter(
+                                    sql.StrictCredential.username_id == username.id,
+                                    sql.StrictCredential.guessed == False) \
+                                .limit(limit) \
+                                .all()
 
                     # When no strict credentials have been provided, we just pull all normal
                     # credentials
@@ -463,10 +588,9 @@ class BruteForcer:
     
                         credentials = self.main_db_sess \
                             .query(sql.Credential) \
-                            .filter(sql.Credential \
-                                        .username_id==username.id,
-                                    sql.Credential \
-                                        .guessed==False) \
+                            .filter(
+                                sql.Credential.username_id == username.id,
+                                sql.Credential.guessed == False) \
                             .limit(limit) \
                             .all()
 
@@ -476,10 +600,9 @@ class BruteForcer:
 
                         credentials += self.main_db_sess \
                             .query(sql.Credential) \
-                            .filter(sql.Credential \
-                                        .username_id==username.id,
-                                   sql.Credential \
-                                        .guessed==False) \
+                            .filter(
+                                sql.Credential.username_id == username.id,
+                                sql.Credential.guessed == False) \
                             .limit(limit-credlen) \
                             .all()
 
@@ -507,11 +630,7 @@ class BruteForcer:
                         if credential.__class__ == sql.StrictCredential:
                             password_value = credential.password
                         else:
-                            import pdb
-                            try:
-                                password_value = credential.password.value
-                            except Exception as e:
-                                pdb.set_trace()
+                            password_value = credential.password.value
    
                         # Current time of authentication attempt
                         ctime = BruteTime.current_time()
