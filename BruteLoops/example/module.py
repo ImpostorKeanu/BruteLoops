@@ -14,7 +14,7 @@ class Module:
     # The __init__ Method
 
     This method can be used to set static values supporting a brute
-    for module. It's useful in situations when an upstream server
+    force module. It's useful in situations when an upstream server
     needs to be targeted.
 
     Arguments for the module that'll be passed along from the user are
