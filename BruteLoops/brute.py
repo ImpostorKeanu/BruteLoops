@@ -481,25 +481,13 @@ class BruteForcer:
                             .all()
 
                     # Avoid race condition
-                        # It's possible that the distinct process identified a valid username between
-                        # the time that the username query was executed and the passwords were gathered
                     if username.recovered: continue 
     
                     for credential in credentials:
-                        # NOTE: Perhaps it'd be more efficient to move the chunked password checking
-                            # to the secondary process entirely? Maybe create a different method
-                            # that expects a series of passwords to attempt? Maybe even send a
-                            # collection of credentials for a given process to check. The latter
-                            # could potentially work well considering authentication jitter has
-                            # been moved off to each child process.
 
                         # =======================================
                         # DO THE AUTHENTICATION FOR EACH PASSWORD
                         # =======================================
-                        # NOTE: Authentication jitter is handled in each disctinct
-                        # process, thus it is not expressly called here. See logic
-                        # that sets the authentication callback in BruteLoops.config
-                        # for how this process works.
    
                         # Current time of authentication attempt
                         ctime = BruteTime.current_time()
