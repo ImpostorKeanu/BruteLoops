@@ -172,7 +172,8 @@ class Module:
         ARGPARSE_SIG = re.compile(
             '^required:(?P<required>True|False),' \
             'type:(?P<type>.+),' \
-            'help:(?P<help>.+)'
+            'help:(?P<help>.+)' \
+            '(,nargs:(?P<nargs>.+))?'
         )
         
         # Signature to derive default values for the parameters
@@ -205,6 +206,7 @@ class Module:
             # Ensure the default isn't empty
             default = default if default != \
                     inspect.Parameter.empty else None
+
             if default: dct['default']=default
         
             # Create the help string
@@ -213,7 +215,12 @@ class Module:
             del(dct['type'])
 
             if 'default' in dct: dct['help']+= f' Default: {dct["default"]}'
-        
+
+            # Handle nargs
+            if 'nargs' in dct and dct['nargs']:
+                # TODO: Update this to support other values
+                dct['nargs'] = '+'
+
             # Add the argument to the parser
             parser.add_argument(f'--{arg.replace("_","-")}', **dct)
 

