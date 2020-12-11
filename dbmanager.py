@@ -72,6 +72,17 @@ def handle_values():
 
     manager.manage_db_values(**new_args)
 
+def prioritize_values():
+    '''Prioritize or unprioritize values
+    '''
+
+    new_args = {'prioritize':not args.un_prioritize}
+
+    for handle in ['usernames','passwords']:
+        if hasattr(args,handle): new_args[handle] = getattr(args,handle)
+
+    manager.manage_priorities(**new_args)
+
 if __name__ == '__main__':
 
     # ===================
@@ -161,7 +172,6 @@ if __name__ == '__main__':
     # DELETE VALUES SUBCOMMAND
     # ========================
     # TODO: TEST ME; PAY ATTENTION TO CASCADING DELETIONS
-    # THEYRE FUCKING TERRIBLE IN SQLALCHEMY
 
     parser_delete_values = subparsers.add_parser('delete-spray-values',
                 description='Delete username and password values ' \
@@ -181,7 +191,7 @@ if __name__ == '__main__':
     # TODO: TEST ME
 
     parser_delete_credentials = subparsers.add_parser(
-            'delete-credentials',
+            'delete-credential-values',
             description='Delete credential values from the target' \
                     'database. This targets password to username ' \
                     'relationships, but a given username or passw' \
@@ -193,6 +203,15 @@ if __name__ == '__main__':
             parents=[blargs.credential_parser])
     parser_delete_credentials.set_defaults(as_credentials=True,
             action='delete')
+
+    parser_prioritize_values = subparsers.add_parser(
+            'prioritize-values',
+            description='Prioritize username/password values',
+            help='Prioritize username/password values',
+            parents=[blargs.stp])
+    parser_prioritize_values.set_defaults(
+            cmd=prioritize_values)
+
 
     # ====================
     # HANDLE THE ARGUMENTS

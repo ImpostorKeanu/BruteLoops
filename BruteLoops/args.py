@@ -58,12 +58,15 @@ stp = scheduling_tweaks_parser = argparse.ArgumentParser(
 stg = scheduling_tweaks_group = stp.add_argument_group(
         'Scheduling Tweak Parameters',
         'Options used to prioritize username or password values')
-stg.add_argument('--priority-usernames','-pu',
+stg.add_argument('--un-prioritize',
+        action='store_true',
+        help='Unprioritize the target values')
+stg.add_argument('--usernames',
         nargs='+',
-        help=PRIORITY_USERNAMES)
-stg.add_argument('--priority-passwords','-pp',
+        help='Usernames to manage')
+stg.add_argument('--passwords',
         nargs='+',
-        help=PRIORITY_PASSWORDS)
+        help='Passwords to manage')
 
 # =====================
 # JITTER CONFIGURATIONS
@@ -197,9 +200,12 @@ PASSWORDS = \
 '''
 
 PASSWORD_FILES = \
-'''
-Space delimited list of files containing newline separated
+'''Space delimited list of files containing newline separated
 records of password values to guess.
+'''
+
+PRIORITIZE_VALUES = \
+'''Mark values as priority in the database.
 '''
 
 ip = input_parser = argparse.ArgumentParser(add_help=False)
@@ -211,6 +217,9 @@ ug.add_argument('--usernames','-us',
 ug.add_argument('--username-files','-ufs',
         nargs='+',
         help=USERNAME_FILES)
+#ug.add_argument('--prioritize',
+#        action='store_true',
+#        help=PRIORITIZE_VALUES)
 
 pg = password_group = ip.add_argument_group('Password Configurations',
         'Password value and file parameters')
@@ -220,6 +229,9 @@ pg.add_argument('--passwords','-ps',
 pg.add_argument('--password-files','-pfs',
         nargs='+',
         help=PASSWORD_FILES)
+#pg.add_argument('--prioritize',
+#        action='store_true',
+#        help=PRIORITIZE_VALUES)
 
 # =================
 # CREDENTIAL PARSER

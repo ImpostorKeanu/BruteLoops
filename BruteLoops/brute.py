@@ -79,8 +79,6 @@ class BruteForcer:
                 'max_auth_tries',
                 'stop_on_valid',
                 'db_file',
-                'priority_usernames',
-                'priority_passwords'
         ]
 
         for attr in config_attrs:
@@ -179,38 +177,21 @@ class BruteForcer:
         recovered = False
         for output in outputs:
 
-            username = self.handler_db_sess \
-                .query(sql.Username) \
-                .filter(sql.Username.value==output[1],
-                    sql.Username.recovered==False) \
-                .first()
+            # ===============================
+            # QUERY FOR THE TARGET CREDENTIAL
+            # ===============================
 
-            # =======================================================
-            # COMPENSATE USERNAME RECENTLY BEING UPDATED TO RECOVERED
-            # =======================================================
-
-            if not username: continue
-
-            # Try for strict credentials first
             credential = self.handler_db_sess \
-                    .query(sql.StrictCredential) \
-                    .filter(
-                        sql.StrictCredential.username == username,
-                        sql.StrictCredential.password == output[2]
-                    ).first()
-
-            if not credential:
-
-                password = self.handler_db_sess \
-                    .query(sql.Password) \
-                    .filter(sql.Password.value==output[2]) \
-                    .first()
-
-                credential = self.handler_db_sess \
                     .query(sql.Credential) \
-                    .filter(sql.Credential.username_id==username.id,
-                            sql.Credential.password_id==password.id) \
+                    .join(sql.Username) \
+                    .join(sql.Password) \
+                    .filter(
+                        sql.Username.value == output[1],
+                        sql.Password.value == output[2],
+                        sql.Username.recovered == False) \
                     .first()
+
+            if not credential: continue
 
             credential.guessed=True
 
@@ -227,7 +208,7 @@ class BruteForcer:
                 self.logger.log(VALID_CREDENTIALS,cred)
 
                 # Update username to "recovered"
-                username.recovered=True
+                credential.username.recovered=True
 
                 # Update the credential to valid
                 credential.valid=True
@@ -423,40 +404,6 @@ class BruteForcer:
         as the value resides in one of the two tables.
         '''
 
-        # Check prioritized usernames
-        for username in self.config.priority_usernames:
-
-            record = self.main_db_sess.query(sql.Username) \
-                    .filter(sql.Username.value == username) \
-                    .first()
-
-            if not record:
-
-                raise ValueError(
-                        UNKNOWN_PRIORITIZED_USERNAME_MSG.format(
-                            username=username)
-                    )
-
-        # Check prioritized passwords
-        for password in self.config.priority_passwords:
-
-            record = self.main_db_sess.query(sql.Password) \
-                    .filter(sql.Password.value == password) \
-                    .first()
-
-            if not record:
-
-                record = self.main_db_sess.query(sql.StrictCredential) \
-                            .filter(sql.StrictCredential.password == password) \
-                        .first()
-
-            if not record:
-
-                raise ValueError(
-                        UNKNOWN_PRIORITIZED_PASSWORD_MSG.format(
-                            password=password)
-                    )
-
         # ========================
         # BEGIN BRUTE FORCE ATTACK
         # ========================
@@ -468,43 +415,27 @@ class BruteForcer:
                 # =======================
                 # GET GUESSABLE USERNAMES
                 # =======================
+                '''Get a list of guessable usernames. Prioritize by:
+
+                1. priority specifications
+                2. Whether or not strict credentials have been set for
+                the user
+                '''
                
                 # Get a list of usernames to target
                     # must not have already been recovered during an earlier attack
                     # future_time must be less than current time
                         # for that user have been completed
 
-                # Get prioritized usernames
-                usernames = []
-                for username in self.config.priority_usernames:
-
-                    record = \
-                        self.main_db_sess.query(sql.Username) \
-                            .filter(
-                                sql.Username.recovered == False,
-                                sql.Username.future_time <= time(),
-                                sql.Username.value == username,) \
-                            .first()
-
-                    usernames.append(record)
-
-                # Prioritize strict credentials over sprays
-                usernames += self.main_db_sess.query(sql.Username) \
-                    .join(sql.StrictCredential) \
-                    .filter(
-                        sql.Username.recovered == False,
-                        sql.Username.future_time <= time(),
-                        sql.StrictCredential.guessed == False,) \
-                    .all()
-
-                # Append spray usernames
-                usernames += [u for u in self.main_db_sess.query(sql.Username) \
-                    .join(sql.Credential) \
-                    .filter(
-                        sql.Username.recovered == False,
-                        sql.Username.future_time <= time(),
-                        sql.Credential.guessed == False,) \
-                    .all() if u and not u in usernames]
+                usernames = self.main_db_sess.query(sql.Username) \
+                        .join(sql.Credential) \
+                        .filter(
+                            sql.Username.recovered == False,
+                            sql.Username.future_time <= time(),
+                            sql.Credential.guessed == False) \
+                        .order_by(sql.Username.priority.desc()) \
+                        .order_by(sql.Credential.strict.desc()) \
+                        .all()
 
                 # Logging sleep events
                 if not usernames and not sleeping:
@@ -533,77 +464,20 @@ class BruteForcer:
                     # ================================
                     # GET CREDENTIALS FOR THE USERNAME
                     # ================================
+                    '''Get credentials to guess for a given user. Order by:
 
-                    credentials, credlen = [], 0
+                    1. Strict credentials
+                    2. Then priority
+                    '''
 
-                    # Get prioritized strict credentials based on
-                    # password
-                    for password in self.config.priority_passwords:
-
-                        # Check for strict credentials first
-                        record = \
-                            self.main_db_sess.query(sql.StrictCredential) \
-                                .filter(sql.Username == username,
-                                    sql.StrictCredential.password == password,
-                                    sql.StrictCredential.guessed == False) \
-                                .first()            
-
-                        if record:
-                            credentials.append(record)
-                            credlen += 1
-                            if credlen == limit: break
-                            continue
-
-                        # Check for spray passwords now
-                        record = \
-                            self.main_db_sess.query(sql.Credential) \
-                                .join(sql.Password) \
-                                .filter(
-                                    sql.Credential.username == username,
-                                    sql.Password.value == password,
-                                    sql.Credential.guessed == False) \
-                                .first()
-
-                        if record:
-                            credentials.append(record)
-                            credlen += 1
-                            if credlen == limit: break
-
-                    # Get more strict credentials if the limit wasn't
-                    # met while pulling prioritized values
-                    if credlen != limit:
-
-                        # Get strict credentials for a given username
-                        credentials += self.main_db_sess \
-                                .query(sql.StrictCredential) \
-                                .filter(
-                                    sql.StrictCredential.username_id == username.id,
-                                    sql.StrictCredential.guessed == False) \
-                                .limit(limit) \
-                                .all()
-
-                    # When no strict credentials have been provided, we just pull all normal
-                    # credentials
-                    if credlen == 0:
-    
-                        credentials = self.main_db_sess \
-                            .query(sql.Credential) \
+                    credentials = self.main_db_sess.query(sql.Credential) \
+                            .join(sql.Password) \
                             .filter(
-                                sql.Credential.username_id == username.id,
-                                sql.Credential.guessed == False) \
+                                sql.Credential.guessed == False,
+                                sql.Credential.username == username) \
+                            .order_by(sql.Credential.strict.desc()) \
+                            .order_by(sql.Password.priority.desc()) \
                             .limit(limit) \
-                            .all()
-
-                    # When only a partial maximum has been pulled from StrictCredentials,
-                    # populate with normal credentials
-                    elif credlen > 0 and credlen < limit:
-
-                        credentials += self.main_db_sess \
-                            .query(sql.Credential) \
-                            .filter(
-                                sql.Credential.username_id == username.id,
-                                sql.Credential.guessed == False) \
-                            .limit(limit-credlen) \
                             .all()
 
                     # Avoid race condition
@@ -626,11 +500,6 @@ class BruteForcer:
                         # process, thus it is not expressly called here. See logic
                         # that sets the authentication callback in BruteLoops.config
                         # for how this process works.
-
-                        if credential.__class__ == sql.StrictCredential:
-                            password_value = credential.password
-                        else:
-                            password_value = credential.password.value
    
                         # Current time of authentication attempt
                         ctime = BruteTime.current_time()
@@ -656,7 +525,7 @@ class BruteForcer:
                         # Do the authentication callback
                         recovered = self.do_authentication_callback(
                             credential.username.value,
-                            password_value
+                            credential.password.value
                         )
 
                         if recovered and self.config.stop_on_valid:
@@ -687,15 +556,6 @@ class BruteForcer:
                     .join(sql.Credential) \
                     .filter(sql.Username.recovered == False,
                             sql.Credential.guessed == False) \
-                    .first()
-
-                if not sample_remaining:
-                    # Check if a static credential remains
-                    sample_remaining = self.main_db_sess \
-                    .query(sql.Username) \
-                    .join(sql.StrictCredential) \
-                    .filter(sql.Username.recovered == False,
-                            sql.StrictCredential.guessed == False) \
                     .first()
 
                 if sample_remaining:

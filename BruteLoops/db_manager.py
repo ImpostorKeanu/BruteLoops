@@ -184,7 +184,7 @@ class DBMixin:
         # Derive the target method to call based on action
         method = ('insert' if insert else 'delete') + '_credential_records'
     
-        # Caall the proper method
+        # Call the proper method
         if is_file:
             for f in container:
                 with open(f) as container:
@@ -199,6 +199,7 @@ class DBMixin:
         treated as spray values, resulting in each supplied password being
         set for guess across all usernames.
         '''
+
 
         is_file = container.__class__ == TextIOWrapper
         
@@ -222,46 +223,43 @@ class DBMixin:
 
                 # Get or create the target username
                 username = self.goc(sql.Username, username)
+                password = self.goc(sql.Password, password)
 
-                # Create a new strict credential record
-                scred = sql.StrictCredential(username=username,
-                        password=password)
+                # Look up the credential
+                credential = self.main_db_sess.query(sql.Credential) \
+                        .join(sql.Username) \
+                        .join(sql.Password) \
+                        .filter(
+                            sql.Username.id == username.id,
+                            sql.Password.id == password.id
+                        ).first()
 
-                # Try to save the credential record
-                try:
-                    self.main_db_sess.add(scred)
+                # If it's there, then we save it as strict
+                if credential and not credential.strict:
+
+                    credential.strict = True
                     self.main_db_sess.commit()
-                except Exception as e:
-                    # Assume the record already exists
-                    self.main_db_sess.rollback()
 
-                # =============================
-                # REMOVE MATCHING SPRAY RECORDS
-                # =============================
-                '''
-                We do this because BruteLoops will favor StrictCredentials
-                over normal Credentials.                
-                '''
+                else:
 
-                password = self.main_db_sess.query(sql.Password) \
-                        .filter(sql.Password.value == password) \
-                        .first()
+                    # Create a new strict credential record
+                    cred = sql.Credential(username=username,
+                            password=password,
+                            strict=True)
 
-                if password:
-
-                    cred = self.main_db_sess.query(sql.Credential) \
-                        .filter(sql.Username == username,
-                                sql.Password == password) \
-                        .first()
-
-                    if cred: self.main_db_sess.delete(cred)
+                    # Try to save the credential record
+                    try:
+                        self.main_db_sess.add(cred)
+                        self.main_db_sess.commit()
+                    except Exception as e:
+                        # Assume the record already exists
+                        self.main_db_sess.rollback()
 
             else:
 
                 # ==============================
                 # INSERT THE VALUES FOR SPRAYING
                 # ==============================
-
                 self.insert_username_records([username])
                 self.insert_password_records([password])
 
@@ -277,50 +275,53 @@ class DBMixin:
             if is_file: line = strip_newline(line)
 
             self.logger.debug(
-                    f'Deleting credential from database: {line}')
+                f'Attempting to delete credential from database: {line}'
+            )
 
             username, password = csv_split(line, credential_delimiter)
 
-            # ==================================
-            # GET THE USERNAME FROM THE DATABASE
-            # ==================================
-
-            username = self.main_db_sess.query(sql.Username) \
-                    .filter(sql.Username.value == username) \
+            credential = self.main_db_sess.query(sql.Credential) \
+                    .join(sql.Username) \
+                    .join(sql.Password) \
+                    .filter(
+                        sql.Username.value == username,
+                        sql.Password.value == password) \
                     .first()
 
-            if not username:
+            if not credential:
                 self.logger.debug(
-                        f'Username not found in database: {username}')
+                    'Credential not found in database: {}:{}' \
+                    .format(username,password)
+                )
                 continue
 
             # ===============================
             # HANDLE STRICT CREDENTIAL RECORD
             # ===============================
 
-            if as_credentials:
+            if as_credentials and credential.strict:
 
-                # Query for the strict credential
-                scred = self.main_db_sess.query(sql.StrictCredential) \
-                        .filter(
-                            sql.StrictCredential.username == username,
-                            sql.StrictCredential.password == password) \
-                        .first()
+                # Remove orphaned usernames
+                if len(credential.username.credentials) == 1:
+                    self.logger.debug(
+                        'Removing final credential for ' \
+                        f'{credential.username.value}. Username will ' \
+                        'be removed as well since no additional ' \
+                        'guesses are scheduled'
+                    )
+                    self.main_db_sess.delete(credential.username)
 
-                # Manage the static credential
-                if scred:
+                # Remove the credential
+                else:
+                    self.logger.debug(
+                        'Removing credential: {}:{}'.format(
+                            credential.username.value,
+                            credential.password.value
+                        )
+                    )
+                    self.main_db_sess.delete(credential)
 
-                    if len(scred.username.credentials) == 0:
-
-                        # Remove the username entirely if no additional
-                        # guesses are available
-                        self.main_db_sess.delete(scred.username)
-
-                    else:
-
-                        self.main_db_sess.delete(scred)
-
-                    self.main_db_sess.commit()
+                self.main_db_sess.commit()
 
             # ===================
             # HANDLE SPRAY VALUES
@@ -352,6 +353,37 @@ class DBMixin:
         '''
 
         return self.get_or_create(*args, **kwargs)
+
+    def manage_priorities(self, usernames=None, passwords=None,
+            prioritize=False):
+
+        if not usernames and not passwords:
+            raise ValueError('usernames or passwords required')
+
+        usernames = usernames if usernames != None else []
+        passwords = passwords if passwords != None else []
+
+        for model,container in {sql.Username:usernames,
+                sql.Password:passwords}.items():
+
+            for value in container:
+
+                record = self.main_db_sess.query(model) \
+                        .filter(model.value == value) \
+                        .first()
+
+                if record:
+                    self.logger.debug(
+                        f'Setting priority ({prioritize}) for: ' \
+                        f'{record.value}'
+                    )
+                    record.priority = prioritize
+                else:
+                    self.logger.debug(
+                        f'Record value not found: {value}'
+                    )
+
+        self.main_db_sess.commit()
 
     def manage_db_values(self, insert=True, usernames=None,
             passwords=None, username_files=None, password_files=None,
@@ -429,21 +461,23 @@ class DBMixin:
                     is_file=True, as_credentials=as_credentials,
                     insert=insert)
 
-        # ==========================================
-        # REASSOCIATE SPRAY PASSWORDS WITH USERNAMES
-        # ==========================================
+        if not as_credentials:
 
-        # Get all passwords
-        passwords = self.main_db_sess.query(sql.Password).all()
-
-        # Associate the passwords with each user
-        for u in self.main_db_sess.query(sql.Username) \
-                .filter(sql.Username.recovered != True) \
-                .all():
-
-            u.passwords = passwords
-
-        self.main_db_sess.commit()
+            # ==========================================
+            # REASSOCIATE SPRAY PASSWORDS WITH USERNAMES
+            # ==========================================
+    
+            # Get all passwords
+            passwords = self.main_db_sess.query(sql.Password).all()
+    
+            # Associate the passwords with each user
+            for u in self.main_db_sess.query(sql.Username) \
+                    .filter(sql.Username.recovered != True) \
+                    .all():
+    
+                u.passwords = passwords
+    
+            self.main_db_sess.commit()
 
     def get_valid_credentials(self):
         '''Return valid credentials
@@ -465,7 +499,9 @@ class DBMixin:
         '''Return strict credential records
         '''
 
-        return self.main_db_sess.query(sql.StrictCredential).all()
+        return self.main_db_sess.query(sql.Credential) \
+                .filter(sql.Credential.strict == True) \
+                .all()
 
 class Manager(DBMixin):
 

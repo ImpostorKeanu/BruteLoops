@@ -15,12 +15,13 @@ class Username(Base):
         doc='Username value')
     recovered = Column(Boolean, default=False,
         doc='Determines if a valid password has been recovered')
+    priority = Column(Boolean, default=False,
+        doc='Determines if the user is prioritized')
     last_time = Column(Float, default=-1.0,
         doc='Last time when username was targeted for authentication')
     future_time = Column(Float, default=-1.0,
         doc='Time when username can be targeted for authentication again')
     passwords = relationship("Password", secondary="credentials")
-    strict_credentials = relationship("StrictCredential", cascade="all, delete")
     credentials = relationship("Credential", cascade="all, delete")
     __mapper_args__ = {'confirm_deleted_rows': False}
 
@@ -35,6 +36,8 @@ class Password(Base):
     id = Column(Integer, primary_key=True, doc='Password id')
     value = Column(String, nullable=False, unique=True,
         doc='Password value')
+    priority = Column(Boolean, default=False,
+        doc='Determines if the password is prioritized')
     usernames = relationship("Username", secondary="credentials")
     credentials = relationship("Credential", cascade="all, delete")
     __mapper_args__ = {'confirm_deleted_rows': False}
@@ -56,6 +59,8 @@ class Credential(Base):
     password = relationship("Password", back_populates="credentials")
     valid = Column(Boolean, default=False,
         doc='Determines if the credentials are valid')
+    strict = Column(Boolean, default=False,
+        doc='Determines if the credentials are valid')
     guessed = Column(Boolean, default=False,
         doc='Determines if the credentials have been guessed')
     __mapper_args__ = {'confirm_deleted_rows': False}
@@ -65,26 +70,9 @@ class Credential(Base):
             )
 
     def __repr__(self):
-        return f'<Credential(id={self.id})>'
-
-class StrictCredential(Base):
-    __tablename__ = 'strict_credentials'
-    id = Column(Integer, doc='Strict credential id',
-            autoincrement="auto", primary_key=True)
-    username_id = Column(Integer, ForeignKey('usernames.id',
-        ondelete='CASCADE', onupdate='CASCADE'), 
-            doc='Username id',nullable=False)
-    username = relationship("Username", back_populates="strict_credentials")
-    password = Column(String, nullable=False, doc="Password value")
-    valid = Column(Boolean, default=False,
-        doc='Determines if the credentials are valid')
-    guessed = Column(Boolean, default=False,
-        doc='Determines if the credentials have been guessed')
-    __mapper_args__ = {'confirm_deleted_rows': False}
-    __table_args__ = (
-            UniqueConstraint('username_id','password',
-                name='_credential_unique_constraint'),
-            )
+        return f'<Credential(id={self.id} ' \
+               f'username={self.username.value}' \
+               f'password={self.password.value})>'
 
 class Attack(Base):
     __tablename__ = 'attacks'

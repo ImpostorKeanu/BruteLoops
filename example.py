@@ -56,13 +56,6 @@ if __name__ == '__main__':
     config.max_auth_tries = args.max_auth_tries
     config.stop_on_valid = args.stop_on_valid
 
-    # Prioritized guess values
-    if args.priority_usernames:
-        config.priority_usernames = set(args.priority_usernames)
-
-    if args.priority_passwords:
-        config.priority_passwords = set(args.priority_passwords)
-
     # Jitter Configurations
     config.authentication_jitter = Jitter(min=args.auth_jitter_min,
             max=args.auth_jitter_max)
