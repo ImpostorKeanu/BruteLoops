@@ -217,9 +217,6 @@ ug.add_argument('--usernames','-us',
 ug.add_argument('--username-files','-ufs',
         nargs='+',
         help=USERNAME_FILES)
-#ug.add_argument('--prioritize',
-#        action='store_true',
-#        help=PRIORITIZE_VALUES)
 
 pg = password_group = ip.add_argument_group('Password Configurations',
         'Password value and file parameters')
@@ -229,9 +226,6 @@ pg.add_argument('--passwords','-ps',
 pg.add_argument('--password-files','-pfs',
         nargs='+',
         help=PASSWORD_FILES)
-#pg.add_argument('--prioritize',
-#        action='store_true',
-#        help=PRIORITIZE_VALUES)
 
 # =================
 # CREDENTIAL PARSER
@@ -265,7 +259,15 @@ and it will target the supplied username.
 CREDENTIAL_DELIMITER = \
 '''The character value that delimits the username and password values
 of a given credential, for instance ":" would be the proper delimiter
-for a given credential "administrator:password123". Default: ":"
+for a given credential "administrator:password123". NOTE: The value of
+this field has no affect on the "--csv-files" flag. Default: ":"
+'''
+
+CSV_FILES = \
+'''Treat the input files as CSV format. Unlike the "--credential-files"
+option, this technique uses Python's standard CSV library to parse out
+the header file and import the target lines. Note that the "--credenti
+al-delimiter" flag has no affect on these inputs.
 '''
 
 cp = credential_parser = argparse.ArgumentParser(add_help=False)
@@ -283,5 +285,8 @@ cg.add_argument('--credential-files','-cfs',
 cg.add_argument('--credential-delimiter',
         default=':',
         help=CREDENTIAL_DELIMITER)
+cg.add_argument('--csv-files',
+        nargs='+',
+        help=CSV_FILES)
 
 bp = brute_parser = argparse.ArgumentParser(parents=[gp,jp,op,lp,ip,cp])

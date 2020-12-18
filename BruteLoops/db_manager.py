@@ -6,6 +6,12 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from io import StringIO,TextIOWrapper
 from sys import stderr
+import csv
+import re
+import re
+
+RE_USERNAME = re.compile('username',re.I)
+RE_PASSWORD = re.compile('password',re.I)
 
 # Components needed to manage usenames and passwords in database files
 logging.basicConfig(format=FORMAT,
@@ -168,7 +174,7 @@ class DBMixin:
     # =============================
 
     def manage_credentials(self, container, is_file=False,
-            as_credentials=False, insert=True):
+            as_credentials=False, insert=True, is_csv_file=False):
         '''Manage credential values. This logic is distinct because inputs
         can be treated as individual username or password values for
         spray attacks, or as individual credential records -- the latter
@@ -185,10 +191,17 @@ class DBMixin:
         method = ('insert' if insert else 'delete') + '_credential_records'
     
         # Call the proper method
-        if is_file:
+        if is_csv_file:
+            for f in container:
+                with open(f) as container:
+                    reader = csv.DictReader(container)
+                    getattr(self, method)(reader, as_credentials)
+
+        elif is_file:
             for f in container:
                 with open(f) as container:
                     getattr(self, method)(container, as_credentials)
+
         else: getattr(self, method)(container, as_credentials)
 
     def insert_credential_records(self, container, as_credentials=False,
@@ -200,20 +213,72 @@ class DBMixin:
         set for guess across all usernames.
         '''
 
+        # =================================
+        # PREPARE KEY FIELDS FOR CSV INPUTS
+        # =================================
+
+        USERNAME_KEY, PASSWORD_KEY, IS_DICTREADER = None, None, False
+        if container.__class__ == csv.DictReader:
+
+            IS_DICTREADER = True
+
+            # Iterate over each field name and find the username
+            # and password field
+            for k in container.fieldnames:
+                if USERNAME_KEY and PASSWORD_KEY: break
+                elif re.match(RE_USERNAME,k): USERNAME_KEY = k
+                elif re.match(RE_PASSWORD,k): PASSWORD_KEY = k
+
+            # Ensure that there's a username and password key
+            # in the header field
+            if as_credentials and not USERNAME_KEY or \
+                    not PASSWORD_KEY:
+
+                raise ValueError(
+                    'CSV file must have "username" and "password" ' \
+                    'word field in the first line of the CSV file ' \
+                    'in order to map the inputs properly. Skipping' \
+                    ' CSV file. Current fields: ' \
+                    f'{container.fieldnames}'
+                )
+
+            elif not USERNAME_KEY and not PASSWORD_KEY:
+
+                raise ValueError(
+                    'CSV file must have at least a "username" or ' \
+                    '"password" field in the first line of the' \
+                    ' CSV file in order to map the inputs ' \
+                    'properly. Skipping CSV file.'
+                )
+
 
         is_file = container.__class__ == TextIOWrapper
         
         for line in container:
 
-            # Strip newlines if we're working with a file
-            if is_file: line = strip_newline(line)
-
             self.logger.debug(
                     f'Inserting credential into database: {line}')
 
-            # Break out the username and password value from the csv
-            # delimiter value
-            username, password = csv_split(line, credential_delimiter)
+            # Strip newlines if we're working with a file
+            if not IS_DICTREADER and is_file:
+                line = strip_newline(line)
+
+            # ====================================
+            # GET THE USERNAME AND PASSWORD VALUES
+            # ====================================
+
+            if IS_DICTREADER:
+
+                # Collect the username and password value from the line
+                username = line[USERNAME_KEY]
+                password = line[PASSWORD_KEY]
+
+            else:
+
+                # Break out the username and password value from the csv
+                # delimiter value
+                username, password = csv_split(line,
+                        credential_delimiter)
 
             if as_credentials:
 
@@ -388,7 +453,8 @@ class DBMixin:
     def manage_db_values(self, insert=True, usernames=None,
             passwords=None, username_files=None, password_files=None,
             credentials=None, credential_files=None,
-            credential_delimiter=':', as_credentials=False):
+            credential_delimiter=':', as_credentials=False,
+            csv_files=None):
 
         # ===============
         # VALIDATE INPUTS
@@ -414,7 +480,8 @@ class DBMixin:
 
         if not usernames and not username_files and \
                 not passwords and not password_files and \
-                not credentials and not credential_files:
+                not credentials and not credential_files and \
+                not csv_files:
             self.logger.debug('No values to manage supplied to db manager')
             return
 
@@ -457,9 +524,15 @@ class DBMixin:
         if credential_files:
             self.logger.debug(
                     f'Managing credential files: {credential_files}')
-            self.manage_credentials(credential_files,
-                    is_file=True, as_credentials=as_credentials,
-                    insert=insert)
+            self.manage_credentials(credential_files, is_file=True,
+                    as_credentials=as_credentials, insert=insert)
+
+        if csv_files:
+            self.logger.debug(
+                    f'Managing CSV credential files: {csv_files}')
+            self.manage_credentials(csv_files, is_csv_file=True,
+                    as_credentials=as_credentials, insert=insert)
+
 
         if not as_credentials:
 
@@ -468,7 +541,9 @@ class DBMixin:
             # ==========================================
     
             # Get all passwords
-            passwords = self.main_db_sess.query(sql.Password).all()
+            passwords = self.main_db_sess.query(sql.Password) \
+                    .filter(sql.Password.strict == False) \
+                    .all()
     
             # Associate the passwords with each user
             for u in self.main_db_sess.query(sql.Username) \

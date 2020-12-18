@@ -67,7 +67,8 @@ def handle_values():
             'insert':args.action == 'insert'}
 
     for handle in ['usernames','passwords','credentials',
-            'username_files','password_files','credential_files']:
+            'username_files','password_files','credential_files',
+            'csv_files']:
         if hasattr(args,handle): new_args[handle] = getattr(args,handle) 
 
     manager.manage_db_values(**new_args)
