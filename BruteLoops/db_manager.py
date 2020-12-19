@@ -134,6 +134,7 @@ class DBMixin:
         '''
 
         self.merge_lines(container, sql.Username)
+        self.associate_spray_values(container, sql.Username)
         
 
     def delete_username_records(self, container):
@@ -159,8 +160,58 @@ class DBMixin:
 
         # Add all the new passwords
         self.merge_lines(container, sql.Password)
+        self.associate_spray_values(container, sql.Password)
 
-        self.main_db_sess.commit()
+    def associate_spray_values(self, container, container_sql_class):
+
+        is_file = container.__class__ == TextIOWrapper
+
+        # ==========================
+        # EXTRACT ASSOCIATION VALUES
+        # ==========================
+        '''These are the values that should be associated with
+        each record in the container. If the records in the
+        container are usernames, then passwords should be the
+        target association type.
+        '''
+
+        if container_sql_class == sql.Username:
+            association_class = sql.Password
+            association_values = self.main_db_sess \
+                    .query(association_class) \
+                    .join(sql.Credential) \
+                    .filter(sql.Credential.strict == False) \
+                    .all()
+        else:
+            association_class = sql.Username
+            association_values = self.main_db_sess \
+                    .query(association_class) \
+                    .all()
+
+        # ================================
+        # ASSOCIATE THE ASSOCIATION VALUES
+        # ================================
+        '''Iterate over each line in the container and pull the
+        record from the database, then associate the association
+        values with that target record.
+        '''
+
+        for line in container:
+
+            if is_file: line = strip_newline(line)
+
+            record = self.main_db_sess.query(container_sql_class) \
+                    .filter(container_sql_class.value == line) \
+                    .first()
+
+            if not record: continue
+
+            if record.__class__ == sql.Username:
+                record.passwords = association_values
+            else:
+                record.usernames = association_values
+
+            self.main_db_sess.commit()
 
     def delete_password_records(self, container):
         '''Delete each password value in the ocntainer from the target
@@ -532,27 +583,6 @@ class DBMixin:
                     f'Managing CSV credential files: {csv_files}')
             self.manage_credentials(csv_files, is_csv_file=True,
                     as_credentials=as_credentials, insert=insert)
-
-
-        if not as_credentials:
-
-            # ==========================================
-            # REASSOCIATE SPRAY PASSWORDS WITH USERNAMES
-            # ==========================================
-    
-            # Get all passwords
-            passwords = self.main_db_sess.query(sql.Password) \
-                    .filter(sql.Password.strict == False) \
-                    .all()
-    
-            # Associate the passwords with each user
-            for u in self.main_db_sess.query(sql.Username) \
-                    .filter(sql.Username.recovered != True) \
-                    .all():
-    
-                u.passwords = passwords
-    
-            self.main_db_sess.commit()
 
     def get_valid_credentials(self):
         '''Return valid credentials
