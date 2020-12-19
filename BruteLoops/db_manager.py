@@ -593,11 +593,6 @@ class DBMixin:
                 .filter(sql.Credential.valid == True) \
                 .all()
 
-        # Static credentials
-        valids += self.main_db_sess.query(sql.StaticCredential) \
-                .filter(sql.StaticCredential.valid == True) \
-                .all()
-
         return valids
 
     def get_strict_credentials(self,credential_delimiter=':'):
