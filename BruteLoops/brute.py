@@ -6,7 +6,6 @@ from . import sql
 from .config import Config
 from .db_manager import *
 from sqlalchemy.orm.session import close_all_sessions
-from multiprocessing.pool import Pool
 from pathlib import Path
 from uuid import uuid4
 from collections import namedtuple
@@ -33,12 +32,13 @@ UNKNOWN_PRIORITIZED_PASSWORD_MSG = \
     'alue or remove it from the configura' \
     'tion: {password}'
 
+
 class BruteForcer:
     '''Base object from which all other brute forcers will inherit.
     Provides all basic functionality, less brute force logic.
     '''
 
-    def __init__(self, config):
+    def __init__(self, config, use_billiard=False):
         '''Initialize the BruteForcer object, including processes.
 
         - config - A BruteLoops.config.Config object providing all
@@ -79,6 +79,12 @@ class BruteForcer:
                 'max_auth_tries',
                 'stop_on_valid',
                 'db_file',
+                'log_file',
+                'log_valid',
+                'log_invalid',
+                'log_general',
+                'log_stdout',
+                'log_stderr'
         ]
 
         for attr in config_attrs:
@@ -96,7 +102,17 @@ class BruteForcer:
         # =============================================================
 
         original_sigint_handler = signal.signal(signal.SIGINT,signal.SIG_IGN)
-        self.pool = Pool(processes=config.process_count)
+
+        if use_billiard:
+
+            import billiard
+            self.pool = billiard.Pool(processes=config.process_count)
+
+        else:
+
+            import multiprocessing
+            self.pool = multiprocessing.pool.Pool(
+                    processes=config.process_count)
 
         if not KeyboardInterrupt in self.config.exception_handlers:
 
@@ -505,7 +521,10 @@ class BruteForcer:
                             # password has been recovered in the distinct process
                         if username.recovered: break
 
-                        # Update the Username object with relevant attributes and commit
+                        # Update the Username/Credential object with relevant
+                        # attributes and commit
+
+                        credential.guess_time=ctime
                         credential.username.last_time=ctime
                         credential.username.future_time=ftime
                         self.main_db_sess.commit()

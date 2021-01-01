@@ -63,6 +63,8 @@ class Credential(Base):
         doc='Determines if the credentials are valid')
     guessed = Column(Boolean, default=False,
         doc='Determines if the credentials have been guessed')
+    guess_time = Column(Float, default=-1.0,
+        doc='Time when the guess occurred')
     __mapper_args__ = {'confirm_deleted_rows': False}
     __table_args__ = (
             UniqueConstraint('username_id','password_id',
