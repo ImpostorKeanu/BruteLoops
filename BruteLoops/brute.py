@@ -618,9 +618,6 @@ class BruteForcer:
                 # Raise to caller
                 else:
 
-                    import pdb
-                    pdb.set_trace()
-
                     self.logger.log(
                         GENERAL_EVENTS,
                         'Unhandled exception occurred. Shutting down attack '\
