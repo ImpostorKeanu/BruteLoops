@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
-from .logging import *
+#from .logging import *
+from BruteLoops.logging import *
+from . import logging
 from .brute_time import BruteTime
 from . import sql
 from .config import Config
@@ -32,6 +34,7 @@ UNKNOWN_PRIORITIZED_PASSWORD_MSG = \
     'alue or remove it from the configura' \
     'tion: {password}'
 
+logger = None
 
 class BruteForcer:
     '''Base object from which all other brute forcers will inherit.
@@ -55,15 +58,18 @@ class BruteForcer:
         # BASIC CONFIGURATION PARAMETERS
         # ==============================
 
-        self.config   = config              # Config object
-        self.presults = []                  # Process results
-        self.pool     = None                # Process pool (initialized by method)
+        self.config   = config
+        self.presults = []
+        self.pool     = None
         self.attack   = None
-        self.logger   = logging.getLogger('BruteForcer')
+        self.logger   = getLogger('BruteLoops.BruteForcer',
+            config.log_level, config.log_valid, config.log_invalid,
+            config.log_general, config.log_file, config.log_stdout,
+            config.log_stderr)
         
         self.logger.log(
             GENERAL_EVENTS,
-            f'Initializing {config.process_count} process'
+            f'Initializing {config.process_count} process(es)'
         )
         
         # ===================================
@@ -110,9 +116,9 @@ class BruteForcer:
 
         else:
 
-            import multiprocessing
-            self.pool = multiprocessing.pool.Pool(
-                    processes=config.process_count)
+            from multiprocessing.pool import Pool
+
+            self.pool = Pool(processes=config.process_count)
 
         if not KeyboardInterrupt in self.config.exception_handlers:
 
@@ -611,6 +617,9 @@ class BruteForcer:
     
                 # Raise to caller
                 else:
+
+                    import pdb
+                    pdb.set_trace()
 
                     self.logger.log(
                         GENERAL_EVENTS,

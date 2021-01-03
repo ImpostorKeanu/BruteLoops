@@ -94,46 +94,6 @@ class Config:
         self.log_level                  = 90
         self.validated                  = False
 
-    def configure_logging(self):
-        'Configure a logger for the library'
-        
-        if self.log_valid or self.log_invalid or self.log_general:
-            
-            if self.log_valid:   self.log_level = BL.VALID_CREDENTIALS
-            if self.log_invalid: self.log_level = BL.CREDENTIAL_EVENTS
-            if self.log_general: self.log_level = BL.GENERAL_EVENTS
-
-            if self.log_file or self.log_stdout or self.log_stderr:
-
-                handlers = []
-
-                if self.log_file:
-                    handlers.append(logging.FileHandler(self.log_file))
-
-                if self.log_stdout:
-                    handlers.append(logging.StreamHandler(stdout))
-
-                if self.log_stderr:
-                    handlers.append(logging.StreamHandler(stderr))
-
-
-                logging.basicConfig(format=BL.LOG_FORMAT,
-                        handlers=handlers,
-                        level=self.log_level)
-
-            else:
-
-                sh = logging.StreamHandler(stdout)
-                logging.basicConfig(format=BL.LOG_FORMAT,
-                        handlers=[sh],
-                        level=self.log_level)
-
-        else:
-
-            # DISABLE LOGGING
-            logging.basicConfig(format=BL.LOG_FORMAT,
-                    level=self.log_level)
-
     def validate(self):
 
         # ==========================
@@ -171,7 +131,6 @@ class Config:
         # SQLITE INITIALIZATION
         # =====================
         self.session_maker = Session(self.db_file)
-        self.configure_logging()
 
         # UPDATE THE OBJECT TO REFLECT VALIDATED STATE
         self.validated = True

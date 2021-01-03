@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 
+import BruteLoops
 from BruteLoops.jitter import Jitter
 from BruteLoops.brute import BruteForcer
 from BruteLoops.config import Config
-from BruteLoops.logging import GENERAL_EVENTS, logging
+from BruteLoops import logging
+from BruteLoops.logging import getLogger, GENERAL_EVENTS
 from BruteLoops.example import parser
 import traceback
 import argparse
@@ -81,7 +83,7 @@ if __name__ == '__main__':
     config.validate()
    
     # Configure logging
-    logger = logging.getLogger('example.py')
+    logger = getLogger('example.py',log_level=10)
     
     try:
     

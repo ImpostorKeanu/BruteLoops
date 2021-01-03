@@ -1,4 +1,4 @@
-from .logging import *
+import BruteLoops
 from pathlib import Path
 from . import sql
 import logging
@@ -13,10 +13,8 @@ import re
 RE_USERNAME = re.compile('username',re.I)
 RE_PASSWORD = re.compile('password',re.I)
 
-# Components needed to manage usenames and passwords in database files
-logging.basicConfig(format=FORMAT,
-        level=logging.DEBUG,
-        stream=stderr)
+logger = BruteLoops.logging.getLogger('BruteLoops.db_manager',
+        log_level=10)
 
 def strip_newline(s):
     '''Strips the final character from a string via list comprehension.
@@ -61,7 +59,7 @@ class DBMixin:
             # Strip newlines from files
             if is_file: line = strip_newline(line)
 
-            self.logger.debug(f'Adding value to database: {line}')
+            logger.debug(f'Adding value to database: {line}')
 
             try:
 
@@ -86,7 +84,7 @@ class DBMixin:
             # Strip newlines from file values
             if is_file: line = strip_newline(line)
 
-            self.logger.debug(
+            logger.debug(
                     f'Deleting value from database: {line}')
 
             try:
@@ -307,7 +305,7 @@ class DBMixin:
         
         for line in container:
 
-            self.logger.debug(
+            logger.debug(
                     f'Inserting credential into database: {line}')
 
             # Strip newlines if we're working with a file
@@ -390,7 +388,7 @@ class DBMixin:
 
             if is_file: line = strip_newline(line)
 
-            self.logger.debug(
+            logger.debug(
                 f'Attempting to delete credential from database: {line}'
             )
 
@@ -405,7 +403,7 @@ class DBMixin:
                     .first()
 
             if not credential:
-                self.logger.debug(
+                logger.debug(
                     'Credential not found in database: {}:{}' \
                     .format(username,password)
                 )
@@ -419,7 +417,7 @@ class DBMixin:
 
                 # Remove orphaned usernames
                 if len(credential.username.credentials) == 1:
-                    self.logger.debug(
+                    logger.debug(
                         'Removing final credential for ' \
                         f'{credential.username.value}. Username will ' \
                         'be removed as well since no additional ' \
@@ -429,7 +427,7 @@ class DBMixin:
 
                 # Remove the credential
                 else:
-                    self.logger.debug(
+                    logger.debug(
                         'Removing credential: {}:{}'.format(
                             credential.username.value,
                             credential.password.value
@@ -489,13 +487,13 @@ class DBMixin:
                         .first()
 
                 if record:
-                    self.logger.debug(
+                    logger.debug(
                         f'Setting priority ({prioritize}) for: ' \
                         f'{record.value}'
                     )
                     record.priority = prioritize
                 else:
-                    self.logger.debug(
+                    logger.debug(
                         f'Record value not found: {value}'
                     )
 
@@ -533,14 +531,14 @@ class DBMixin:
                 not passwords and not password_files and \
                 not credentials and not credential_files and \
                 not csv_files:
-            self.logger.debug('No values to manage supplied to db manager')
+            logger.debug('No values to manage supplied to db manager')
             return
 
         # ===============
         # BEGIN EXECUTION
         # ===============
 
-        self.logger.debug(f'Starting db management. Action: ' + \
+        logger.debug(f'Starting db management. Action: ' + \
                 ('INSERT' if insert else 'DELETE'))
 
         # ===================
@@ -548,18 +546,18 @@ class DBMixin:
         # ===================
 
         if usernames:
-            self.logger.debug(f'Managing usernames: {usernames}')
+            logger.debug(f'Managing usernames: {usernames}')
             self.manage_values(sql.Username, usernames, insert=insert)
         if passwords:
-            self.logger.debug(f'Managing passwords: {passwords}')
+            logger.debug(f'Managing passwords: {passwords}')
             self.manage_values(sql.Password, passwords, insert=insert)
 
         if username_files:
-            self.logger.debug(f'Managing username files: {username_files}')
+            logger.debug(f'Managing username files: {username_files}')
             self.manage_values(sql.Username, username_files,
                     is_file=True, insert=insert)
         if password_files:
-            self.logger.debug(f'Managing password files: {password_files}')
+            logger.debug(f'Managing password files: {password_files}')
             self.manage_values(sql.Password, password_files,
                     is_file=True, insert=insert)
 
@@ -568,18 +566,18 @@ class DBMixin:
         # ========================
 
         if credentials:
-            self.logger.debug(f'Managing credentials: {credentials}')
+            logger.debug(f'Managing credentials: {credentials}')
             self.manage_credentials(credentials,
                     as_credentials=as_credentials, insert=insert)
 
         if credential_files:
-            self.logger.debug(
+            logger.debug(
                     f'Managing credential files: {credential_files}')
             self.manage_credentials(credential_files, is_file=True,
                     as_credentials=as_credentials, insert=insert)
 
         if csv_files:
-            self.logger.debug(
+            logger.debug(
                     f'Managing CSV credential files: {csv_files}')
             self.manage_credentials(csv_files, is_csv_file=True,
                     as_credentials=as_credentials, insert=insert)
@@ -608,7 +606,6 @@ class Manager(DBMixin):
     def __init__(self, db_file):
         self.session_maker = Session(db_file)
         self.main_db_sess = self.session_maker.new()
-        self.logger = logging.getLogger('BruteLoops.db_manager')
         
 class Session:
     # TODO: This will replace the session creation logic in BruteLoops.config.validate
