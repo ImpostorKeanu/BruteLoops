@@ -175,16 +175,18 @@ class DBMixin:
         '''
 
         if container_sql_class == sql.Username:
-            association_class = sql.Password
+
             association_values = self.main_db_sess \
-                    .query(association_class) \
+                    .query(sql.Password) \
                     .join(sql.Credential) \
                     .filter(sql.Credential.strict == False) \
                     .all()
+
         else:
-            association_class = sql.Username
+
             association_values = self.main_db_sess \
-                    .query(association_class) \
+                    .query(sql.Username) \
+                    .filter(sql.Username.recovered == False) \
                     .all()
 
         # ================================
@@ -194,6 +196,7 @@ class DBMixin:
         record from the database, then associate the association
         values with that target record.
         '''
+
 
         for line in container:
 
@@ -205,9 +208,15 @@ class DBMixin:
 
             if not record: continue
 
-            if record.__class__ == sql.Username:
-                record.passwords = association_values
+            if isinstance(record, sql.Username):
+
+                # Avoid overwriting previous credential records
+                # by appending password values.
+                for value in association_values:
+                    record.append(value)
+
             else:
+
                 record.usernames = association_values
 
             self.main_db_sess.commit()
@@ -303,7 +312,8 @@ class DBMixin:
 
 
         is_file = container.__class__ == TextIOWrapper
-        
+
+        usernames = []        
         for line in container:
 
             logger.debug(
@@ -337,8 +347,11 @@ class DBMixin:
                 # ===========================
 
                 # Get or create the target username
-                username = self.goc(sql.Username, username)
-                password = self.goc(sql.Password, password)
+                new, username = self.goc(sql.Username, username)
+
+                if new: usernames.append(username.value)
+
+                new, password = self.goc(sql.Password, password)
 
                 # Look up the credential
                 credential = self.main_db_sess.query(sql.Credential) \
@@ -377,6 +390,9 @@ class DBMixin:
                 # ==============================
                 self.insert_username_records([username])
                 self.insert_password_records([password])
+
+        if as_credentials and usernames:
+            self.associate_spray_values(usernames, sql.Username)
 
     def delete_credential_records(self, container, as_credentials=False,
             credential_delimiter=':'):
@@ -456,12 +472,14 @@ class DBMixin:
                 .filter(model.value == value) \
                 .first()
 
-        if instance: return instance
+        if instance:
+            return False, instance
         else:
             instance = model(value=value)
             self.main_db_sess.add(instance)
             self.main_db_sess.commit()
-            return instance
+            self.main_db_sess.flush()
+            return True, instance
 
     def goc(self, *args, **kwargs):
         '''Shortcut to get_or_create.
@@ -609,9 +627,8 @@ class Manager(DBMixin):
         self.main_db_sess = self.session_maker.new()
         
 class Session:
-    # TODO: This will replace the session creation logic in BruteLoops.config.validate
 
-    def __init__(self, db_file):
+    def __init__(self, db_file, echo=False):
         '''Initialize a session object.
         '''
 
@@ -619,7 +636,7 @@ class Session:
         # SQLITE INITIALIZATION
         # =====================
 
-        engine = create_engine('sqlite:///'+db_file)
+        engine = create_engine('sqlite:///'+db_file,echo=echo)
         Session = sessionmaker()
         Session.configure(bind=engine)
 

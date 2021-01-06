@@ -73,8 +73,8 @@ class Credential(Base):
 
     def __repr__(self):
         return f'<Credential(id={self.id} ' \
-               f'username={self.username.value}' \
-               f'password={self.password.value})>'
+               f'username=({self.username.id}) {self.username.value}' \
+               f' password=({self.password.id}) {self.password.value}) >'
 
 class Attack(Base):
     __tablename__ = 'attacks'
