@@ -163,6 +163,7 @@ class DBMixin:
     def associate_spray_values(self, container, container_sql_class):
 
         is_file = container.__class__ == TextIOWrapper
+        if is_file: container.seek(0)
 
         # ==========================
         # EXTRACT ASSOCIATION VALUES
