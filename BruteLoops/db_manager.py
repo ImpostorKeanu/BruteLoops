@@ -210,10 +210,8 @@ class DBMixin:
 
             if isinstance(record, sql.Username):
 
-                # Avoid overwriting previous credential records
-                # by appending password values.
-                for value in association_values:
-                    record.append(value)
+                record.passwords = list(set(
+                    record.passwords + association_values))
 
             else:
 
@@ -349,7 +347,7 @@ class DBMixin:
                 # Get or create the target username
                 new, username = self.goc(sql.Username, username)
 
-                if new: usernames.append(username.value)
+                #if new: usernames.append(username.value)
 
                 new, password = self.goc(sql.Password, password)
 
