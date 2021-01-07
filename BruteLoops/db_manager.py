@@ -53,6 +53,7 @@ class DBMixin:
         '''
 
         is_file = container.__class__ == TextIOWrapper 
+        if is_file: container.seek(0)
 
         for line in container:
 
@@ -78,6 +79,7 @@ class DBMixin:
         '''
 
         is_file = container.__class__ == TextIOWrapper
+        if is_file: container.seek(0)
 
         for line in container:
 
@@ -165,59 +167,89 @@ class DBMixin:
         is_file = container.__class__ == TextIOWrapper
         if is_file: container.seek(0)
 
-        # ==========================
-        # EXTRACT ASSOCIATION VALUES
-        # ==========================
-        '''These are the values that should be associated with
-        each record in the container. If the records in the
-        container are usernames, then passwords should be the
-        target association type.
-        '''
+        # ===========================================
+        # ASSOCIATE PASSWORD VALUES BACK TO USERNAMES
+        # ===========================================
 
         if container_sql_class == sql.Username:
 
-            association_values = self.main_db_sess \
+            logger.debug(
+                'Associating usernames to passwords')
+
+            for line in container:
+    
+                if is_file: line = strip_newline(line)
+
+                # ================
+                # GET THE USERNAME
+                # ================
+    
+                username = self.main_db_sess.query(
+                    container_sql_class) \
+                        .filter(sql.Username.value == line) \
+                        .first()
+
+                if not username: continue
+
+                # ==================================
+                # GET AND ASSOCIATE TARGET PASSWORDS
+                # ==================================
+    
+                passwords = self.main_db_sess \
                     .query(sql.Password) \
                     .join(sql.Credential) \
-                    .filter(sql.Credential.strict == False) \
-                    .all()
+                    .filter(
+                        (sql.Password.id != None) &
+                        (
+                            (sql.Credential.strict == False) |
+                            (
+                                (sql.Credential.username == username) &
+                                (sql.Credential.strict == True)
+                            )
+                        )
+                    ).all()
+
+                username.passwords = passwords
+    
+        # ===========================================
+        # ASSOCIATE USERNAMES BACK TO PASSWORD VALUES
+        # ===========================================
 
         else:
 
-            association_values = self.main_db_sess \
+            logger.debug(
+                'Associating passwords to usernames')
+
+            # =========================
+            # GET VALID USERNAME VALUES
+            # =========================
+            '''
+            - Omit recovered usernames
+            '''
+
+            usernames = self.main_db_sess \
                     .query(sql.Username) \
                     .filter(sql.Username.recovered == False) \
                     .all()
 
-        # ================================
-        # ASSOCIATE THE ASSOCIATION VALUES
-        # ================================
-        '''Iterate over each line in the container and pull the
-        record from the database, then associate the association
-        values with that target record.
-        '''
+            for line in container:
+    
+                if is_file: line = strip_newline(line)
 
+                # =============================
+                # GET THE TARGET PASSWORD VALUE
+                # =============================
+    
+                password = self.main_db_sess \
+                        .query(sql.Password) \
+                        .filter(sql.Password.value == line) \
+                        .first()
 
-        for line in container:
+                if not password: continue
 
-            if is_file: line = strip_newline(line)
-
-            record = self.main_db_sess.query(container_sql_class) \
-                    .filter(container_sql_class.value == line) \
-                    .first()
-
-            if not record: continue
-
-            if isinstance(record, sql.Username):
-
-                record.passwords = list(set(
-                    record.passwords + association_values))
-
-            else:
-
-                record.usernames = association_values
-
-            self.main_db_sess.commit()
+                password.usernames = usernames
+    
+        self.main_db_sess.commit()
 
     def delete_password_records(self, container):
         '''Delete each password value in the ocntainer from the target
@@ -310,6 +342,7 @@ class DBMixin:
 
 
         is_file = container.__class__ == TextIOWrapper
+        if is_file: container.seek(0)
 
         usernames = []        
         for line in container:
@@ -398,6 +431,7 @@ class DBMixin:
         '''
 
         is_file = container.__class__ == TextIOWrapper
+        if is_file: container.seek(0)
         
         for line in container:
 
