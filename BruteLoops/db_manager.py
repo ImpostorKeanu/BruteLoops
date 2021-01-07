@@ -184,8 +184,7 @@ class DBMixin:
                 # GET THE USERNAME
                 # ================
     
-                username = self.main_db_sess.query(
-                    container_sql_class) \
+                username = self.main_db_sess.query(container_sql_class) \
                         .filter(sql.Username.value == line) \
                         .first()
 
@@ -228,9 +227,9 @@ class DBMixin:
             '''
 
             usernames = self.main_db_sess \
-                    .query(sql.Username) \
-                    .filter(sql.Username.recovered == False) \
-                    .all()
+                .query(sql.Username) \
+                .filter(sql.Username.recovered == False) \
+                .all()
 
             for line in container:
     
@@ -241,9 +240,9 @@ class DBMixin:
                 # =============================
     
                 password = self.main_db_sess \
-                        .query(sql.Password) \
-                        .filter(sql.Password.value == line) \
-                        .first()
+                    .query(sql.Password) \
+                    .filter(sql.Password.value == line) \
+                    .first()
 
                 if not password: continue
 
