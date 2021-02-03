@@ -156,7 +156,7 @@ class Module(HTTPModule):
         '''
 
         if 'user_agent' in kwargs:
-            headers['User-Agent'] = kwargs['user_agent']
+            self.headers['User-Agent'] = kwargs['user_agent']
 
         session = Session(msol_url=self.url, headers=self.headers)
         session.proxies = kwargs['proxies'] if \

@@ -32,13 +32,14 @@ class HTTPModule(Module):
         '''
 
         self.url = url
+        self.verify_ssl = verify_ssl
 
         # ===================
         # HANDLE HTTP PROXIES
         # ===================
 
         if proxies and not isinstance(proxies,list):
-            raise ValueError('Invalid proxies argument. Must be list')
+            raise ValueError('Invalid proxies argument. Must be list.')
 
         proxies = proxies if proxies != None else []
 
@@ -70,4 +71,5 @@ class HTTPModule(Module):
         # OTHER INSTANCE VARIABLES
         # ========================
 
-        self.user_agent = user_agent if user_agent else DEFAULT_USER_AGENT        
+        self.user_agent = user_agent if user_agent else DEFAULT_USER_AGENT
+        self.headers['User-Agent'] = self.user_agent
