@@ -376,8 +376,8 @@ class DBMixin:
         usernames = []        
         for line in container:
 
-            logger.debug(
-                    f'Inserting credential into database: {line}')
+            #logger.debug(
+            #        f'Inserting credential into database: {line}')
 
             # Strip newlines if we're working with a file
             if not IS_DICTREADER and is_file:
@@ -466,9 +466,9 @@ class DBMixin:
 
             if is_file: line = strip_newline(line)
 
-            logger.debug(
-                f'Attempting to delete credential from database: {line}'
-            )
+            #logger.debug(
+            #    f'Attempting to delete credential from database: {line}'
+            #)
 
             username, password = csv_split(line, credential_delimiter)
 
