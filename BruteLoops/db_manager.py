@@ -8,7 +8,6 @@ from io import StringIO,TextIOWrapper
 from sys import stderr
 import csv
 import re
-import re
 
 RE_USERNAME = re.compile('username',re.I)
 RE_PASSWORD = re.compile('password',re.I)
@@ -60,7 +59,7 @@ class DBMixin:
             # Strip newlines from files
             if is_file: line = strip_newline(line)
 
-            logger.debug(f'Adding value to database: {line}')
+            #logger.debug(f'Adding value to database: {line}')
 
             try:
 
@@ -86,8 +85,8 @@ class DBMixin:
             # Strip newlines from file values
             if is_file: line = strip_newline(line)
 
-            logger.debug(
-                    f'Deleting value from database: {line}')
+            #logger.debug(
+            #        f'Deleting value from database: {line}')
 
             try:
 
@@ -135,7 +134,6 @@ class DBMixin:
 
         self.merge_lines(container, sql.Username)
         self.associate_spray_values(container, sql.Username)
-        
 
     def delete_username_records(self, container):
         '''Delete each username value in the container from the target
@@ -164,6 +162,7 @@ class DBMixin:
 
     def associate_spray_values(self, container, container_sql_class):
 
+        # Seek back to the beginning of any file containers
         is_file = container.__class__ == TextIOWrapper
         if is_file: container.seek(0)
 
@@ -185,7 +184,10 @@ class DBMixin:
                 # ================
     
                 username = self.main_db_sess.query(container_sql_class) \
-                        .filter(sql.Username.value == line) \
+                        .filter(
+                            (sql.Username.value == line) &
+                            (sql.Username.recovered == False)
+                        ) \
                         .first()
 
                 if not username: continue
@@ -193,23 +195,51 @@ class DBMixin:
                 # ==================================
                 # GET AND ASSOCIATE TARGET PASSWORDS
                 # ==================================
-    
-                passwords = self.main_db_sess \
-                    .query(sql.Password) \
-                    .join(sql.Credential) \
+                '''
+
+                Outer join is used here so that all passwords are
+                  returned that are not associated with any credentials
+                  along with any passwords that are associated with
+                  credentials but are strict only to the target username
+
+                Filter notes:
+
+                - Require that the passwords have an id, obviously
+                - Only non-strict credentials, unless the strict
+                  credential is for the current username
+                '''
+
+#                passwords = self.main_db_sess \
+#                    .query(sql.Password) \
+#                    .outerjoin(sql.Credential) \
+#                    .filter(
+#                        (sql.Password.credentials == None) | 
+#                        ((sql.Password.id != None) &
+#                        (
+#                            (sql.Credential.strict == False) |
+#                            (
+#                                (sql.Credential.username == username) &
+#                                (sql.Credential.strict == True)
+#                            )
+#                        ))
+#                    ).all()
+#
+#                username.passwords = passwords
+
+                username.passwords += self.main_db_sess.query(sql.Password) \
+                    .outerjoin(sql.Credential) \
                     .filter(
-                        (sql.Password.id != None) &
-                        (
-                            (sql.Credential.strict == False) |
+                        (sql.Password.credentials == None) | 
                             (
-                                (sql.Credential.username == username) &
-                                (sql.Credential.strict == True)
+                                (sql.Password.id != None) & 
+                                (sql.Credential.strict == False) &
+                                (sql.Credential.username != username)
                             )
-                        )
                     ).all()
 
-                username.passwords = passwords
-    
+            logger.debug(
+                'Finished associating usernames to passwords')
+
         # ===========================================
         # ASSOCIATE USERNAMES BACK TO PASSWORD VALUES
         # ===========================================
@@ -598,6 +628,7 @@ class DBMixin:
         if usernames:
             logger.debug(f'Managing usernames: {usernames}')
             self.manage_values(sql.Username, usernames, insert=insert)
+
         if passwords:
             logger.debug(f'Managing passwords: {passwords}')
             self.manage_values(sql.Password, passwords, insert=insert)
@@ -606,6 +637,7 @@ class DBMixin:
             logger.debug(f'Managing username files: {username_files}')
             self.manage_values(sql.Username, username_files,
                     is_file=True, insert=insert)
+
         if password_files:
             logger.debug(f'Managing password files: {password_files}')
             self.manage_values(sql.Password, password_files,

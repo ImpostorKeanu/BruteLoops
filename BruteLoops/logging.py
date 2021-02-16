@@ -34,29 +34,23 @@ def getLogger(name, log_level=GENERAL_EVENTS, log_valid=False,
         if log_invalid: log_level = CREDENTIAL_EVENTS
         if log_general: log_level = GENERAL_EVENTS
 
-        if log_file:
+    if log_file:
 
-            init_handler(logger,
-                logging.FileHandler,
-                log_file)
+        init_handler(logger,
+            logging.FileHandler,
+            log_file)
 
-        if log_stdout:
-
-            init_handler(logger,
-                logging.StreamHandler,
-                stdout)
-
-        if log_stderr:
-
-            init_handler(logger,
-                logging.StreamHandler,
-                stderr)
-
-    else:
+    if log_stdout:
 
         init_handler(logger,
             logging.StreamHandler,
             stdout)
+
+    if log_stderr:
+
+        init_handler(logger,
+            logging.StreamHandler,
+            stderr)
 
     logger.setLevel(log_level)
 
