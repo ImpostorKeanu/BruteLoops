@@ -170,10 +170,10 @@ class Module:
         # Regular expression string that will be used to parse the
         # argument information from the function annotation
         ARGPARSE_SIG = re.compile(
-            '^required:(?P<required>True|False),' \
-            'type:(?P<type>.+),' \
-            'help:(?P<help>.+)' \
-            '(,nargs:(?P<nargs>.+))?'
+            '^required:(?P<required>True|False),'
+            'type:(?P<type>.+?),'
+            '(nargs:(?P<nargs>.+),)?'
+            'help:(?P<help>.+)$'
         )
         
         # Signature to derive default values for the parameters
@@ -187,7 +187,7 @@ class Module:
 
             # Parse the annotation
             match = re.match(ARGPARSE_SIG, str)
-        
+
             # Throw an error when parsing fails
             if not match:
                 raise ValueError(

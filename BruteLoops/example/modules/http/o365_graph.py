@@ -76,17 +76,23 @@ class Session(Session):
 
     auth_path = '/common/oauth2/token'
 
-    def __init__(self, msol_url=None, headers=None, *args, **kwargs):
+    def __init__(self, msol_url=None, headers=None,
+            allow_redirects=True, verify_ssl=False, *args, **kwargs):
 
         super().__init__(*args, **kwargs)
 
-        # Update MSOL URL
+        # Configure redirects
+        self.allow_redirects=allow_redirects
 
+        # using the setattr builtin here because requests.Session
+        # doesn't care for new instance variables beinga assigned
+        setattr(self,'verify_ssl',verify_ssl)
+
+        # Update MSOL URL
         self.msol_url = msol_url if msol_url else MSONLINE_URL
         self.msol_url = strip_slash(self.msol_url)
 
         # Update headers
-
         headers = headers if headers else {}
         headers['Accept']='application/json'
         self.headers.update(headers)
@@ -105,7 +111,10 @@ class Session(Session):
             'scope':'openid'}
 
         # Make the post request
-        resp = self.post(self.msol_url+self.auth_path,data=data)
+        resp = self.post(self.msol_url+self.auth_path,
+                data=data,
+                allow_redirects=self.allow_redirects,
+                verify=self.verify_ssl)
 
         # Search the response for error codes
         error_code = re.search(ERROR_CODE_RE,resp.text)
@@ -158,9 +167,13 @@ class Module(HTTPModule):
         if 'user_agent' in kwargs:
             self.headers['User-Agent'] = kwargs['user_agent']
 
-        session = Session(msol_url=self.url, headers=self.headers)
-        session.proxies = kwargs['proxies'] if \
-                'proxies' in kwargs else None
+        session = Session(msol_url=self.url,
+                headers=self.headers,
+                verify_ssl=self.verify_ssl,
+                allow_redirects=self.allow_redirects)
+
+        if self.proxies:
+            session.proxies.update(self.proxies)
 
         return (session.authenticate(username,password),
                 username,password,)

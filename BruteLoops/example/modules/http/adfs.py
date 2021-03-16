@@ -10,12 +10,16 @@ class Module(HTTPModule):
     name = 'http.adfs'
     brief_description = 'Active Directory Federated Services'
     description = 'Brute force an ADFS server. NOTE: this module has '
-    'not been thoroughly tested and is quite crude. It effectively '
+    'not been thoroughly tested and is crude. It effectively '
     'takes a base URL, and just updates the POST body with the supppl'
     'ied credentials. It may not work on all ADFS versions.'
 
     def __call__(self, username, password, *args, **kwargs):
         '''Make the module callable.
+
+        During testing it appeared as though valid credentials always
+        resulted in a 302 redirect, so that's what we test for in the
+        logic below.
         '''
 
         # Craft the payload
@@ -27,11 +31,8 @@ class Module(HTTPModule):
         
         # Make the request while ignoring redirects
         resp = requests.post(
-            self.url,
-            data=payload,
-            proxies=self.proxies,
-            headers=self.headers,
-            allow_redirects=False)
+            **self.request_args,
+            data=payload)
 
         # Credentials should be valid on a 302 redirect
         if resp.status_code == 302:
