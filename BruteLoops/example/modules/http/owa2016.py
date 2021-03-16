@@ -10,21 +10,24 @@ class Module(BLModule):
     name = 'http.owa2016'
     description = brief_description = 'OWA 2016 web interface'
 
-    def __init__(self, url:'required:True,type:str,help:URL to target',
-            proxies:'required:False,type:str,help:HTTP proxies'={},
-            headers:'required:False,type:str,help:HTTP headers'={},
+    def __init__(self, url:'required:True,type:str,help:URL to target. '
+            'This is the full path to the POST resource, which '
+            'is generally similar to: /owa/auth.owa. Example: '
+            'https://owa.domain.com/owa/auth.owa',
+            proxies:'required:False,type:str,help:HTTP proxies'=None,
+            headers:'required:False,type:str,help:HTTP headers'=None,
             verify_ssl:'required:False,type:str,help:Verify SSL'=False):
 
         self.url = url
-        self.proxies = proxies
-        self.headers = headers
-        self.verify_ssl = verify_ssl
+        self.proxies = proxies if proxies else {}
+        self.headers = headers if headers else {}
+        self.verify_ssl = verify_ssl if verify_ssl != None else False
 
     def __call__(self,username,password,*args,**kwargs):
-    
+
         # post data
         data = {
-            'destination':url,
+            'destination':self.url,
             'flags':4,
             'forcedownlevel':0,
             'username':username,
