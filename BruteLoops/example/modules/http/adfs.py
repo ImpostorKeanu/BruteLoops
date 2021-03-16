@@ -31,22 +31,17 @@ class Module(HTTPModule):
             'AuthMethod':'FormsAuthentication',
         }
         
-        # Make the request while ignoring redirects
-<<<<<<< HEAD
-        resp = requests.post(
-            **self.request_args,
-            data=payload)
-=======
         try:
+
+            # Make the request while ignoring redirects
             resp = requests.post(
-                self.url,
-                data=payload,
-                proxies=self.proxies,
-                headers=self.headers,
-                allow_redirects=False)
+                **self.request_args,
+                data=payload)
+
         except requests.exceptions.ConnectionError:
             # ADFS appears to fall over on occasion
             # Sleep for a few moments, then try again
+
             sleep(5)
             resp = requests.post(
                 self.url,
@@ -54,7 +49,6 @@ class Module(HTTPModule):
                 proxies=self.proxies,
                 headers=self.headers,
                 allow_redirects=False)
->>>>>>> 686da7ca62287148d27152c443f50808fc1c46cb
 
         # Credentials should be valid on a 302 redirect
         if resp.status_code == 302:
