@@ -3,6 +3,7 @@ import warnings
 from urllib.parse import urlparse
 import re
 from BruteLoops.db_manager import csv_split
+import pdb
 
 warnings.filterwarnings('ignore')
 PROXY_FORMAT='<http|https>:<Proxy URI>'
@@ -42,7 +43,11 @@ class HTTPModule(Module):
                 'type:str,'
                 'nargs:+,'
                 'help:Space delimited static HTTP headers to pass alo'
-                'ng to each request.'=None,
+                'ng to each request. Note that each header must be fo'
+                'rmatted as follows: "Header: value". The ": " sequen'
+                'e is used to identify the break between the header a'
+                'nd the value. Example > X-Forwarded-For: localhost' \
+                    =None,
             verify_ssl:'required:False,'
                 'type:bool,'
                 'help:Verify SSL cert'=False,
@@ -119,11 +124,21 @@ class HTTPModule(Module):
         # ===================
         # HANDLE HTTP HEADERS
         # ===================
+        '''Parse a list of HTTP headers from the arguments.
+
+        Each header is expected to be formatted as:
+
+        <HeaderKey>: <HeaderValue>
+
+        Note that the colon+space ": " value serves as the
+        actual split delimiter.
+        '''
+
         headers = headers if headers != None else {}
 
         for header in headers:
             try:
-                key, value = csv_split(header)
+                key, value = header.split(': ', 1)
                 self.headers[key] = value.strip()
             except Exception as e:
                 raise ValueError(
