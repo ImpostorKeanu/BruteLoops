@@ -3,6 +3,7 @@ import inspect
 import re
         
 class Module:
+
     '''# Base Module Class
 
     This class serves as a template for brute force modules within this
@@ -173,7 +174,7 @@ class Module:
             '^required:(?P<required>True|False),'
             'type:(?P<type>.+?),'
             '(nargs:(?P<nargs>.+),)?'
-            'help:(?P<help>.+)$'
+            'help:(?P<help>.+)'
         )
         
         # Signature to derive default values for the parameters
