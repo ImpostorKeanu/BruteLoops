@@ -71,7 +71,7 @@ this repository: `python3.7 -m pip install -r requirements.txt`
 ```
 git clone https://github.com/arch4ngel/bruteloops
 cd bruteloops
-python3 -m pip -install -r requirements.txt
+python3 -m pip install -r requirements.txt
 ```
 
 # How do I use this Damn Thing?
