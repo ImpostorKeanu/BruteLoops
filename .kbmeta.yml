@@ -1,0 +1,24 @@
+# Tool name, which can differ from the repo name
+name: Justin Angel
+
+# Maintainer's name and email
+maintainer:
+  name: Justin Angel
+  email: justin@blackhillsinfosec.com
+
+# TTP tags with the format: <MITRE Tactic>/<Technique>
+# URL for reference: https://attack.mitre.org/tactics/enterprise/
+ttps:
+  - credential_access/password_spraying
+  - credential_access/credential_stuffing
+  
+# Bulleted high level description. Please keep bullets brief.
+descriptions:
+  - Highly configurable BruteForce attack utility
+  - Capable of matching AD password policies.
+  - Multiprocessed.
+  - Can attack any protocol.
+  
+# Determines if the tool can be discussed publicly
+# Valid Values: true, false
+public: true
