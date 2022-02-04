@@ -1,9 +1,16 @@
+from BruteLoops import data
 from BruteLoops.example.module import Module
 import warnings
 from urllib.parse import urlparse
 import re
 from BruteLoops.db_manager import csv_split
+from functools import wraps
+from random import randint
+from inspect import getargspec
+from logging import getLogger,INFO
 import pdb
+
+brute_logger = getLogger('BruteLoops.example.shortcuts.http')
 
 warnings.filterwarnings('ignore')
 PROXY_FORMAT='<http|https>:<Proxy URI>'
@@ -17,6 +24,39 @@ PROXY_RE= re.compile('^(?P<app_proto>(http|https)?):(?P<proxy_uri>.+)', re.I)
 
 # Requests supports only http, https, and socs5 proxies
 PROXY_URI_RE=re.compile('^(http|https|socks5)://(.+):[0-9]{1,5}')
+
+def handleUA(f):
+    '''A decorator to handle user agent strings, supporting a
+    randomization capability. If the string is "RANDOM", then
+    a random value will be selected from BruteLoops.data.UAS.
+    See that module to learn where random values originate
+    from.
+    '''
+
+    @wraps(f)
+    def wrapper(self, username, password, *args, **kwargs):
+
+        if self.randomize_ua:
+
+            # ======================
+            # GET A RANDOM UA STRING
+            # ======================
+
+            # loadUserAgents actually only loads when UAS is
+            # empty or the force argument is set to True.
+            data.loadUserAgents()
+
+            if data.UAS:
+
+                # Get a value from UAS
+                self.user_agent = data.UAS[randint(0, len(data.UAS)-1)]
+
+        # Set the header value
+        self.headers['User-Agent'] = self.user_agent
+
+        return f(self, username, password, *args, **kwargs)
+
+    return wrapper
 
 class HTTPModule(Module):
 
@@ -148,8 +188,11 @@ class HTTPModule(Module):
         # ========================
         # OTHER INSTANCE VARIABLES
         # ========================
-        if self.user_agent:
-            self.headers['User-Agent'] = self.user_agent
+
+        self.randomize_ua = False
+        if self.user_agent == 'RANDOM':
+            self.randomize_ua = True
+            self.headers['User-Agent'] = DEFAULT_USER_AGENT 
 
     @property
     def request_args(self):

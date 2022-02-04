@@ -7,6 +7,7 @@ from . import jitter
 from . import logging
 from . import sql
 from . import example
+from . import data
 
 __all__ = ['args','brute','brute_time','callback','config','helpers',
-        'jitter','logging','sql']
+        'jitter','logging','sql', 'example']

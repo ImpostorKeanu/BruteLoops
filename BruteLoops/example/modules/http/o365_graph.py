@@ -1,7 +1,7 @@
 from requests import Session
 import re
 import logging
-from BruteLoops.example.shortcuts.http import HTTPModule
+from BruteLoops.example.shortcuts.http import HTTPModule, handleUA
 
 from logging import getLogger,INFO
 
@@ -159,13 +159,11 @@ class Module(HTTPModule):
     description = 'Brute force the Office365 Graph API. Recommended ' \
             f'URL: {MSONLINE_URL}'
 
+    @handleUA 
     def __call__(self, username, password, *args, **kwargs):
         '''Proxy the call request up to the Session object to perform
         authentication.
         '''
-
-        if 'user_agent' in kwargs:
-            self.headers['User-Agent'] = kwargs['user_agent']
 
         session = Session(msol_url=self.url,
                 headers=self.headers,
