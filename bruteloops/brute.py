@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-#from .logging import *
-from BruteLoops.logging import *
 from . import logging
 from .brute_time import BruteTime
 from . import sql
@@ -17,7 +15,6 @@ from types import FunctionType, MethodType
 import traceback
 import re
 import signal
-import logging
 from time import time
 
 UNKNOWN_PRIORITIZED_USERNAME_MSG = \
@@ -33,8 +30,6 @@ UNKNOWN_PRIORITIZED_PASSWORD_MSG = \
     'ppear in the database. Insert this v' \
     'alue or remove it from the configura' \
     'tion: {password}'
-
-logger = None
 
 class BruteForcer:
     '''Base object from which all other brute forcers will inherit.
@@ -62,7 +57,7 @@ class BruteForcer:
         self.presults = []
         self.pool     = None
         self.attack   = None
-        self.logger   = getLogger('BruteLoops.BruteForcer',
+        self.logger   = logging.getLogger('BruteLoops.BruteForcer',
             config.log_level, config.log_valid, config.log_invalid,
             config.log_general, config.log_file, config.log_stdout,
             config.log_stderr)

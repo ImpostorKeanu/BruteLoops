@@ -14,12 +14,11 @@ setuptools.setup(
     version='0.0.1',
     author='Justin Angel',
     author_email='justin@arch4ngel.ninja',
-    description='A simple password spraying API',
+    description='A simple password guessing API.',
     long_description=long_description,
     long_description_content_type='text/markdown',
     url='https://github.com/arch4ngel/bruteloops',
     include_package_data=True,
-    package_data={"": ["*.txt"]},
     packages=setuptools.find_packages(),
     classifiers=[
         'Programming Language :: Python :: 3',
@@ -27,6 +26,5 @@ setuptools.setup(
         'Operating System :: POSIX :: Linux',
     ],
     python_requires='>=3.7',
-    scripts=['bl-dbmanager.py','bl-example.py',],
     install_requires=install_requires
 )

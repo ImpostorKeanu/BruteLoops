@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from sys import stdout,stderr
 import logging
+from functools import wraps
 
 SLEEP_EVENTS            = 85
 VALID_CREDENTIALS       = 80
@@ -20,6 +21,70 @@ def init_handler(logger, klass, *args, **kwargs):
     handler = klass(*args, **kwargs)
     handler.setFormatter(LOG_FORMAT)
     logger.addHandler(handler)
+
+def do_log(level):
+    '''Decorator to simplify custom logging levels.
+
+    Args:
+        level: The custom level to pass to the decorated
+            logging method.
+    '''
+
+    def decorator(f):
+
+        @wraps(f)
+        def wrapper(logger, m:str):
+
+            # Log with the proper level
+            logger.log(level, m)
+
+        return wrapper
+
+    return decorator
+
+class BruteLogger(logging.Logger):
+
+    @do_log(SLEEP_EVENTS)
+    def sleep(self, m:str):
+        '''Log sleep events.
+
+        Args:
+            m: The string message to log.
+        '''
+
+        pass
+
+    @do_log(VALID_CREDENTIALS)
+    def valid(self, m:str):
+        '''Log valid credential events.
+
+        Args:
+            m: The string message to log.
+        '''
+
+        pass
+
+    @do_log(CREDENTIAL_EVENTS)
+    def invalid(self, m:str):
+        '''Log invalid credential events.
+
+        Args:
+            m: The string message to log.
+        '''
+
+        pass
+
+    @do_log(GENERAL_EVENTS)
+    def general(self, m:str):
+        '''Log general events.
+
+        Args:
+            m: The string message to log.
+        '''
+
+        pass
+
+logging.setLoggerClass(BruteLogger)
 
 def getLogger(name, log_level=GENERAL_EVENTS, log_valid=False,
         log_invalid=False, log_general=False, log_file=None,

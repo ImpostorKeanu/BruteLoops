@@ -1,7 +1,6 @@
-import BruteLoops
-from pathlib import Path
 from . import sql
-import logging
+from . import logging
+from pathlib import Path
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from io import StringIO,TextIOWrapper
@@ -12,7 +11,7 @@ import re
 RE_USERNAME = re.compile('username',re.I)
 RE_PASSWORD = re.compile('password',re.I)
 
-logger = BruteLoops.logging.getLogger('BruteLoops.db_manager',
+logger = logging.getLogger('BruteLoops.db_manager',
         log_level=10)
 
 def strip_newline(s):
