@@ -7,25 +7,13 @@ interfaces.
 See various [Wiki](https://github.com/arch4ngel/BruteLoops/wiki) sections
 for more information.
 
-A "modular" example is included with the library that
-demonstrates how to use this package. It's fully functional
-and provides multiple brute force modules. Below is a sample
-of its capabilities:
+# If you're looking for the old example modules...
 
-```
-http.accellion_ftp  Accellion FTP HTTP interface login module
-http.basic_digest   Generic HTTP basic digest auth
-http.basic_ntlm     Generic HTTP basic NTLM authentication
-http.global_protect
-                    Global Protect web interface
-http.mattermost     Mattermost login web interface
-http.netwrix        Netwrix web login
-http.okta           Okta JSON API
-http.owa2010        OWA 2010 web interface
-http.owa2016        OWA 2016 web interface
-smb.smb             Target a single SMB server
-testing.fake        Fake authentication module for training/testing
-```
+See [BFG](https://github.com/arch4ngel/bl-bfg).
+
+The examples have been offloaded to a distinct project to
+minimize code and packaging issues. Database and attack
+capabilities have also been merged into a single binary.
 
 # Key Features
 
