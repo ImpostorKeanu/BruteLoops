@@ -5,10 +5,6 @@ import setuptools
 with open('README.md', 'r', encoding='utf-8') as f:
     long_description = f.read()
 
-# Read in all requirements from requirements.txt
-with open('requirements.txt', 'r', encoding='utf-8') as f:
-    install_requires = [l.strip() for l in f]
-
 setuptools.setup(
     name='bruteloops',
     version='0.1',
@@ -26,5 +22,7 @@ setuptools.setup(
         'Operating System :: POSIX :: Linux',
     ],
     python_requires='>=3.7',
-    install_requires=install_requires
+    install_requires=[
+        'sqlalchemy==1.3.0',
+        'billiard==3.6.3.0']
 )
