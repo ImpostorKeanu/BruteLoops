@@ -62,17 +62,13 @@ class BruteForcer:
             config.log_general, config.log_file, config.log_stdout,
             config.log_stderr)
         
-        self.logger.log(
-            GENERAL_EVENTS,
-            f'Initializing {config.process_count} process(es)'
-        )
+        self.logger.general(f'Initializing {config.process_count} process(es)')
         
         # ===================================
         # LOG ATTACK CONFIGURATION PARAMETERS
         # ===================================
 
-        self.logger.log(GENERAL_EVENTS,
-                'Logging attack configuration parameters')
+        self.logger.general('Logging attack configuration parameters')
 
         config_attrs = [
                 'authentication_jitter',
@@ -89,12 +85,10 @@ class BruteForcer:
         ]
 
         for attr in config_attrs:
-            self.logger.log(GENERAL_EVENTS,
-                    f'Config Parameter -- {attr}: '+str(getattr(self.config,attr)))
+            self.logger.general(f'Config Parameter -- {attr}: '+str(getattr(self.config,attr)))
 
         if hasattr(self.config.authentication_callback, 'callback_name'):
-            self.logger.log(GENERAL_EVENTS,
-                    f'Config Parameter -- callback_name: '+ \
+            self.logger.general(f'Config Parameter -- callback_name: '+ \
                             getattr(self.config.authentication_callback,
                                 'callback_name'))
             
@@ -154,8 +148,7 @@ class BruteForcer:
         # =================
         
         current_time = BruteTime.current_time(format=str)
-        self.logger.log(GENERAL_EVENTS,
-                f'Beginning attack: {current_time}')
+        self.logger.general(f'Beginning attack: {current_time}')
 
         # CREATE A NEW ATTACK
         self.attack = sql.Attack(start_time=BruteTime.current_time())
@@ -222,7 +215,7 @@ class BruteForcer:
             if output[0]:
 
                 recovered = True
-                self.logger.log(VALID_CREDENTIALS,cred)
+                self.logger.valid(cred)
 
                 # Update username to "recovered"
                 credential.username.recovered=True
@@ -235,7 +228,7 @@ class BruteForcer:
 
                 # Update the credential to invalid
                 credential.valid=False
-                self.logger.log(CREDENTIAL_EVENTS,cred)
+                self.logger.invalid(cred)
 
 
         # Commit the changes
@@ -372,13 +365,13 @@ class BruteForcer:
         # LOG ATTACK COMPLETION
         # =====================
 
-        self.logger.log(GENERAL_EVENTS,'Shutting attack down')
+        self.logger.general('Shutting attack down')
 
         self.attack.complete = True
         self.attack.end_time = BruteTime.current_time()
         self.main_db_sess.commit()
 
-        self.logger.log(GENERAL_EVENTS,'Closing/joining Processes')
+        self.logger.general('Closing/joining Processes')
 
         if self.pool:
             self.pool.close()
@@ -462,8 +455,7 @@ class BruteForcer:
                         .first()
                     sleeping = True
                     if u and u.future_time > 60+time():
-                        self.logger.log(
-                            GENERAL_EVENTS,
+                        self.logger.general(
                             f'Sleeping until {BruteTime.float_to_str(u.future_time)}'
                         )
                 elif usernames and sleeping:
@@ -546,8 +538,7 @@ class BruteForcer:
                 # STOP ATTACK DUE TO STOP_ON_VALID_CREDENTIALS
                 # ============================================
                 if recovered and self.config.stop_on_valid:
-                        self.logger.log(
-                            GENERAL_EVENTS,
+                        self.logger.general(
                             'Valid credentials recovered. Exiting per ' \
                             'stop_on_valid configuration.',
                         )
@@ -581,7 +572,7 @@ class BruteForcer:
 
                 outputs = self.monitor_processes(ready_all=True)
                 self.handle_outputs(outputs)
-                self.logger.log(GENERAL_EVENTS,'Attack finished')
+                self.logger.general('Attack finished')
     
                 # ========
                 # SHUTDOWN
@@ -613,8 +604,7 @@ class BruteForcer:
                 # Raise to caller
                 else:
 
-                    self.logger.log(
-                        GENERAL_EVENTS,
+                    self.logger.general(
                         'Unhandled exception occurred. Shutting down attack '\
                         'and returning control to the caller.'
                     )

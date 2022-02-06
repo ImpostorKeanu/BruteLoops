@@ -74,6 +74,11 @@ class BruteLogger(logging.Logger):
 
         pass
 
+    @do_log(CREDENTIAL_EVENTS)
+    def credential(self, m:str):
+
+        pass
+
     @do_log(GENERAL_EVENTS)
     def general(self, m:str):
         '''Log general events.
