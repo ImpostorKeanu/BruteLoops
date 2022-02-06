@@ -1,5 +1,11 @@
 import argparse
 
+class BoolAction(argparse.Action):
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        setattr(namespace, self.dest, False)
+        if values in ['true','True']:
+            setattr(namespace, self.dest, True)
 
 # ==================
 # GENERAL PARAMETERS
@@ -46,7 +52,8 @@ gg.add_argument('--auth-threshold','-at',
         help=AUTH_THRESHOLD,
         dest='max_auth_tries')
 gg.add_argument('--stop-on-valid','-sov',
-        action='store_true',
+        action=BoolAction,
+        default=False,
         help=STOP_ON_VALID)
 
 # ===============================
@@ -58,9 +65,11 @@ stp = scheduling_tweaks_parser = argparse.ArgumentParser(
 stg = scheduling_tweaks_group = stp.add_argument_group(
         'Scheduling Tweak Parameters',
         'Options used to prioritize username or password values')
-stg.add_argument('--un-prioritize',
-        action='store_true',
-        help='Unprioritize the target values')
+stg.add_argument('--prioritize',
+        action=BoolAction,
+        default=True,
+        help='Determine if values should be prioritized or '
+            'unprioritized. Default: %(default)s')
 stg.add_argument('--usernames',
         nargs='+',
         help='Usernames to manage')
@@ -129,8 +138,7 @@ force attack. Default: %(default)s
 '''
 
 LOG_STDOUT = \
-'''Issue this flag to disable printing log records to STDOUT along
-with the log file. Default: %(default)s
+'''Enable/disable logging to stdout. Default: %(default)s
 '''
 
 op = output_parser = argparse.ArgumentParser(add_help=False)
@@ -139,8 +147,9 @@ og = output_group = op.add_argument_group('Output Parameters',
 og.add_argument('--log-file','-lf',
         default='brute_log.txt',
         help=LOG_FILE)
-og.add_argument('--no-log-stdout','-nlso',
-        action='store_false',
+og.add_argument('--log-stdout','-nlso',
+        action=BoolAction,
+        default=True,
         help=LOG_STDOUT,
         dest='log_stdout')
 
@@ -149,30 +158,34 @@ og.add_argument('--no-log-stdout','-nlso',
 # ==============
 
 LOG_GENERAL = \
-'''Disable logging of general events.
+'''Enable/disable logging of general events. Default: %(default)s
 '''
 
 LOG_VALID = \
-'''Disable logging of valid credentials. LIKELY UNDESIRABLE.
+'''Enable/disable logging of valid credentials. You probably want to
+enable this. Default: %(default)s.
 '''
 
 LOG_INVALID = \
-'''Disable logging of invalid credentials.
+'''Disable logging of invalid credentials. Default: %(default)s
 '''
 
 lp = logging_parser = argparse.ArgumentParser(add_help=False)
 lg = logging_group = lp.add_argument_group('Logging Parameters',
         'Options related to logging')
-lg.add_argument('--no-log-general','-nlg',
-        action='store_false',
+lg.add_argument('--log-general','-nlg',
+        action=BoolAction,
+        default=True,
         help=LOG_GENERAL,
         dest='log_general')
-lg.add_argument('--no-log-valid','-nlv',
-        action='store_false',
+lg.add_argument('--log-valid','-nlv',
+        action=BoolAction,
+        default=True,
         help=LOG_VALID,
         dest='log_valid')
-lg.add_argument('--no-log-invalid','-nliv',
-        action='store_false',
+lg.add_argument('--log-invalid','-nliv',
+        action=BoolAction,
+        default=True,
         help=LOG_INVALID,
         dest='log_invalid')
 
