@@ -259,13 +259,10 @@ class BruteForcer:
             # Guess failed for some reason
             elif outcome == -1:
 
-
                 self.logger.module(
                     'Failed to check credentials. Will retry. {}:{}'.format(
                         credential.username.value,
                         credential.password.value))
-
-                pass
 
             # Credentials are no good
             else: 
