@@ -259,6 +259,12 @@ class BruteForcer:
             # Guess failed for some reason
             elif outcome == -1:
 
+
+                self.logger.module(
+                    'Failed to check credentials. Will retry. {}:{}'.format(
+                        credential.username.value,
+                        credential.password.value))
+
                 pass
 
             # Credentials are no good
@@ -279,7 +285,7 @@ class BruteForcer:
             elif not actionable and credential.username.actionable:
                 credential.username.actionable = False
                 self.logger.invalid(
-                    f'Invalid username: {credential.username.value}')
+                    f'INVALID USERNAME: {credential.username.value}')
     
             # ===================
             # WRITE MODULE EVENTS
