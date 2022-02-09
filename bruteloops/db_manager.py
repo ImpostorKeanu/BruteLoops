@@ -141,6 +141,34 @@ class DBMixin:
 
         self.delete_lines(container, sql.Username)
 
+    def disable_username_records(self, container):
+        '''Set the actionable attribute on each record in the container
+        to False, removing them from further guesses.
+        '''
+
+        for v in container:
+            for u in self.main_db_sess.query(sql.Username) \
+                    .filter(
+                        sql.Username.value == v,
+                        sql.Username.actionable == True) \
+                    .all():
+                u.actionable = False
+        self.main_db_sess.commit()
+
+    def enable_username_records(self, container):
+        '''Set the actionable attribute on each record in the container
+        to True, ensuring they will be targeted for further guesses.
+        '''
+
+        for v in container:
+            for u in self.main_db_sess.query(sql.Username) \
+                    .filter(
+                        sql.Username.value == v,
+                        sql.Username.actionable == False) \
+                    .all():
+                u.actionable = True
+        self.main_db_sess.commit()
+
     # ===========================
     # PASSWORD MANAGEMENT METHODS
     # ===========================

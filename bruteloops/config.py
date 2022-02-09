@@ -74,7 +74,8 @@ class Config:
             log_file=False,                 # FILE TO RECEIVE ADDITIONAL LOGS
             log_stdout=False,               # LOG EVENTS TO STDOUT
             log_stderr=False,               # LOG EVENTS TO STDERR
-            exception_handlers=None):        # DICTIONARY OF EXCEPTION HANDLERS: {class:exception_handler}
+            randomize_usernames=True,       # RANDOMIZE ORDERING OF USERNAMES
+            exception_handlers=None):       # DICTIONARY OF EXCEPTION HANDLERS: {class:exception_handler}
 
         self.process_count              = process_count
         self.authentication_callback    = authentication_callback
@@ -89,6 +90,7 @@ class Config:
         self.log_file                   = log_file
         self.log_stdout                 = log_stdout
         self.log_stderr                 = log_stderr
+        self.randomize_usernames        = randomize_usernames
         self.exception_handlers         = exception_handlers if \
                 exception_handlers else {}
         self.log_level                  = 90

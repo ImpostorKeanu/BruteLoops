@@ -52,7 +52,7 @@ gg.add_argument('--auth-threshold','-at',
         help=AUTH_THRESHOLD,
         dest='max_auth_tries')
 gg.add_argument('--stop-on-valid','-sov',
-        action=BoolAction,
+        action=argparse.BooleanOptionalAction,
         default=False,
         help=STOP_ON_VALID)
 
@@ -66,7 +66,7 @@ stg = scheduling_tweaks_group = stp.add_argument_group(
         'Scheduling Tweak Parameters',
         'Options used to prioritize username or password values')
 stg.add_argument('--prioritize',
-        action=BoolAction,
+        action=argparse.BooleanOptionalAction,
         default=True,
         help='Determine if values should be prioritized or '
             'unprioritized. Default: %(default)s')
@@ -147,8 +147,8 @@ og = output_group = op.add_argument_group('Output Parameters',
 og.add_argument('--log-file','-lf',
         default='brute_log.txt',
         help=LOG_FILE)
-og.add_argument('--log-stdout','-nlso',
-        action=BoolAction,
+og.add_argument('--log-stdout',
+        action=argparse.BooleanOptionalAction,
         default=True,
         help=LOG_STDOUT,
         dest='log_stdout')
@@ -173,18 +173,18 @@ LOG_INVALID = \
 lp = logging_parser = argparse.ArgumentParser(add_help=False)
 lg = logging_group = lp.add_argument_group('Logging Parameters',
         'Options related to logging')
-lg.add_argument('--log-general','-nlg',
-        action=BoolAction,
+lg.add_argument('--log-general',
+        action=argparse.BooleanOptionalAction,
         default=True,
         help=LOG_GENERAL,
         dest='log_general')
-lg.add_argument('--log-valid','-nlv',
-        action=BoolAction,
+lg.add_argument('--log-valid',
+        action=argparse.BooleanOptionalAction,
         default=True,
         help=LOG_VALID,
         dest='log_valid')
-lg.add_argument('--log-invalid','-nliv',
-        action=BoolAction,
+lg.add_argument('--log-invalid',
+        action=argparse.BooleanOptionalAction,
         default=True,
         help=LOG_INVALID,
         dest='log_invalid')

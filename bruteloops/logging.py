@@ -5,6 +5,7 @@ from functools import wraps
 
 SLEEP_EVENTS            = 85
 VALID_CREDENTIALS       = 80
+MODULE_EVENTS           = 75
 CREDENTIAL_EVENTS       = 70
 GENERAL_EVENTS          = 60
 
@@ -13,6 +14,7 @@ LOG_FORMAT = logging.Formatter(FORMAT)
 
 logging.addLevelName(SLEEP_EVENTS,'SLEEP_EVENT')
 logging.addLevelName(VALID_CREDENTIALS,'VALID')
+logging.addLevelName(MODULE_EVENTS,'MODULE_EVENT')
 logging.addLevelName(CREDENTIAL_EVENTS,'INVALID')
 logging.addLevelName(GENERAL_EVENTS,'GENERAL')
 
@@ -79,6 +81,11 @@ class BruteLogger(logging.Logger):
 
         pass
 
+    @do_log(MODULE_EVENTS)
+    def module(self, m:str):
+
+        pass
+
     @do_log(GENERAL_EVENTS)
     def general(self, m:str):
         '''Log general events.
@@ -89,7 +96,8 @@ class BruteLogger(logging.Logger):
 
         pass
 
-logging.setLoggerClass(BruteLogger)
+if logging.getLoggerClass() != BruteLogger:
+    logging.setLoggerClass(BruteLogger)
 
 def getLogger(name, log_level=GENERAL_EVENTS, log_valid=False,
         log_invalid=False, log_general=False, log_file=None,

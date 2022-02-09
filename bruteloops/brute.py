@@ -16,6 +16,7 @@ import traceback
 import re
 import signal
 from time import time
+from random import shuffle
 
 UNKNOWN_PRIORITIZED_USERNAME_MSG = \
     'Prioritized username value supplied ' \
@@ -81,7 +82,8 @@ class BruteForcer:
                 'log_invalid',
                 'log_general',
                 'log_stdout',
-                'log_stderr'
+                'log_stderr',
+                'randomize_usernames'
         ]
 
         for attr in config_attrs:
@@ -166,8 +168,8 @@ class BruteForcer:
 
         ```
             output_list = [
-               (<OUTCOME>,<USERNAME>,<PASSWORD>),
-               (<OUTCOME>,<USERNAME>,<PASSWORD>)
+               (<OUTCOME>,<USERNAME>,<PASSWORD>,<ACTIONABLE>),
+               (<OUTCOME>,<USERNAME>,<PASSWORD>,<ACTIONABLE>)
             ]
 
         ```
@@ -175,9 +177,19 @@ class BruteForcer:
         In the structure below:
 
         - `OUTCOME` - is an integer value indicating if authentication was
-        successful (1 for true, 0 for false)
+        successful (-1 for "incomplete", 1 for true, 0 for false)
         - `USERNAME` - string value of the username
         - `PASSWORD` - string value of the password
+        - `ACTIONABLE` - Boolean value determining if the record should be disabled.
+
+        ## NEW OUTPUTS ##
+        {
+            'outcome': int,
+            'username': str,
+            'password': str,
+            'actionable': bool,
+            'events': [str]
+        }
         '''
 
         # ==================================================
@@ -186,6 +198,14 @@ class BruteForcer:
 
         recovered = False
         for output in outputs:
+
+            # Stop being lazy
+            # Make this a named tuple, or something
+            outcome = output.get('outcome', 0)
+            username = output.get('username', None)
+            password = output.get('password', None)
+            actionable = output.get('actionable', True)
+            events = output.get('events', [])
 
             # ===============================
             # QUERY FOR THE TARGET CREDENTIAL
@@ -196,23 +216,36 @@ class BruteForcer:
                     .join(sql.Username) \
                     .join(sql.Password) \
                     .filter(
-                        sql.Username.value == output[1],
-                        sql.Password.value == output[2],
+                        sql.Username.value == username,
+                        sql.Password.value == password,
                         sql.Username.recovered == False) \
                     .first()
 
             if not credential: continue
 
-            credential.guessed=True
-
             # ======================
             # HANDLE THE CREDENTIALS
             # ======================
 
-            cred = f'{output[1]}:{output[2]}'
+            if self.config.max_auth_jitter:
+
+                # =====================
+                # SET FUTURE TIME AGAIN
+                # =====================
+                '''
+                - Set once before, just before making the guess.
+                - Mitigates likelihood of locking out accounts.
+                '''
+
+                credential.username.future_time = \
+                    self.config.max_auth_jitter.get_jitter_future()
+
+            cred = f'{output["username"]}:{output["password"]}'
 
             # Handle valid credentials
-            if output[0]:
+            if outcome == 1:
+
+                credential.guessed=True
 
                 recovered = True
                 self.logger.valid(cred)
@@ -223,13 +256,38 @@ class BruteForcer:
                 # Update the credential to valid
                 credential.valid=True
 
+            # Guess failed for some reason
+            elif outcome == -1:
+
+                pass
+
             # Credentials are no good
             else: 
+
+                credential.guessed=True
 
                 # Update the credential to invalid
                 credential.valid=False
                 self.logger.invalid(cred)
 
+            # ================================================
+            # MANAGE THE ACTIONABLE ATTRIBUTE FOR THE USERNAME
+            # ================================================
+    
+            if actionable and not credential.username.actionable:
+                credential.username.actionable = True
+            elif not actionable and credential.username.actionable:
+                credential.username.actionable = False
+                self.logger.invalid(
+                    f'Invalid username: {credential.username.value}')
+    
+            # ===================
+            # WRITE MODULE EVENTS
+            # ===================
+    
+            if events and isinstance(events, list):
+                for event in events:
+                    self.logger.module(event)
 
         # Commit the changes
         self.handler_db_sess.commit()
@@ -437,15 +495,52 @@ class BruteForcer:
                     # future_time must be less than current time
                         # for that user have been completed
 
-                usernames = self.main_db_sess.query(sql.Username) \
-                        .join(sql.Credential) \
-                        .filter(
-                            sql.Username.recovered == False,
-                            sql.Username.future_time <= time(),
-                            sql.Credential.guessed == False) \
-                        .order_by(sql.Username.priority.desc()) \
-                        .order_by(sql.Credential.strict.desc()) \
-                        .all()
+                if self.config.randomize_usernames:
+
+                    # Get priority usernames first
+                    p_usernames = priority_usernames = \
+                        self.main_db_sess.query(sql.Username) \
+                            .join(sql.Credential) \
+                            .filter(
+                                sql.Username.recovered == False,
+                                sql.Username.priority == True,
+                                sql.Username.future_time <= time(),
+                                sql.Username.actionable == True,
+                                sql.Credential.guessed == False) \
+                            .order_by(sql.Username.priority.desc()) \
+                            .order_by(sql.Credential.strict.desc()) \
+                            .all()
+
+                    p_usernames = p_usernames if p_usernames else []
+    
+                    # Marry priority usernames to non-priority usernames
+                    usernames = self.main_db_sess.query(sql.Username) \
+                            .join(sql.Credential) \
+                            .filter(
+                                sql.Username.recovered == False,
+                                sql.Username.priority == False,
+                                sql.Username.actionable == True,
+                                sql.Username.future_time <= time(),
+                                sql.Credential.guessed == False) \
+                            .all()
+
+                    usernames = usernames = usernames if usernames else []
+                    shuffle(usernames)
+                    usernames += p_usernames
+                    del(p_usernames)
+
+                else:
+
+                    usernames = self.main_db_sess.query(sql.Username) \
+                            .join(sql.Credential) \
+                            .filter(
+                                sql.Username.recovered == False,
+                                sql.Username.future_time <= time(),
+                                sql.Username.actionable == True,
+                                sql.Credential.guessed == False) \
+                            .order_by(sql.Username.priority.desc()) \
+                            .order_by(sql.Credential.strict.desc()) \
+                            .all()
 
                 # Logging sleep events
                 if not usernames and not sleeping:
@@ -554,6 +649,7 @@ class BruteForcer:
                     .query(sql.Username) \
                     .join(sql.Credential) \
                     .filter(sql.Username.recovered == False,
+                            sql.Username.actionable == True,
                             sql.Credential.guessed == False) \
                     .first()
 

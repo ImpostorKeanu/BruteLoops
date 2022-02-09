@@ -15,6 +15,9 @@ class Username(Base):
         doc='Username value')
     recovered = Column(Boolean, default=False,
         doc='Determines if a valid password has been recovered')
+    actionable = Column(Boolean, default=True,
+        doc='Determines if the account is actionable, removing '
+            'it from additional guesses when set to False.')
     priority = Column(Boolean, default=False,
         doc='Determines if the user is prioritized')
     last_time = Column(Float, default=-1.0,

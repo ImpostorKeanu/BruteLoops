@@ -1,0 +1,620 @@
+2022-02-04 13:44:37,233 - BruteLoops.BruteForcer - GENERAL - Initializing 1 process(es)
+2022-02-04 13:44:37,233 - BruteLoops.BruteForcer - GENERAL - Logging attack configuration parameters
+2022-02-04 13:44:37,233 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- authentication_jitter: <Jitter(min="1s", max="1s")>
+2022-02-04 13:44:37,233 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_jitter: <Jitter(min="10m", max="30m")>
+2022-02-04 13:44:37,233 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_tries: 1
+2022-02-04 13:44:37,233 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- stop_on_valid: False
+2022-02-04 13:44:37,233 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- db_file: /tmp/test.db
+2022-02-04 13:44:37,233 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_file: brute_log.txt
+2022-02-04 13:44:37,233 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_valid: True
+2022-02-04 13:44:37,233 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_invalid: True
+2022-02-04 13:44:37,233 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_general: True
+2022-02-04 13:44:37,233 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stdout: True
+2022-02-04 13:44:37,233 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stderr: False
+2022-02-04 13:44:37,242 - BruteLoops.BruteForcer - GENERAL - Beginning attack: 13:44:37 EST (22/02/04)
+2022-02-04 13:44:37,403 - BruteLoops.BruteForcer - GENERAL - Unhandled exception occurred. Shutting down attack and returning control to the caller.
+2022-02-04 13:44:37,403 - BruteLoops.BruteForcer - GENERAL - Shutting attack down
+2022-02-04 13:44:37,417 - BruteLoops.BruteForcer - GENERAL - Closing/joining Processes
+2022-02-04 13:52:00,563 - BruteLoops.BruteForcer - GENERAL - Initializing 1 process(es)
+2022-02-04 13:52:00,563 - BruteLoops.BruteForcer - GENERAL - Logging attack configuration parameters
+2022-02-04 13:52:00,563 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- authentication_jitter: <Jitter(min="1s", max="1s")>
+2022-02-04 13:52:00,563 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_jitter: <Jitter(min="10m", max="30m")>
+2022-02-04 13:52:00,563 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_tries: 1
+2022-02-04 13:52:00,563 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- stop_on_valid: False
+2022-02-04 13:52:00,563 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- db_file: /tmp/test.db
+2022-02-04 13:52:00,563 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_file: brute_log.txt
+2022-02-04 13:52:00,563 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_valid: True
+2022-02-04 13:52:00,563 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_invalid: True
+2022-02-04 13:52:00,563 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_general: True
+2022-02-04 13:52:00,563 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stdout: True
+2022-02-04 13:52:00,563 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stderr: False
+2022-02-04 13:52:00,568 - BruteLoops.BruteForcer - GENERAL - Beginning attack: 13:52:00 EST (22/02/04)
+2022-02-04 13:52:00,617 - BruteLoops.BruteForcer - GENERAL - Sleeping until 14:12:54 EST (22/02/04)
+2022-02-04 13:52:08,601 - BruteLoops.BruteForcer - GENERAL - Shutting attack down
+2022-02-04 13:52:08,611 - BruteLoops.BruteForcer - GENERAL - Closing/joining Processes
+2022-02-04 13:52:25,772 - BruteLoops.BruteForcer - GENERAL - Initializing 1 process(es)
+2022-02-04 13:52:25,772 - BruteLoops.BruteForcer - GENERAL - Logging attack configuration parameters
+2022-02-04 13:52:25,772 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- authentication_jitter: <Jitter(min="1s", max="1s")>
+2022-02-04 13:52:25,773 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_jitter: <Jitter(min="10m", max="30m")>
+2022-02-04 13:52:25,773 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_tries: 1
+2022-02-04 13:52:25,773 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- stop_on_valid: False
+2022-02-04 13:52:25,773 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- db_file: /tmp/test.db
+2022-02-04 13:52:25,773 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_file: brute_log.txt
+2022-02-04 13:52:25,773 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_valid: True
+2022-02-04 13:52:25,773 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_invalid: True
+2022-02-04 13:52:25,773 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_general: True
+2022-02-04 13:52:25,773 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stdout: True
+2022-02-04 13:52:25,773 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stderr: False
+2022-02-04 13:52:25,778 - BruteLoops.BruteForcer - GENERAL - Beginning attack: 13:52:25 EST (22/02/04)
+2022-02-04 13:52:25,925 - BruteLoops.BruteForcer - GENERAL - Unhandled exception occurred. Shutting down attack and returning control to the caller.
+2022-02-04 13:52:25,925 - BruteLoops.BruteForcer - GENERAL - Shutting attack down
+2022-02-04 13:52:25,935 - BruteLoops.BruteForcer - GENERAL - Closing/joining Processes
+2022-02-04 13:53:19,854 - BruteLoops.BruteForcer - GENERAL - Initializing 1 process(es)
+2022-02-04 13:53:19,854 - BruteLoops.BruteForcer - GENERAL - Logging attack configuration parameters
+2022-02-04 13:53:19,854 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- authentication_jitter: <Jitter(min="1s", max="1s")>
+2022-02-04 13:53:19,854 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_jitter: <Jitter(min="10m", max="30m")>
+2022-02-04 13:53:19,854 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_tries: 1
+2022-02-04 13:53:19,854 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- stop_on_valid: False
+2022-02-04 13:53:19,854 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- db_file: /tmp/test.db
+2022-02-04 13:53:19,854 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_file: brute_log.txt
+2022-02-04 13:53:19,854 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_valid: True
+2022-02-04 13:53:19,854 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_invalid: True
+2022-02-04 13:53:19,855 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_general: True
+2022-02-04 13:53:19,855 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stdout: True
+2022-02-04 13:53:19,855 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stderr: False
+2022-02-04 13:53:19,859 - BruteLoops.BruteForcer - GENERAL - Beginning attack: 13:53:19 EST (22/02/04)
+2022-02-04 13:53:20,020 - BruteLoops.BruteForcer - GENERAL - Unhandled exception occurred. Shutting down attack and returning control to the caller.
+2022-02-04 13:53:20,020 - BruteLoops.BruteForcer - GENERAL - Shutting attack down
+2022-02-04 13:53:20,043 - BruteLoops.BruteForcer - GENERAL - Closing/joining Processes
+2022-02-04 13:54:12,427 - BruteLoops.BruteForcer - GENERAL - Initializing 1 process(es)
+2022-02-04 13:54:12,427 - BruteLoops.BruteForcer - GENERAL - Logging attack configuration parameters
+2022-02-04 13:54:12,427 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- authentication_jitter: <Jitter(min="1s", max="1s")>
+2022-02-04 13:54:12,427 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_jitter: <Jitter(min="10m", max="30m")>
+2022-02-04 13:54:12,427 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_tries: 1
+2022-02-04 13:54:12,428 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- stop_on_valid: False
+2022-02-04 13:54:12,428 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- db_file: /tmp/test.db
+2022-02-04 13:54:12,428 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_file: brute_log.txt
+2022-02-04 13:54:12,428 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_valid: True
+2022-02-04 13:54:12,428 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_invalid: True
+2022-02-04 13:54:12,428 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_general: True
+2022-02-04 13:54:12,428 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stdout: True
+2022-02-04 13:54:12,428 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stderr: False
+2022-02-04 13:54:12,433 - BruteLoops.BruteForcer - GENERAL - Beginning attack: 13:54:12 EST (22/02/04)
+2022-02-04 13:54:12,587 - BruteLoops.BruteForcer - GENERAL - Unhandled exception occurred. Shutting down attack and returning control to the caller.
+2022-02-04 13:54:12,588 - BruteLoops.BruteForcer - GENERAL - Shutting attack down
+2022-02-04 13:54:12,598 - BruteLoops.BruteForcer - GENERAL - Closing/joining Processes
+2022-02-04 13:55:08,018 - BruteLoops.BruteForcer - GENERAL - Initializing 1 process(es)
+2022-02-04 13:55:08,018 - BruteLoops.BruteForcer - GENERAL - Logging attack configuration parameters
+2022-02-04 13:55:08,018 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- authentication_jitter: <Jitter(min="1s", max="1s")>
+2022-02-04 13:55:08,018 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_jitter: <Jitter(min="10m", max="30m")>
+2022-02-04 13:55:08,018 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_tries: 1
+2022-02-04 13:55:08,018 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- stop_on_valid: False
+2022-02-04 13:55:08,018 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- db_file: /tmp/test.db
+2022-02-04 13:55:08,018 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_file: brute_log.txt
+2022-02-04 13:55:08,018 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_valid: True
+2022-02-04 13:55:08,018 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_invalid: True
+2022-02-04 13:55:08,018 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_general: True
+2022-02-04 13:55:08,018 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stdout: True
+2022-02-04 13:55:08,018 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stderr: False
+2022-02-04 13:55:08,023 - BruteLoops.BruteForcer - GENERAL - Beginning attack: 13:55:08 EST (22/02/04)
+2022-02-04 13:55:08,171 - BruteLoops.BruteForcer - GENERAL - Unhandled exception occurred. Shutting down attack and returning control to the caller.
+2022-02-04 13:55:08,171 - BruteLoops.BruteForcer - GENERAL - Shutting attack down
+2022-02-04 13:55:08,182 - BruteLoops.BruteForcer - GENERAL - Closing/joining Processes
+2022-02-04 13:57:21,021 - BruteLoops.BruteForcer - GENERAL - Initializing 1 process(es)
+2022-02-04 13:57:21,021 - BruteLoops.BruteForcer - GENERAL - Logging attack configuration parameters
+2022-02-04 13:57:21,021 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- authentication_jitter: <Jitter(min="1s", max="1s")>
+2022-02-04 13:57:21,021 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_jitter: <Jitter(min="10m", max="30m")>
+2022-02-04 13:57:21,021 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_tries: 1
+2022-02-04 13:57:21,021 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- stop_on_valid: False
+2022-02-04 13:57:21,021 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- db_file: /tmp/test.db
+2022-02-04 13:57:21,021 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_file: brute_log.txt
+2022-02-04 13:57:21,021 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_valid: True
+2022-02-04 13:57:21,021 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_invalid: True
+2022-02-04 13:57:21,021 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_general: True
+2022-02-04 13:57:21,021 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stdout: True
+2022-02-04 13:57:21,021 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stderr: False
+2022-02-04 13:57:21,026 - BruteLoops.BruteForcer - GENERAL - Beginning attack: 13:57:21 EST (22/02/04)
+2022-02-04 13:57:21,180 - BruteLoops.BruteForcer - GENERAL - Unhandled exception occurred. Shutting down attack and returning control to the caller.
+2022-02-04 13:57:21,180 - BruteLoops.BruteForcer - GENERAL - Shutting attack down
+2022-02-04 13:57:21,191 - BruteLoops.BruteForcer - GENERAL - Closing/joining Processes
+2022-02-04 13:57:48,834 - BruteLoops.BruteForcer - GENERAL - Initializing 1 process(es)
+2022-02-04 13:57:48,834 - BruteLoops.BruteForcer - GENERAL - Logging attack configuration parameters
+2022-02-04 13:57:48,834 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- authentication_jitter: <Jitter(min="1s", max="1s")>
+2022-02-04 13:57:48,834 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_jitter: <Jitter(min="10m", max="30m")>
+2022-02-04 13:57:48,834 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_tries: 1
+2022-02-04 13:57:48,834 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- stop_on_valid: False
+2022-02-04 13:57:48,834 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- db_file: /tmp/test.db
+2022-02-04 13:57:48,834 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_file: brute_log.txt
+2022-02-04 13:57:48,834 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_valid: True
+2022-02-04 13:57:48,834 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_invalid: True
+2022-02-04 13:57:48,834 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_general: True
+2022-02-04 13:57:48,835 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stdout: True
+2022-02-04 13:57:48,835 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stderr: False
+2022-02-04 13:57:48,839 - BruteLoops.BruteForcer - GENERAL - Beginning attack: 13:57:48 EST (22/02/04)
+2022-02-04 13:57:50,190 - BruteLoops.BruteForcer - INVALID - testuser@stuff.com:password123
+2022-02-04 13:57:50,402 - BruteLoops.BruteForcer - GENERAL - Sleeping until 14:17:55 EST (22/02/04)
+2022-02-04 13:57:50,402 - BruteLoops.BruteForcer - GENERAL - Attack finished
+2022-02-04 13:57:50,402 - BruteLoops.BruteForcer - GENERAL - Shutting attack down
+2022-02-04 13:57:50,413 - BruteLoops.BruteForcer - GENERAL - Closing/joining Processes
+2022-02-04 14:00:44,731 - BruteLoops.BruteForcer - GENERAL - Initializing 1 process(es)
+2022-02-04 14:00:44,732 - BruteLoops.BruteForcer - GENERAL - Logging attack configuration parameters
+2022-02-04 14:00:44,732 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- authentication_jitter: <Jitter(min="1s", max="1s")>
+2022-02-04 14:00:44,732 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_jitter: <Jitter(min="10m", max="30m")>
+2022-02-04 14:00:44,732 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_tries: 1
+2022-02-04 14:00:44,732 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- stop_on_valid: False
+2022-02-04 14:00:44,732 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- db_file: /tmp/test.db
+2022-02-04 14:00:44,732 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_file: brute_log.txt
+2022-02-04 14:00:44,732 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_valid: True
+2022-02-04 14:00:44,732 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_invalid: True
+2022-02-04 14:00:44,732 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_general: True
+2022-02-04 14:00:44,732 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stdout: True
+2022-02-04 14:00:44,732 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stderr: False
+2022-02-04 14:00:44,737 - BruteLoops.BruteForcer - GENERAL - Beginning attack: 14:00:44 EST (22/02/04)
+2022-02-04 14:00:46,087 - BruteLoops.BruteForcer - INVALID - testuser@stuff.com:password123
+2022-02-04 14:00:46,307 - BruteLoops.BruteForcer - GENERAL - Sleeping until 14:17:30 EST (22/02/04)
+2022-02-04 14:00:46,308 - BruteLoops.BruteForcer - GENERAL - Attack finished
+2022-02-04 14:00:46,308 - BruteLoops.BruteForcer - GENERAL - Shutting attack down
+2022-02-04 14:00:46,318 - BruteLoops.BruteForcer - GENERAL - Closing/joining Processes
+2022-02-04 14:02:37,741 - BruteLoops.BruteForcer - GENERAL - Initializing 1 process(es)
+2022-02-04 14:02:37,741 - BruteLoops.BruteForcer - GENERAL - Logging attack configuration parameters
+2022-02-04 14:02:37,741 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- authentication_jitter: <Jitter(min="1s", max="1s")>
+2022-02-04 14:02:37,741 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_jitter: <Jitter(min="10m", max="30m")>
+2022-02-04 14:02:37,741 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_tries: 1
+2022-02-04 14:02:37,741 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- stop_on_valid: False
+2022-02-04 14:02:37,741 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- db_file: /tmp/test.db
+2022-02-04 14:02:37,741 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_file: brute_log.txt
+2022-02-04 14:02:37,741 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_valid: True
+2022-02-04 14:02:37,741 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_invalid: True
+2022-02-04 14:02:37,741 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_general: True
+2022-02-04 14:02:37,741 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stdout: True
+2022-02-04 14:02:37,741 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stderr: False
+2022-02-04 14:02:37,746 - BruteLoops.BruteForcer - GENERAL - Beginning attack: 14:02:37 EST (22/02/04)
+2022-02-04 14:02:37,908 - BruteLoops.BruteForcer - GENERAL - Unhandled exception occurred. Shutting down attack and returning control to the caller.
+2022-02-04 14:02:37,908 - BruteLoops.BruteForcer - GENERAL - Shutting attack down
+2022-02-04 14:02:37,924 - BruteLoops.BruteForcer - GENERAL - Closing/joining Processes
+2022-02-04 14:02:49,368 - BruteLoops.BruteForcer - GENERAL - Initializing 1 process(es)
+2022-02-04 14:02:49,368 - BruteLoops.BruteForcer - GENERAL - Logging attack configuration parameters
+2022-02-04 14:02:49,368 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- authentication_jitter: <Jitter(min="1s", max="1s")>
+2022-02-04 14:02:49,368 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_jitter: <Jitter(min="10m", max="30m")>
+2022-02-04 14:02:49,368 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_tries: 1
+2022-02-04 14:02:49,368 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- stop_on_valid: False
+2022-02-04 14:02:49,368 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- db_file: /tmp/test.db
+2022-02-04 14:02:49,368 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_file: brute_log.txt
+2022-02-04 14:02:49,368 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_valid: True
+2022-02-04 14:02:49,368 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_invalid: True
+2022-02-04 14:02:49,368 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_general: True
+2022-02-04 14:02:49,369 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stdout: True
+2022-02-04 14:02:49,369 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stderr: False
+2022-02-04 14:02:49,374 - BruteLoops.BruteForcer - GENERAL - Beginning attack: 14:02:49 EST (22/02/04)
+2022-02-04 14:02:49,420 - BruteLoops.BruteForcer - GENERAL - Sleeping until 14:12:59 EST (22/02/04)
+2022-02-04 14:02:56,276 - BruteLoops.BruteForcer - GENERAL - Unhandled exception occurred. Shutting down attack and returning control to the caller.
+2022-02-04 14:02:56,276 - BruteLoops.BruteForcer - GENERAL - Shutting attack down
+2022-02-04 14:02:56,297 - BruteLoops.BruteForcer - GENERAL - Closing/joining Processes
+2022-02-04 14:03:03,544 - BruteLoops.BruteForcer - GENERAL - Initializing 1 process(es)
+2022-02-04 14:03:03,544 - BruteLoops.BruteForcer - GENERAL - Logging attack configuration parameters
+2022-02-04 14:03:03,544 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- authentication_jitter: <Jitter(min="1s", max="1s")>
+2022-02-04 14:03:03,544 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_jitter: <Jitter(min="10m", max="30m")>
+2022-02-04 14:03:03,544 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_tries: 1
+2022-02-04 14:03:03,544 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- stop_on_valid: False
+2022-02-04 14:03:03,544 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- db_file: /tmp/test.db
+2022-02-04 14:03:03,544 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_file: brute_log.txt
+2022-02-04 14:03:03,544 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_valid: True
+2022-02-04 14:03:03,544 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_invalid: True
+2022-02-04 14:03:03,544 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_general: True
+2022-02-04 14:03:03,544 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stdout: True
+2022-02-04 14:03:03,544 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stderr: False
+2022-02-04 14:03:03,549 - BruteLoops.BruteForcer - GENERAL - Beginning attack: 14:03:03 EST (22/02/04)
+2022-02-04 14:03:04,897 - BruteLoops.BruteForcer - INVALID - testuser@stuff.com:password123
+2022-02-04 14:03:05,108 - BruteLoops.BruteForcer - GENERAL - Sleeping until 14:25:33 EST (22/02/04)
+2022-02-04 14:03:05,109 - BruteLoops.BruteForcer - GENERAL - Attack finished
+2022-02-04 14:03:05,109 - BruteLoops.BruteForcer - GENERAL - Shutting attack down
+2022-02-04 14:03:05,118 - BruteLoops.BruteForcer - GENERAL - Closing/joining Processes
+2022-02-04 14:05:18,568 - BruteLoops.BruteForcer - GENERAL - Initializing 1 process(es)
+2022-02-04 14:05:18,568 - BruteLoops.BruteForcer - GENERAL - Logging attack configuration parameters
+2022-02-04 14:05:18,568 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- authentication_jitter: <Jitter(min="1s", max="1s")>
+2022-02-04 14:05:18,568 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_jitter: <Jitter(min="10m", max="30m")>
+2022-02-04 14:05:18,568 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_tries: 1
+2022-02-04 14:05:18,568 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- stop_on_valid: False
+2022-02-04 14:05:18,568 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- db_file: /tmp/test.db
+2022-02-04 14:05:18,568 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_file: brute_log.txt
+2022-02-04 14:05:18,568 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_valid: True
+2022-02-04 14:05:18,568 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_invalid: True
+2022-02-04 14:05:18,568 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_general: True
+2022-02-04 14:05:18,568 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stdout: True
+2022-02-04 14:05:18,568 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stderr: False
+2022-02-04 14:05:18,573 - BruteLoops.BruteForcer - GENERAL - Beginning attack: 14:05:18 EST (22/02/04)
+2022-02-04 14:05:18,624 - BruteLoops.BruteForcer - GENERAL - Sleeping until 14:32:55 EST (22/02/04)
+2022-02-04 14:05:18,624 - BruteLoops.BruteForcer - GENERAL - Attack finished
+2022-02-04 14:05:18,624 - BruteLoops.BruteForcer - GENERAL - Shutting attack down
+2022-02-04 14:05:18,633 - BruteLoops.BruteForcer - GENERAL - Closing/joining Processes
+2022-02-04 14:05:24,230 - BruteLoops.BruteForcer - GENERAL - Initializing 1 process(es)
+2022-02-04 14:05:24,230 - BruteLoops.BruteForcer - GENERAL - Logging attack configuration parameters
+2022-02-04 14:05:24,230 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- authentication_jitter: <Jitter(min="1s", max="1s")>
+2022-02-04 14:05:24,230 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_jitter: <Jitter(min="10m", max="30m")>
+2022-02-04 14:05:24,230 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_tries: 1
+2022-02-04 14:05:24,230 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- stop_on_valid: False
+2022-02-04 14:05:24,230 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- db_file: /tmp/test.db
+2022-02-04 14:05:24,230 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_file: brute_log.txt
+2022-02-04 14:05:24,230 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_valid: True
+2022-02-04 14:05:24,230 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_invalid: True
+2022-02-04 14:05:24,230 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_general: True
+2022-02-04 14:05:24,231 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stdout: True
+2022-02-04 14:05:24,231 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stderr: False
+2022-02-04 14:05:24,235 - BruteLoops.BruteForcer - GENERAL - Beginning attack: 14:05:24 EST (22/02/04)
+2022-02-04 14:05:25,610 - BruteLoops.BruteForcer - INVALID - testuser@stuff.com:password123
+2022-02-04 14:05:25,822 - BruteLoops.BruteForcer - GENERAL - Sleeping until 14:33:10 EST (22/02/04)
+2022-02-04 14:05:25,823 - BruteLoops.BruteForcer - GENERAL - Attack finished
+2022-02-04 14:05:25,823 - BruteLoops.BruteForcer - GENERAL - Shutting attack down
+2022-02-04 14:05:25,833 - BruteLoops.BruteForcer - GENERAL - Closing/joining Processes
+2022-02-04 14:08:05,346 - BruteLoops.BruteForcer - GENERAL - Initializing 1 process(es)
+2022-02-04 14:08:05,346 - BruteLoops.BruteForcer - GENERAL - Logging attack configuration parameters
+2022-02-04 14:08:05,346 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- authentication_jitter: <Jitter(min="1s", max="1s")>
+2022-02-04 14:08:05,346 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_jitter: <Jitter(min="10m", max="30m")>
+2022-02-04 14:08:05,346 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_tries: 1
+2022-02-04 14:08:05,346 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- stop_on_valid: False
+2022-02-04 14:08:05,346 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- db_file: /tmp/test.db
+2022-02-04 14:08:05,346 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_file: brute_log.txt
+2022-02-04 14:08:05,346 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_valid: True
+2022-02-04 14:08:05,346 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_invalid: True
+2022-02-04 14:08:05,346 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_general: True
+2022-02-04 14:08:05,346 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stdout: True
+2022-02-04 14:08:05,346 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stderr: False
+2022-02-04 14:08:05,351 - BruteLoops.BruteForcer - GENERAL - Beginning attack: 14:08:05 EST (22/02/04)
+2022-02-04 14:08:05,514 - BruteLoops.BruteForcer - GENERAL - Unhandled exception occurred. Shutting down attack and returning control to the caller.
+2022-02-04 14:08:05,514 - BruteLoops.BruteForcer - GENERAL - Shutting attack down
+2022-02-04 14:08:05,530 - BruteLoops.BruteForcer - GENERAL - Closing/joining Processes
+2022-02-04 14:09:25,809 - BruteLoops.BruteForcer - GENERAL - Initializing 1 process(es)
+2022-02-04 14:09:25,809 - BruteLoops.BruteForcer - GENERAL - Logging attack configuration parameters
+2022-02-04 14:09:25,809 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- authentication_jitter: <Jitter(min="1s", max="1s")>
+2022-02-04 14:09:25,809 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_jitter: <Jitter(min="10m", max="30m")>
+2022-02-04 14:09:25,809 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_tries: 1
+2022-02-04 14:09:25,809 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- stop_on_valid: False
+2022-02-04 14:09:25,809 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- db_file: /tmp/test.db
+2022-02-04 14:09:25,809 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_file: brute_log.txt
+2022-02-04 14:09:25,809 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_valid: True
+2022-02-04 14:09:25,809 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_invalid: True
+2022-02-04 14:09:25,809 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_general: True
+2022-02-04 14:09:25,809 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stdout: True
+2022-02-04 14:09:25,809 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stderr: False
+2022-02-04 14:09:25,814 - BruteLoops.BruteForcer - GENERAL - Beginning attack: 14:09:25 EST (22/02/04)
+2022-02-04 14:09:25,971 - BruteLoops.BruteForcer - GENERAL - Unhandled exception occurred. Shutting down attack and returning control to the caller.
+2022-02-04 14:09:25,971 - BruteLoops.BruteForcer - GENERAL - Shutting attack down
+2022-02-04 14:09:25,982 - BruteLoops.BruteForcer - GENERAL - Closing/joining Processes
+2022-02-04 14:09:54,511 - BruteLoops.BruteForcer - GENERAL - Initializing 1 process(es)
+2022-02-04 14:09:54,511 - BruteLoops.BruteForcer - GENERAL - Logging attack configuration parameters
+2022-02-04 14:09:54,511 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- authentication_jitter: <Jitter(min="1s", max="1s")>
+2022-02-04 14:09:54,511 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_jitter: <Jitter(min="10m", max="30m")>
+2022-02-04 14:09:54,511 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_tries: 1
+2022-02-04 14:09:54,511 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- stop_on_valid: False
+2022-02-04 14:09:54,511 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- db_file: /tmp/test.db
+2022-02-04 14:09:54,511 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_file: brute_log.txt
+2022-02-04 14:09:54,511 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_valid: True
+2022-02-04 14:09:54,511 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_invalid: True
+2022-02-04 14:09:54,511 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_general: True
+2022-02-04 14:09:54,511 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stdout: True
+2022-02-04 14:09:54,511 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stderr: False
+2022-02-04 14:09:54,516 - BruteLoops.BruteForcer - GENERAL - Beginning attack: 14:09:54 EST (22/02/04)
+2022-02-04 14:09:55,983 - BruteLoops.BruteForcer - INVALID - testuser@stuff.com:password123
+2022-02-04 14:09:56,196 - BruteLoops.BruteForcer - GENERAL - Sleeping until 14:22:05 EST (22/02/04)
+2022-02-04 14:09:56,197 - BruteLoops.BruteForcer - GENERAL - Attack finished
+2022-02-04 14:09:56,197 - BruteLoops.BruteForcer - GENERAL - Shutting attack down
+2022-02-04 14:09:56,208 - BruteLoops.BruteForcer - GENERAL - Closing/joining Processes
+2022-02-04 14:16:33,523 - BruteLoops.BruteForcer - GENERAL - Initializing 1 process(es)
+2022-02-04 14:16:33,523 - BruteLoops.BruteForcer - GENERAL - Logging attack configuration parameters
+2022-02-04 14:16:33,523 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- authentication_jitter: <Jitter(min="1s", max="1s")>
+2022-02-04 14:16:33,523 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_jitter: <Jitter(min="10m", max="30m")>
+2022-02-04 14:16:33,523 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_tries: 1
+2022-02-04 14:16:33,523 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- stop_on_valid: False
+2022-02-04 14:16:33,523 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- db_file: /tmp/test.db
+2022-02-04 14:16:33,523 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_file: brute_log.txt
+2022-02-04 14:16:33,523 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_valid: True
+2022-02-04 14:16:33,523 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_invalid: True
+2022-02-04 14:16:33,523 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_general: True
+2022-02-04 14:16:33,523 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stdout: True
+2022-02-04 14:16:33,523 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stderr: False
+2022-02-04 14:16:33,528 - BruteLoops.BruteForcer - GENERAL - Beginning attack: 14:16:33 EST (22/02/04)
+2022-02-04 14:16:33,692 - BruteLoops.BruteForcer - GENERAL - Unhandled exception occurred. Shutting down attack and returning control to the caller.
+2022-02-04 14:16:33,692 - BruteLoops.BruteForcer - GENERAL - Shutting attack down
+2022-02-04 14:16:33,703 - BruteLoops.BruteForcer - GENERAL - Closing/joining Processes
+2022-02-04 14:17:00,575 - BruteLoops.BruteForcer - GENERAL - Initializing 1 process(es)
+2022-02-04 14:17:00,575 - BruteLoops.BruteForcer - GENERAL - Logging attack configuration parameters
+2022-02-04 14:17:00,575 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- authentication_jitter: <Jitter(min="1s", max="1s")>
+2022-02-04 14:17:00,575 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_jitter: <Jitter(min="10m", max="30m")>
+2022-02-04 14:17:00,575 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_tries: 1
+2022-02-04 14:17:00,575 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- stop_on_valid: False
+2022-02-04 14:17:00,575 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- db_file: /tmp/test.db
+2022-02-04 14:17:00,575 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_file: brute_log.txt
+2022-02-04 14:17:00,575 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_valid: True
+2022-02-04 14:17:00,575 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_invalid: True
+2022-02-04 14:17:00,575 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_general: True
+2022-02-04 14:17:00,575 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stdout: True
+2022-02-04 14:17:00,575 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stderr: False
+2022-02-04 14:17:00,580 - BruteLoops.BruteForcer - GENERAL - Beginning attack: 14:17:00 EST (22/02/04)
+2022-02-04 14:17:02,137 - BruteLoops.BruteForcer - INVALID - testuser@stuff.com:password123
+2022-02-04 14:17:02,349 - BruteLoops.BruteForcer - GENERAL - Sleeping until 14:32:11 EST (22/02/04)
+2022-02-04 14:17:02,350 - BruteLoops.BruteForcer - GENERAL - Attack finished
+2022-02-04 14:17:02,350 - BruteLoops.BruteForcer - GENERAL - Shutting attack down
+2022-02-04 14:17:02,360 - BruteLoops.BruteForcer - GENERAL - Closing/joining Processes
+2022-02-04 14:17:17,150 - BruteLoops.BruteForcer - GENERAL - Initializing 1 process(es)
+2022-02-04 14:17:17,151 - BruteLoops.BruteForcer - GENERAL - Logging attack configuration parameters
+2022-02-04 14:17:17,151 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- authentication_jitter: <Jitter(min="1s", max="1s")>
+2022-02-04 14:17:17,151 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_jitter: <Jitter(min="10m", max="30m")>
+2022-02-04 14:17:17,151 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_tries: 1
+2022-02-04 14:17:17,151 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- stop_on_valid: False
+2022-02-04 14:17:17,151 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- db_file: /tmp/test.db
+2022-02-04 14:17:17,151 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_file: brute_log.txt
+2022-02-04 14:17:17,151 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_valid: True
+2022-02-04 14:17:17,151 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_invalid: True
+2022-02-04 14:17:17,151 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_general: True
+2022-02-04 14:17:17,151 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stdout: True
+2022-02-04 14:17:17,151 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stderr: False
+2022-02-04 14:17:17,156 - BruteLoops.BruteForcer - GENERAL - Beginning attack: 14:17:17 EST (22/02/04)
+2022-02-04 14:17:18,626 - BruteLoops.BruteForcer - INVALID - testuser@stuff.com:password123
+2022-02-04 14:17:18,838 - BruteLoops.BruteForcer - GENERAL - Sleeping until 14:35:54 EST (22/02/04)
+2022-02-04 14:17:18,839 - BruteLoops.BruteForcer - GENERAL - Attack finished
+2022-02-04 14:17:18,839 - BruteLoops.BruteForcer - GENERAL - Shutting attack down
+2022-02-04 14:17:18,850 - BruteLoops.BruteForcer - GENERAL - Closing/joining Processes
+2022-02-04 14:17:27,788 - BruteLoops.BruteForcer - GENERAL - Initializing 1 process(es)
+2022-02-04 14:17:27,788 - BruteLoops.BruteForcer - GENERAL - Logging attack configuration parameters
+2022-02-04 14:17:27,788 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- authentication_jitter: <Jitter(min="1s", max="1s")>
+2022-02-04 14:17:27,788 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_jitter: <Jitter(min="10m", max="30m")>
+2022-02-04 14:17:27,788 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_tries: 1
+2022-02-04 14:17:27,788 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- stop_on_valid: False
+2022-02-04 14:17:27,788 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- db_file: /tmp/test.db
+2022-02-04 14:17:27,788 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_file: brute_log.txt
+2022-02-04 14:17:27,788 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_valid: True
+2022-02-04 14:17:27,788 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_invalid: True
+2022-02-04 14:17:27,788 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_general: True
+2022-02-04 14:17:27,788 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stdout: True
+2022-02-04 14:17:27,788 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stderr: False
+2022-02-04 14:17:27,793 - BruteLoops.BruteForcer - GENERAL - Beginning attack: 14:17:27 EST (22/02/04)
+2022-02-04 14:17:29,273 - BruteLoops.BruteForcer - INVALID - testuser@stuff.com:password123
+2022-02-04 14:17:29,492 - BruteLoops.BruteForcer - GENERAL - Sleeping until 14:32:33 EST (22/02/04)
+2022-02-04 14:17:29,492 - BruteLoops.BruteForcer - GENERAL - Attack finished
+2022-02-04 14:17:29,493 - BruteLoops.BruteForcer - GENERAL - Shutting attack down
+2022-02-04 14:17:29,504 - BruteLoops.BruteForcer - GENERAL - Closing/joining Processes
+2022-02-04 14:17:48,804 - BruteLoops.BruteForcer - GENERAL - Initializing 1 process(es)
+2022-02-04 14:17:48,804 - BruteLoops.BruteForcer - GENERAL - Logging attack configuration parameters
+2022-02-04 14:17:48,804 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- authentication_jitter: <Jitter(min="1s", max="1s")>
+2022-02-04 14:17:48,804 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_jitter: <Jitter(min="10m", max="30m")>
+2022-02-04 14:17:48,804 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_tries: 1
+2022-02-04 14:17:48,804 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- stop_on_valid: False
+2022-02-04 14:17:48,804 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- db_file: /tmp/test.db
+2022-02-04 14:17:48,804 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_file: brute_log.txt
+2022-02-04 14:17:48,805 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_valid: True
+2022-02-04 14:17:48,805 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_invalid: True
+2022-02-04 14:17:48,805 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_general: True
+2022-02-04 14:17:48,805 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stdout: True
+2022-02-04 14:17:48,805 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stderr: False
+2022-02-04 14:17:48,810 - BruteLoops.BruteForcer - GENERAL - Beginning attack: 14:17:48 EST (22/02/04)
+2022-02-04 14:17:50,265 - BruteLoops.BruteForcer - INVALID - testuser@stuff.com:password123
+2022-02-04 14:17:50,478 - BruteLoops.BruteForcer - GENERAL - Sleeping until 14:27:54 EST (22/02/04)
+2022-02-04 14:17:50,479 - BruteLoops.BruteForcer - GENERAL - Attack finished
+2022-02-04 14:17:50,479 - BruteLoops.BruteForcer - GENERAL - Shutting attack down
+2022-02-04 14:17:50,490 - BruteLoops.BruteForcer - GENERAL - Closing/joining Processes
+2022-02-04 14:18:20,138 - BruteLoops.BruteForcer - GENERAL - Initializing 1 process(es)
+2022-02-04 14:18:20,138 - BruteLoops.BruteForcer - GENERAL - Logging attack configuration parameters
+2022-02-04 14:18:20,138 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- authentication_jitter: <Jitter(min="1s", max="1s")>
+2022-02-04 14:18:20,138 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_jitter: <Jitter(min="10m", max="30m")>
+2022-02-04 14:18:20,138 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_tries: 1
+2022-02-04 14:18:20,138 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- stop_on_valid: False
+2022-02-04 14:18:20,138 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- db_file: /tmp/test.db
+2022-02-04 14:18:20,138 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_file: brute_log.txt
+2022-02-04 14:18:20,138 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_valid: True
+2022-02-04 14:18:20,139 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_invalid: True
+2022-02-04 14:18:20,139 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_general: True
+2022-02-04 14:18:20,139 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stdout: True
+2022-02-04 14:18:20,139 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stderr: False
+2022-02-04 14:18:20,143 - BruteLoops.BruteForcer - GENERAL - Beginning attack: 14:18:20 EST (22/02/04)
+2022-02-04 14:18:21,501 - BruteLoops.BruteForcer - INVALID - testuser@stuff.com:password123
+2022-02-04 14:18:21,713 - BruteLoops.BruteForcer - GENERAL - Sleeping until 14:29:38 EST (22/02/04)
+2022-02-04 14:18:21,714 - BruteLoops.BruteForcer - GENERAL - Attack finished
+2022-02-04 14:18:21,714 - BruteLoops.BruteForcer - GENERAL - Shutting attack down
+2022-02-04 14:18:21,724 - BruteLoops.BruteForcer - GENERAL - Closing/joining Processes
+2022-02-04 14:19:08,814 - BruteLoops.BruteForcer - GENERAL - Initializing 1 process(es)
+2022-02-04 14:19:08,814 - BruteLoops.BruteForcer - GENERAL - Logging attack configuration parameters
+2022-02-04 14:19:08,814 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- authentication_jitter: <Jitter(min="1s", max="1s")>
+2022-02-04 14:19:08,814 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_jitter: <Jitter(min="10m", max="30m")>
+2022-02-04 14:19:08,814 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_tries: 1
+2022-02-04 14:19:08,814 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- stop_on_valid: False
+2022-02-04 14:19:08,814 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- db_file: /tmp/test.db
+2022-02-04 14:19:08,814 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_file: brute_log.txt
+2022-02-04 14:19:08,814 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_valid: True
+2022-02-04 14:19:08,815 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_invalid: True
+2022-02-04 14:19:08,815 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_general: True
+2022-02-04 14:19:08,815 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stdout: True
+2022-02-04 14:19:08,815 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stderr: False
+2022-02-04 14:19:08,819 - BruteLoops.BruteForcer - GENERAL - Beginning attack: 14:19:08 EST (22/02/04)
+2022-02-04 14:19:10,174 - BruteLoops.BruteForcer - INVALID - testuser@stuff.com:password123
+2022-02-04 14:19:10,384 - BruteLoops.BruteForcer - GENERAL - Sleeping until 14:41:46 EST (22/02/04)
+2022-02-04 14:19:10,385 - BruteLoops.BruteForcer - GENERAL - Attack finished
+2022-02-04 14:19:10,385 - BruteLoops.BruteForcer - GENERAL - Shutting attack down
+2022-02-04 14:19:10,393 - BruteLoops.BruteForcer - GENERAL - Closing/joining Processes
+2022-02-04 19:24:18,623 - BruteLoops.BruteForcer - GENERAL - Initializing 1 process(es)
+2022-02-04 19:24:18,624 - BruteLoops.BruteForcer - GENERAL - Logging attack configuration parameters
+2022-02-04 19:24:18,624 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- authentication_jitter: <Jitter(min="1s", max="1s")>
+2022-02-04 19:24:18,624 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_jitter: <Jitter(min="10m", max="30m")>
+2022-02-04 19:24:18,624 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_tries: 1
+2022-02-04 19:24:18,624 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- stop_on_valid: False
+2022-02-04 19:24:18,624 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- db_file: /tmp/test.db
+2022-02-04 19:24:18,624 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_file: brute_log.txt
+2022-02-04 19:24:18,624 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_valid: True
+2022-02-04 19:24:18,624 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_invalid: True
+2022-02-04 19:24:18,624 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_general: True
+2022-02-04 19:24:18,624 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stdout: True
+2022-02-04 19:24:18,624 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stderr: False
+2022-02-04 19:24:18,657 - BruteLoops.BruteForcer - GENERAL - Beginning attack: 19:24:18 UTC (22/02/04)
+2022-02-04 19:24:19,893 - BruteLoops.BruteForcer - INVALID - testuser@stuff.com:password123
+2022-02-04 19:24:20,104 - BruteLoops.BruteForcer - GENERAL - Sleeping until 19:49:05 UTC (22/02/04)
+2022-02-04 19:24:20,104 - BruteLoops.BruteForcer - GENERAL - Attack finished
+2022-02-04 19:24:20,104 - BruteLoops.BruteForcer - GENERAL - Shutting attack down
+2022-02-04 19:24:20,121 - BruteLoops.BruteForcer - GENERAL - Closing/joining Processes
+2022-02-04 19:24:31,033 - BruteLoops.BruteForcer - GENERAL - Initializing 1 process(es)
+2022-02-04 19:24:31,033 - BruteLoops.BruteForcer - GENERAL - Logging attack configuration parameters
+2022-02-04 19:24:31,033 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- authentication_jitter: <Jitter(min="1s", max="1s")>
+2022-02-04 19:24:31,033 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_jitter: <Jitter(min="10m", max="30m")>
+2022-02-04 19:24:31,033 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_tries: 1
+2022-02-04 19:24:31,033 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- stop_on_valid: False
+2022-02-04 19:24:31,033 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- db_file: /tmp/test.db
+2022-02-04 19:24:31,034 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_file: brute_log.txt
+2022-02-04 19:24:31,034 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_valid: True
+2022-02-04 19:24:31,034 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_invalid: True
+2022-02-04 19:24:31,034 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_general: True
+2022-02-04 19:24:31,034 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stdout: True
+2022-02-04 19:24:31,034 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stderr: False
+2022-02-04 19:24:31,050 - BruteLoops.BruteForcer - GENERAL - Beginning attack: 19:24:31 UTC (22/02/04)
+2022-02-04 19:24:32,387 - BruteLoops.BruteForcer - INVALID - testuser@stuff.com:password123
+2022-02-04 19:24:32,599 - BruteLoops.BruteForcer - GENERAL - Sleeping until 19:46:23 UTC (22/02/04)
+2022-02-04 19:24:32,599 - BruteLoops.BruteForcer - GENERAL - Attack finished
+2022-02-04 19:24:32,599 - BruteLoops.BruteForcer - GENERAL - Shutting attack down
+2022-02-04 19:24:32,610 - BruteLoops.BruteForcer - GENERAL - Closing/joining Processes
+2022-02-04 19:25:31,869 - BruteLoops.BruteForcer - GENERAL - Initializing 1 process(es)
+2022-02-04 19:25:31,869 - BruteLoops.BruteForcer - GENERAL - Logging attack configuration parameters
+2022-02-04 19:25:31,869 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- authentication_jitter: <Jitter(min="1s", max="1s")>
+2022-02-04 19:25:31,869 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_jitter: <Jitter(min="10m", max="30m")>
+2022-02-04 19:25:31,869 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_tries: 1
+2022-02-04 19:25:31,869 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- stop_on_valid: False
+2022-02-04 19:25:31,870 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- db_file: /tmp/test.db
+2022-02-04 19:25:31,870 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_file: brute_log.txt
+2022-02-04 19:25:31,870 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_valid: True
+2022-02-04 19:25:31,870 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_invalid: True
+2022-02-04 19:25:31,870 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_general: True
+2022-02-04 19:25:31,870 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stdout: True
+2022-02-04 19:25:31,870 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stderr: False
+2022-02-04 19:25:31,886 - BruteLoops.BruteForcer - GENERAL - Beginning attack: 19:25:31 UTC (22/02/04)
+2022-02-04 19:25:33,324 - BruteLoops.BruteForcer - INVALID - testuser@stuff.com:password123
+2022-02-04 19:25:33,536 - BruteLoops.BruteForcer - GENERAL - Sleeping until 19:52:42 UTC (22/02/04)
+2022-02-04 19:25:33,537 - BruteLoops.BruteForcer - GENERAL - Attack finished
+2022-02-04 19:25:33,537 - BruteLoops.BruteForcer - GENERAL - Shutting attack down
+2022-02-04 19:25:33,556 - BruteLoops.BruteForcer - GENERAL - Closing/joining Processes
+2022-02-04 19:26:20,752 - BruteLoops.BruteForcer - GENERAL - Initializing 1 process(es)
+2022-02-04 19:26:20,752 - BruteLoops.BruteForcer - GENERAL - Logging attack configuration parameters
+2022-02-04 19:26:20,752 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- authentication_jitter: <Jitter(min="1s", max="1s")>
+2022-02-04 19:26:20,752 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_jitter: <Jitter(min="10m", max="30m")>
+2022-02-04 19:26:20,752 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_tries: 1
+2022-02-04 19:26:20,752 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- stop_on_valid: False
+2022-02-04 19:26:20,752 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- db_file: /tmp/test.db
+2022-02-04 19:26:20,752 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_file: brute_log.txt
+2022-02-04 19:26:20,752 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_valid: True
+2022-02-04 19:26:20,752 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_invalid: True
+2022-02-04 19:26:20,752 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_general: True
+2022-02-04 19:26:20,752 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stdout: True
+2022-02-04 19:26:20,752 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stderr: False
+2022-02-04 19:26:20,768 - BruteLoops.BruteForcer - GENERAL - Beginning attack: 19:26:20 UTC (22/02/04)
+2022-02-04 19:26:22,205 - BruteLoops.BruteForcer - INVALID - testuser@stuff.com:password123
+2022-02-04 19:26:22,418 - BruteLoops.BruteForcer - GENERAL - Sleeping until 19:53:02 UTC (22/02/04)
+2022-02-04 19:26:22,419 - BruteLoops.BruteForcer - GENERAL - Attack finished
+2022-02-04 19:26:22,419 - BruteLoops.BruteForcer - GENERAL - Shutting attack down
+2022-02-04 19:26:22,430 - BruteLoops.BruteForcer - GENERAL - Closing/joining Processes
+2022-02-04 19:26:28,450 - BruteLoops.BruteForcer - GENERAL - Initializing 1 process(es)
+2022-02-04 19:26:28,450 - BruteLoops.BruteForcer - GENERAL - Logging attack configuration parameters
+2022-02-04 19:26:28,450 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- authentication_jitter: <Jitter(min="1s", max="1s")>
+2022-02-04 19:26:28,450 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_jitter: <Jitter(min="10m", max="30m")>
+2022-02-04 19:26:28,450 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_tries: 1
+2022-02-04 19:26:28,451 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- stop_on_valid: False
+2022-02-04 19:26:28,451 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- db_file: /tmp/test.db
+2022-02-04 19:26:28,451 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_file: brute_log.txt
+2022-02-04 19:26:28,451 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_valid: True
+2022-02-04 19:26:28,451 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_invalid: True
+2022-02-04 19:26:28,451 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_general: True
+2022-02-04 19:26:28,451 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stdout: True
+2022-02-04 19:26:28,451 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stderr: False
+2022-02-04 19:26:28,468 - BruteLoops.BruteForcer - GENERAL - Beginning attack: 19:26:28 UTC (22/02/04)
+2022-02-04 19:26:30,007 - BruteLoops.BruteForcer - INVALID - testuser@stuff.com:password123
+2022-02-04 19:26:30,219 - BruteLoops.BruteForcer - GENERAL - Sleeping until 19:49:29 UTC (22/02/04)
+2022-02-04 19:26:30,220 - BruteLoops.BruteForcer - GENERAL - Attack finished
+2022-02-04 19:26:30,220 - BruteLoops.BruteForcer - GENERAL - Shutting attack down
+2022-02-04 19:26:30,249 - BruteLoops.BruteForcer - GENERAL - Closing/joining Processes
+2022-02-04 19:47:47,794 - BruteLoops.BruteForcer - GENERAL - Initializing 1 process(es)
+2022-02-04 19:47:47,794 - BruteLoops.BruteForcer - GENERAL - Logging attack configuration parameters
+2022-02-04 19:47:47,794 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- authentication_jitter: <Jitter(min="1s", max="1s")>
+2022-02-04 19:47:47,794 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_jitter: <Jitter(min="10m", max="30m")>
+2022-02-04 19:47:47,794 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_tries: 1
+2022-02-04 19:47:47,794 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- stop_on_valid: False
+2022-02-04 19:47:47,794 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- db_file: /tmp/test.db
+2022-02-04 19:47:47,794 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_file: brute_log.txt
+2022-02-04 19:47:47,794 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_valid: True
+2022-02-04 19:47:47,794 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_invalid: True
+2022-02-04 19:47:47,794 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_general: True
+2022-02-04 19:47:47,794 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stdout: True
+2022-02-04 19:47:47,794 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stderr: False
+2022-02-04 19:47:47,826 - BruteLoops.BruteForcer - GENERAL - Beginning attack: 19:47:47 UTC (22/02/04)
+2022-02-04 19:47:47,968 - BruteLoops.BruteForcer - GENERAL - Unhandled exception occurred. Shutting down attack and returning control to the caller.
+2022-02-04 19:47:47,968 - BruteLoops.BruteForcer - GENERAL - Shutting attack down
+2022-02-04 19:47:47,994 - BruteLoops.BruteForcer - GENERAL - Closing/joining Processes
+2022-02-04 19:48:08,656 - BruteLoops.BruteForcer - GENERAL - Initializing 1 process(es)
+2022-02-04 19:48:08,656 - BruteLoops.BruteForcer - GENERAL - Logging attack configuration parameters
+2022-02-04 19:48:08,656 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- authentication_jitter: <Jitter(min="1s", max="1s")>
+2022-02-04 19:48:08,656 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_jitter: <Jitter(min="10m", max="30m")>
+2022-02-04 19:48:08,656 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_tries: 1
+2022-02-04 19:48:08,657 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- stop_on_valid: False
+2022-02-04 19:48:08,657 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- db_file: /tmp/test.db
+2022-02-04 19:48:08,657 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_file: brute_log.txt
+2022-02-04 19:48:08,657 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_valid: True
+2022-02-04 19:48:08,657 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_invalid: True
+2022-02-04 19:48:08,657 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_general: True
+2022-02-04 19:48:08,657 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stdout: True
+2022-02-04 19:48:08,657 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stderr: False
+2022-02-04 19:48:08,673 - BruteLoops.BruteForcer - GENERAL - Beginning attack: 19:48:08 UTC (22/02/04)
+2022-02-04 19:48:10,118 - BruteLoops.BruteForcer - INVALID - testuser@stuff.com:password123
+2022-02-04 19:48:10,338 - BruteLoops.BruteForcer - GENERAL - Sleeping until 20:17:13 UTC (22/02/04)
+2022-02-04 19:48:10,339 - BruteLoops.BruteForcer - GENERAL - Attack finished
+2022-02-04 19:48:10,339 - BruteLoops.BruteForcer - GENERAL - Shutting attack down
+2022-02-04 19:48:10,349 - BruteLoops.BruteForcer - GENERAL - Closing/joining Processes
+2022-02-04 19:48:46,445 - BruteLoops.BruteForcer - GENERAL - Initializing 1 process(es)
+2022-02-04 19:48:46,446 - BruteLoops.BruteForcer - GENERAL - Logging attack configuration parameters
+2022-02-04 19:48:46,446 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- authentication_jitter: <Jitter(min="1s", max="1s")>
+2022-02-04 19:48:46,446 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_jitter: <Jitter(min="10m", max="30m")>
+2022-02-04 19:48:46,446 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_tries: 1
+2022-02-04 19:48:46,446 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- stop_on_valid: False
+2022-02-04 19:48:46,446 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- db_file: /tmp/test.db
+2022-02-04 19:48:46,446 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_file: brute_log.txt
+2022-02-04 19:48:46,446 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_valid: True
+2022-02-04 19:48:46,446 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_invalid: True
+2022-02-04 19:48:46,446 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_general: True
+2022-02-04 19:48:46,446 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stdout: True
+2022-02-04 19:48:46,446 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stderr: False
+2022-02-04 19:48:46,462 - BruteLoops.BruteForcer - GENERAL - Beginning attack: 19:48:46 UTC (22/02/04)
+2022-02-04 19:48:47,918 - BruteLoops.BruteForcer - INVALID - testuser@stuff.com:password123
+2022-02-04 19:48:48,129 - BruteLoops.BruteForcer - GENERAL - Sleeping until 20:09:28 UTC (22/02/04)
+2022-02-04 19:48:48,130 - BruteLoops.BruteForcer - GENERAL - Attack finished
+2022-02-04 19:48:48,130 - BruteLoops.BruteForcer - GENERAL - Shutting attack down
+2022-02-04 19:48:48,140 - BruteLoops.BruteForcer - GENERAL - Closing/joining Processes
+2022-02-04 19:48:57,619 - BruteLoops.BruteForcer - GENERAL - Initializing 1 process(es)
+2022-02-04 19:48:57,619 - BruteLoops.BruteForcer - GENERAL - Logging attack configuration parameters
+2022-02-04 19:48:57,619 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- authentication_jitter: <Jitter(min="1s", max="1s")>
+2022-02-04 19:48:57,619 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_jitter: <Jitter(min="10m", max="30m")>
+2022-02-04 19:48:57,619 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_tries: 1
+2022-02-04 19:48:57,619 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- stop_on_valid: False
+2022-02-04 19:48:57,619 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- db_file: /tmp/test.db
+2022-02-04 19:48:57,619 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_file: brute_log.txt
+2022-02-04 19:48:57,619 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_valid: True
+2022-02-04 19:48:57,619 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_invalid: True
+2022-02-04 19:48:57,619 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_general: True
+2022-02-04 19:48:57,619 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stdout: True
+2022-02-04 19:48:57,619 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stderr: False
+2022-02-04 19:48:57,636 - BruteLoops.BruteForcer - GENERAL - Beginning attack: 19:48:57 UTC (22/02/04)
+2022-02-04 19:48:59,074 - BruteLoops.BruteForcer - INVALID - testuser@stuff.com:password123
+2022-02-04 19:48:59,287 - BruteLoops.BruteForcer - GENERAL - Sleeping until 20:13:51 UTC (22/02/04)
+2022-02-04 19:48:59,287 - BruteLoops.BruteForcer - GENERAL - Attack finished
+2022-02-04 19:48:59,287 - BruteLoops.BruteForcer - GENERAL - Shutting attack down
+2022-02-04 19:48:59,298 - BruteLoops.BruteForcer - GENERAL - Closing/joining Processes
+2022-02-04 20:14:10,499 - BruteLoops.BruteForcer - GENERAL - Initializing 1 process(es)
+2022-02-04 20:14:10,500 - BruteLoops.BruteForcer - GENERAL - Logging attack configuration parameters
+2022-02-04 20:14:10,500 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- authentication_jitter: <Jitter(min="1s", max="1s")>
+2022-02-04 20:14:10,500 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_jitter: <Jitter(min="10m", max="30m")>
+2022-02-04 20:14:10,500 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- max_auth_tries: 1
+2022-02-04 20:14:10,500 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- stop_on_valid: False
+2022-02-04 20:14:10,500 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- db_file: /tmp/test.db
+2022-02-04 20:14:10,500 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_file: brute_log.txt
+2022-02-04 20:14:10,500 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_valid: True
+2022-02-04 20:14:10,500 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_invalid: True
+2022-02-04 20:14:10,500 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_general: True
+2022-02-04 20:14:10,500 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stdout: True
+2022-02-04 20:14:10,500 - BruteLoops.BruteForcer - GENERAL - Config Parameter -- log_stderr: False
+2022-02-04 20:14:10,506 - BruteLoops.BruteForcer - GENERAL - Beginning attack: 20:14:10 UTC (22/02/04)
+2022-02-04 20:14:12,064 - BruteLoops.BruteForcer - INVALID - testuser@stuff.com:password123
+2022-02-04 20:14:12,276 - BruteLoops.BruteForcer - GENERAL - Sleeping until 20:33:25 UTC (22/02/04)
+2022-02-04 20:14:12,277 - BruteLoops.BruteForcer - GENERAL - Attack finished
+2022-02-04 20:14:12,277 - BruteLoops.BruteForcer - GENERAL - Shutting attack down
+2022-02-04 20:14:12,287 - BruteLoops.BruteForcer - GENERAL - Closing/joining Processes
