@@ -282,7 +282,7 @@ class BruteForcer:
             elif not actionable and credential.username.actionable:
                 credential.username.actionable = False
                 self.logger.invalid(
-                    f'INVALID USERNAME: {credential.username.value}')
+                    f'INVALID USERNAME - {credential.username.value}')
     
             # ===================
             # WRITE MODULE EVENTS
