@@ -58,11 +58,13 @@ class BruteForcer:
         self.presults = []
         self.pool     = None
         self.attack   = None
-        self.logger   = logging.getLogger('BruteLoops.BruteForcer',
-            config.log_level, config.log_valid, config.log_invalid,
-            config.log_general, config.log_file, config.log_stdout,
-            config.log_stderr)
-        
+        self.logger   = logging.getLogger(
+            name='BruteLoops.BruteForcer',
+            log_level=config.log_level,
+            log_file=config.log_file,
+            log_stdout=config.log_stdout,
+            log_stderr=config.log_stderr)
+
         self.logger.general(f'Initializing {config.process_count} process(es)')
         
         # ===================================
@@ -78,9 +80,7 @@ class BruteForcer:
                 'stop_on_valid',
                 'db_file',
                 'log_file',
-                'log_valid',
-                'log_invalid',
-                'log_general',
+                'log_level',
                 'log_stdout',
                 'log_stderr',
                 'randomize_usernames'
@@ -167,11 +167,13 @@ class BruteForcer:
         tuples/lists conforming to the following format:
 
         ```
-            output_list = [
-               (<OUTCOME>,<USERNAME>,<PASSWORD>,<ACTIONABLE>),
-               (<OUTCOME>,<USERNAME>,<PASSWORD>,<ACTIONABLE>)
-            ]
-
+        outputs = [{
+                'outcome': int,
+                'username': str,
+                'password': str,
+                'actionable': bool,
+                'events': [str]
+            }]
         ```
 
         In the structure below:
@@ -181,15 +183,6 @@ class BruteForcer:
         - `USERNAME` - string value of the username
         - `PASSWORD` - string value of the password
         - `ACTIONABLE` - Boolean value determining if the record should be disabled.
-
-        ## NEW OUTPUTS ##
-        {
-            'outcome': int,
-            'username': str,
-            'password': str,
-            'actionable': bool,
-            'events': [str]
-        }
         '''
 
         # ==================================================
@@ -259,10 +252,8 @@ class BruteForcer:
             # Guess failed for some reason
             elif outcome == -1:
 
-                self.logger.module(
-                    'Failed to check credentials. Will retry. {}:{}'.format(
-                        credential.username.value,
-                        credential.password.value))
+                self.logger.general(
+                    f'Failed to guess credential. - {cred}')
 
             # Credentials are no good
             else: 
@@ -280,6 +271,8 @@ class BruteForcer:
             if actionable and not credential.username.actionable:
                 credential.username.actionable = True
             elif not actionable and credential.username.actionable:
+                self.logger.invalid_username(
+                    f'Disabling invalid username - {cred}')
                 credential.username.actionable = False
     
             # ===================

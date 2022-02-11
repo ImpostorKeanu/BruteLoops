@@ -68,9 +68,7 @@ class Config:
             max_auth_tries=1,               # JITTER ONLY AFTER A THRESHOLD
             stop_on_valid=False,            # STOP AFTER A SINGLE CREDENTIAL IS RECOVERED
             db_file=None,                   # SQLITE DATABASE FILE
-            log_valid=False,                # ALERT TO STDOUT ON VALID CREDENTIALS
-            log_invalid=False,              # ALERT TO STDOUT ON INVALID CREDENTIALS
-            log_general=False,              # GENERAL BRUTEFORCE ALERTS
+            log_level=False,                # LOGGING LEVEL
             log_file=False,                 # FILE TO RECEIVE ADDITIONAL LOGS
             log_stdout=False,               # LOG EVENTS TO STDOUT
             log_stderr=False,               # LOG EVENTS TO STDERR
@@ -84,16 +82,15 @@ class Config:
         self.max_auth_tries             = max_auth_tries
         self.stop_on_valid              = stop_on_valid
         self.db_file                    = db_file
-        self.log_valid                  = log_valid
-        self.log_invalid                = log_invalid
-        self.log_general                = log_general
+        self.log_level                  = log_level
         self.log_file                   = log_file
         self.log_stdout                 = log_stdout
         self.log_stderr                 = log_stderr
         self.randomize_usernames        = randomize_usernames
         self.exception_handlers         = exception_handlers if \
-                exception_handlers else {}
-        self.log_level                  = 90
+            exception_handlers else {}
+        self.log_level                  = 90 if \
+            not self.log_level else self.log_level
         self.validated                  = False
 
     def validate(self):

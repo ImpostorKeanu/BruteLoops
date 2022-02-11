@@ -25,7 +25,6 @@ specified for "Threshold Jitter". Default: %(default)s
 
 STOP_ON_VALID = \
 '''Stop the brute force attack when valid credentials are recovered.
-Default: %(default)s
 '''
 
 PRIORITY_USERNAMES = \
@@ -138,7 +137,11 @@ force attack. Default: %(default)s
 '''
 
 LOG_STDOUT = \
-'''Enable/disable logging to stdout. Default: %(default)s
+'''Enable/disable logging to stdout.
+'''
+
+LOG_LEVEL = \
+'''Determines the logging level. Default: %(default)s
 '''
 
 op = output_parser = argparse.ArgumentParser(add_help=False)
@@ -152,42 +155,59 @@ og.add_argument('--log-stdout',
         default=True,
         help=LOG_STDOUT,
         dest='log_stdout')
+og.add_argument('--log-level',
+        choices=('general',
+            'valid-credentials',
+            'invalid-credentials',
+            'invalid-usernames'),
+        default='valid-credentials',
+        help=LOG_LEVEL)       
 
 # ==============
 # LOGGING LEVELS
 # ==============
 
-LOG_GENERAL = \
-'''Enable/disable logging of general events. Default: %(default)s
-'''
+#LOG_GENERAL = \
+#'''Manage logging of general events. Default: %(default)s
+#'''
+#
+#LOG_VALID = \
+#'''Manage logging of valid credentials. Default: %(default)s.
+#'''
+#
+#LOG_INVALID = \
+#'''Manage logging of invalid credentials. Default: %(default)s
+#'''
+#
+#LOG_INVALID_USERNAME = \
+#'''Manage logging of invalid usernames. Default: %(default)s
+#'''
+#
+#lp = logging_parser = argparse.ArgumentParser(add_help=False)
+#lg = logging_group = lp.add_argument_group('Logging Parameters',
+#        'Options related to logging')
+#
+#lg.add_argument('--log-general',
+#        action=argparse.BooleanOptionalAction,
+#        default=True,
+#        help=LOG_GENERAL,
+#        dest='log_general')
+#lg.add_argument('--log-valid',
+#        action=argparse.BooleanOptionalAction,
+#        default=True,
+#        help=LOG_VALID,
+#        dest='log_valid')
+#lg.add_argument('--log-invalid',
+#        action=argparse.BooleanOptionalAction,
+#        default=True,
+#        help=LOG_INVALID,
+#        dest='log_invalid')
+#lg.add_argument('--log-invalid-usernames',
+#        action=argparse.BooleanOptionalAction,
+#        default=True,
+#        help=LOG_INVALID_USERNAME,
+#        dest='log_invalid_usernames')
 
-LOG_VALID = \
-'''Enable/disable logging of valid credentials. You probably want to
-enable this. Default: %(default)s.
-'''
-
-LOG_INVALID = \
-'''Disable logging of invalid credentials. Default: %(default)s
-'''
-
-lp = logging_parser = argparse.ArgumentParser(add_help=False)
-lg = logging_group = lp.add_argument_group('Logging Parameters',
-        'Options related to logging')
-lg.add_argument('--log-general',
-        action=argparse.BooleanOptionalAction,
-        default=True,
-        help=LOG_GENERAL,
-        dest='log_general')
-lg.add_argument('--log-valid',
-        action=argparse.BooleanOptionalAction,
-        default=True,
-        help=LOG_VALID,
-        dest='log_valid')
-lg.add_argument('--log-invalid',
-        action=argparse.BooleanOptionalAction,
-        default=True,
-        help=LOG_INVALID,
-        dest='log_invalid')
 
 # ============
 # INPUT PARSER
@@ -302,4 +322,5 @@ cg.add_argument('--csv-files',
         nargs='+',
         help=CSV_FILES)
 
-bp = brute_parser = argparse.ArgumentParser(parents=[gp,jp,op,lp,ip,cp])
+#bp = brute_parser = argparse.ArgumentParser(parents=[gp,jp,op,lp,ip,cp])
+bp = brute_parser = argparse.ArgumentParser(parents=[gp,jp,op,ip,cp])

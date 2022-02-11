@@ -3,21 +3,44 @@ from sys import stdout,stderr
 import logging
 from functools import wraps
 
-SLEEP_EVENTS            = 85
+GENERAL_EVENTS        = 90
+CREDENTIAL_EVENTS            = 85
 VALID_CREDENTIALS       = 80
-MODULE_EVENTS           = 75
-CREDENTIAL_EVENTS       = 70
-GENERAL_EVENTS          = 60
+SLEEP_EVENTS       = 70
+INVALID_USERNAME          = 60
 
 FORMAT='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 LOG_FORMAT = logging.Formatter(FORMAT)
 
+logging.addLevelName(INVALID_USERNAME, 'INVALID_USERNAME')
 logging.addLevelName(SLEEP_EVENTS,'SLEEP_EVENT')
 logging.addLevelName(VALID_CREDENTIALS,'VALID')
-logging.addLevelName(MODULE_EVENTS,'MODULE_EVENT')
 logging.addLevelName(CREDENTIAL_EVENTS,'INVALID')
 logging.addLevelName(GENERAL_EVENTS,'GENERAL')
 
+LEVEL_LOOKUP = dict(general=GENERAL_EVENTS,
+    valid=VALID_CREDENTIALS,
+    invalid=CREDENTIAL_EVENTS,
+    invalid_username=INVALID_USERNAME)
+
+SYNONYM_LOOKUP = dict(
+    general=('general','general-events','general-event',),
+    valid=('valid','valid-credentials','valid-credential',),
+    invalid=('invalid','invalid-credentials','invalid-credential',),
+    invalid_username=('invalid-usernames','invalid-username',))
+
+def lookup_log_level(level:str):
+
+    for level_key, synonyms in SYNONYM_LOOKUP.items():
+        if level in synonyms:
+            break
+        level_key = None
+
+    if not level_key:
+        raise ValueError(f'Invalid log level supplied: {level}')
+
+    return LEVEL_LOOKUP[level_key]
+            
 def init_handler(logger, klass, *args, **kwargs):
 
     handler = klass(*args, **kwargs)
@@ -76,12 +99,17 @@ class BruteLogger(logging.Logger):
 
         pass
 
+    @do_log(INVALID_USERNAME)
+    def invalid_username(self, m:str):
+
+        pass
+
     @do_log(CREDENTIAL_EVENTS)
     def credential(self, m:str):
 
         pass
 
-    @do_log(MODULE_EVENTS)
+    @do_log(GENERAL_EVENTS)
     def module(self, m:str):
 
         pass
@@ -99,18 +127,11 @@ class BruteLogger(logging.Logger):
 if logging.getLoggerClass() != BruteLogger:
     logging.setLoggerClass(BruteLogger)
 
-def getLogger(name, log_level=GENERAL_EVENTS, log_valid=False,
-        log_invalid=False, log_general=False, log_file=None,
-        log_stdout=False, log_stderr=True):
+def getLogger(name, log_level='invalid',
+        log_file=None, log_stdout=False, log_stderr=True):
     'Configure a logger for the library'
 
-    logger = logging.getLogger(name)
-    
-    if log_valid or log_invalid or log_general:
-        
-        if log_valid:   log_level = VALID_CREDENTIALS
-        if log_invalid: log_level = CREDENTIAL_EVENTS
-        if log_general: log_level = GENERAL_EVENTS
+    logger = logging.getLogger(name)    
 
     if log_file:
 
@@ -130,6 +151,10 @@ def getLogger(name, log_level=GENERAL_EVENTS, log_valid=False,
             logging.StreamHandler,
             stderr)
 
-    logger.setLevel(log_level)
+    if isinstance(log_level, str):
+        logger.setLevel(
+            lookup_log_level(log_level))
+    else:
+        logger.setLevel(log_level)
 
     return logger
