@@ -18,19 +18,46 @@ import signal
 from time import time
 from random import shuffle
 
-UNKNOWN_PRIORITIZED_USERNAME_MSG = \
-    'Prioritized username value supplied ' \
-    'during configuration that does not a' \
-    'ppear in the database. Insert this v' \
-    'alue or remove it from the configura' \
-    'tion: {username}'
+UNKNOWN_PRIORITIZED_USERNAME_MSG = (
+'Prioritized username value supplied during configuration that does '
+'not appear in the database. Insert this value or remove it from the '
+'configuration: {username}')
 
-UNKNOWN_PRIORITIZED_PASSWORD_MSG = \
-    'Prioritized password value supplied ' \
-    'during configuration that does not a' \
-    'ppear in the database. Insert this v' \
-    'alue or remove it from the configura' \
-    'tion: {password}'
+UNKNOWN_PRIORITIZED_PASSWORD_MSG = (
+'Prioritized password value supplied during configuration that does '
+'not appear in the database. Insert this value or remove it from the '
+'configuration: {password}')
+
+ACTIONABLE_USERNAMES_QUERY = \
+'''
+SELECT usernames.id
+FROM usernames
+WHERE usernames.priority = {priority}
+    AND usernames.actionable = true
+    AND usernames.recovered = false
+    AND usernames.future_time <= {future_time}
+    AND (
+        SELECT count(credentials.id) FROM credentials
+        WHERE usernames.id=usernames.id
+            AND credentials.guessed = false
+        LIMIT 1
+    ) < (SELECT count(passwords.id) FROM passwords)
+LIMIT {limit}
+'''
+
+USERNAME_PASSWORDS_QUERY = \
+'''
+SELECT passwords.id
+FROM passwords
+WHERE passwords.priority = {priority}
+    AND passwords.sprayable = true
+    AND passwords.id NOT IN (
+        SELECT credentials.password_id
+        FROM credentials
+        WHERE credentials.username_id = {username_id}
+    )
+LIMIT {limit};
+'''
 
 class BruteForcer:
     '''Base object from which all other brute forcers will inherit.
@@ -108,7 +135,6 @@ class BruteForcer:
         else:
 
             from multiprocessing.pool import Pool
-
             self.pool = Pool(processes=config.process_count)
 
         if not KeyboardInterrupt in self.config.exception_handlers:
@@ -337,7 +363,7 @@ class BruteForcer:
         ]
         ```
         '''
-       
+
         outputs = []
         while True:
 
@@ -477,145 +503,154 @@ class BruteForcer:
                 # =======================
                 # GET GUESSABLE USERNAMES
                 # =======================
-                '''Get a list of guessable usernames. Prioritize by:
 
-                1. priority specifications
-                2. Whether or not strict credentials have been set for
-                the user
                 '''
-               
-                # Get a list of usernames to target
-                    # must not have already been recovered during an earlier attack
-                    # future_time must be less than current time
-                        # for that user have been completed
+                # QUERYING GUESSABLE USERNAMES
 
-                if self.config.randomize_usernames:
+                - Username must be guessable
+                - Username must not have the maximum number of credential
+                  records, i.e the total number of passwords
 
-                    # Get priority usernames first
-                    p_usernames = priority_usernames = \
-                        self.main_db_sess.query(sql.Username) \
-                            .join(sql.Credential) \
-                            .filter(
-                                sql.Username.recovered == False,
-                                sql.Username.priority == True,
-                                sql.Username.future_time <= time(),
-                                sql.Username.actionable == True,
-                                sql.Credential.guessed == False) \
-                            .order_by(sql.Username.priority.desc()) \
-                            .order_by(sql.Credential.strict.desc()) \
-                            .all()
+                # QUERYING RELEVANT PASSWORDS
 
-                    p_usernames = p_usernames if p_usernames else []
-    
-                    # Marry priority usernames to non-priority usernames
-                    usernames = self.main_db_sess.query(sql.Username) \
-                            .join(sql.Credential) \
-                            .filter(
-                                sql.Username.recovered == False,
-                                sql.Username.priority == False,
-                                sql.Username.actionable == True,
-                                sql.Username.future_time <= time(),
-                                sql.Credential.guessed == False) \
-                            .all()
+                - For each username, query CREDENTIALS for values that have
+                  been guessed and do an inverse lookup
+                '''
 
-                    usernames = usernames = usernames if usernames else []
+                # Get priority username ids
+                username_ids = [r[0] for r in self.main_db_sess.execute(
+                        ACTIONABLE_USERNAMES_QUERY.format(
+                            priority='true',
+                            future_time=time(),
+                            limit=limit))]
+
+                # Get non-priority username ids
+                uid_len = len(username_ids)
+                if not uid_len >= limit:
+
+                    username_ids += [r[0] for r in self.main_db_sess.execute(
+                            ACTIONABLE_USERNAMES_QUERY.format(
+                                priority='false',
+                                future_time=time(),
+                                limit=limit-uid_len))]
+
+                # Get the username instances
+                usernames = self.main_db_sess.query(sql.Username) \
+                    .filter(
+                        sql.Username.id.in_(username_ids)
+                    ).all()
+
+                # Shuffle the username instances
+                if usernames and self.config.randomize_usernames:
                     shuffle(usernames)
-                    usernames += p_usernames
-                    del(p_usernames)
-
-                else:
-
-                    usernames = self.main_db_sess.query(sql.Username) \
-                            .join(sql.Credential) \
-                            .filter(
-                                sql.Username.recovered == False,
-                                sql.Username.future_time <= time(),
-                                sql.Username.actionable == True,
-                                sql.Credential.guessed == False) \
-                            .order_by(sql.Username.priority.desc()) \
-                            .order_by(sql.Credential.strict.desc()) \
-                            .all()
 
                 # Logging sleep events
                 if not usernames and not sleeping:
+
                     u = self.main_db_sess.query(sql.Username) \
                         .filter(sql.Username.recovered == 0) \
                         .order_by(sql.Username.future_time.desc()) \
                         .first()
+
                     sleeping = True
+
                     if u and u.future_time > 60+time():
+
                         self.logger.general(
                             f'Sleeping until {BruteTime.float_to_str(u.future_time)}'
                         )
+
                 elif usernames and sleeping:
+
                     sleeping = False
 
-                # =========================
-                # BRUTE FORCE EACH USERNAME
-                # =========================
-  
-                # Current limit will be used to calculate the limit of the current query
-                 # used to assure that the limit remains lesser than the greatest password
-                 # id
+                # ====================================
+                # CREATE GET/CREDENTIALS FOR EACH USER
+                # ====================================
+
                 for username in usernames:
 
-                    # ================================
-                    # GET CREDENTIALS FOR THE USERNAME
-                    # ================================
-                    '''Get credentials to guess for a given user. Order by:
+                    # ====================================
+                    # PULL STRICT CREDENTIALS FOR THE USER
+                    # ====================================
 
-                    1. Strict credentials
-                    2. Then priority
-                    '''
-
-                    credentials = self.main_db_sess.query(sql.Credential) \
-                            .join(sql.Password) \
+                    credentials = \
+                        self.main_db_sess.query(sql.Credential) \
                             .filter(
+                                sql.Credential.username_id == username.id,
                                 sql.Credential.guessed == False,
-                                sql.Credential.username == username) \
-                            .order_by(sql.Credential.strict.desc()) \
-                            .order_by(sql.Password.priority.desc()) \
+                                sql.Credential.strict == True) \
+                            .order_by() \
                             .limit(limit) \
                             .all()
 
-                    # Avoid race condition
-                    if username.recovered: continue 
-    
+                    climit = limit-len(credentials)
+
+                    # Current time
+                    ctime = BruteTime.current_time()
+
+                    # Get the future time when this user can be targeted later
+                    if self.config.max_auth_jitter:
+
+                        # Derive from the password jitter
+                        ftime = self.config.max_auth_jitter.get_jitter_future()
+
+                    else:
+
+                        # Default effectively asserting that no jitter will occur.
+                        ftime = -1.0
+
+                    # =======================================
+                    # GET PASSWORDS TO GUESS FOR THE USERNAME
+                    # =======================================
+
+                    password_ids = []
+
+                    if climit > 0:
+
+                        # Priority passwords
+                        password_ids = [r[0] for r in self.main_db_sess.execute(
+                            USERNAME_PASSWORDS_QUERY.format(
+                                priority='true',
+                                username_id=username.id,
+                                limit=climit))]
+
+                    pass_len = len(password_ids)
+
+                    if pass_len < climit:
+
+                        # Non-priority passwords
+                        password_ids += [r[0] for r in self.main_db_sess.execute(
+                            USERNAME_PASSWORDS_QUERY.format(
+                                priority='false',
+                                username_id=username.id,
+                                limit=climit-pass_len))]
+
+                    # Build the credentials
+                    credentials += [
+                        sql.Credential(
+                            username_id = username.id,
+                            password_id = pid,
+                            guess_time = ctime)
+                        for pid in password_ids]
+
+                    if username.recovered: break
+
+                    username.last_time = ctime
+                    username.future_time = ftime
+
+                    self.main_db_sess.add_all(credentials)
+                    self.main_db_sess.commit()
+
+                    # ==============================
+                    # DO THE AUTHENTICATION CALLBACK
+                    # ==============================
+
                     for credential in credentials:
 
-                        # =======================================
-                        # DO THE AUTHENTICATION FOR EACH PASSWORD
-                        # =======================================
-   
-                        # Current time of authentication attempt
-                        ctime = BruteTime.current_time()
-
-                        # Get the future time when this user can be targeted later
-                        if self.config.max_auth_jitter:
-                            # Derive from the password jitter
-                            ftime = self.config.max_auth_jitter.get_jitter_future()
-                        else:
-                            # Default effectively asserting that no jitter will occur.
-                            ftime = -1.0
-
-                        # Avoid race condition
-                            # also prevents checking of additional passwords if a valid
-                            # password has been recovered in the distinct process
-                        if username.recovered: break
-
-                        # Update the Username/Credential object with relevant
-                        # attributes and commit
-
-                        credential.guess_time=ctime
-                        credential.username.last_time=ctime
-                        credential.username.future_time=ftime
-                        self.main_db_sess.commit()
-
-                        # Do the authentication callback
                         recovered = self.do_authentication_callback(
                             credential.username.value,
-                            credential.password.value
-                        )
+                            credential.password.value)
 
                         if recovered and self.config.stop_on_valid:
                             break
@@ -626,17 +661,23 @@ class BruteForcer:
                 # ============================================
                 # STOP ATTACK DUE TO STOP_ON_VALID_CREDENTIALS
                 # ============================================
+
                 if recovered and self.config.stop_on_valid:
-                        self.logger.general(
-                            'Valid credentials recovered. Exiting per ' \
-                            'stop_on_valid configuration.',
-                        )
-                        self.shutdown()
-                        break
+                    self.logger.general(
+                        'Valid credentials recovered. Exiting per ' \
+                        'stop_on_valid configuration.',
+                    )
+                    self.shutdown()
+                    break
 
                 # ===============================================
                 # CONTINUE LOOPING UNTIL ALL GUESSES ARE FINISHED
                 # ===============================================
+                '''BUG BELOW!
+
+                - Current query must be updated to determine if additional
+                  guesses need to occur.
+                '''
 
                 # Check if a normal credentials remains
                 sample_remaining = self.main_db_sess \
