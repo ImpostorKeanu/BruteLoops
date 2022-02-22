@@ -35,13 +35,33 @@ FROM usernames
 WHERE usernames.priority = {priority}
     AND usernames.actionable = true
     AND usernames.recovered = false
-    AND usernames.future_time <= {future_time}
+    AND usernames.future_time <= {current_time}
     AND (
-        SELECT count(credentials.id) FROM credentials
-        WHERE usernames.id=usernames.id
-            AND credentials.guessed = false
-        LIMIT 1
-    ) < (SELECT count(passwords.id) FROM passwords)
+            ((
+                SELECT count(password_id)
+                FROM credentials
+                WHERE credentials.username_id = usernames.id
+                    AND credentials.guessed = false
+                    AND credentials.strict = true
+                LIMIT 1
+            ) > 0)
+
+            OR
+
+            ((
+                SELECT count(credentials.id)
+                FROM credentials
+                INNER JOIN passwords ON credentials.password_id = passwords.id
+                WHERE credentials.username_id = usernames.id
+                    AND credentials.guessed = true
+                    AND credentials.strict = false
+                    AND passwords.sprayable = true
+            ) < (
+                SELECT count(passwords.id)
+                FROM passwords
+                WHERE passwords.sprayable = true
+            ))
+        )
 LIMIT {limit}
 '''
 
@@ -55,6 +75,7 @@ WHERE passwords.priority = {priority}
         SELECT credentials.password_id
         FROM credentials
         WHERE credentials.username_id = {username_id}
+            AND credentials.guessed = true
     )
 LIMIT {limit};
 '''
@@ -85,20 +106,20 @@ class BruteForcer:
         self.presults = []
         self.pool     = None
         self.attack   = None
-        self.logger   = logging.getLogger(
+        self.log  = logging.getLogger(
             name='BruteLoops.BruteForcer',
             log_level=config.log_level,
             log_file=config.log_file,
             log_stdout=config.log_stdout,
             log_stderr=config.log_stderr)
 
-        self.logger.general(f'Initializing {config.process_count} process(es)')
+        self.log.general(f'Initializing {config.process_count} process(es)')
         
         # ===================================
         # LOG ATTACK CONFIGURATION PARAMETERS
         # ===================================
 
-        self.logger.general('Logging attack configuration parameters')
+        self.log.general('Logging attack configuration parameters')
 
         config_attrs = [
                 'authentication_jitter',
@@ -114,10 +135,10 @@ class BruteForcer:
         ]
 
         for attr in config_attrs:
-            self.logger.general(f'Config Parameter -- {attr}: '+str(getattr(self.config,attr)))
+            self.log.general(f'Config Parameter -- {attr}: '+str(getattr(self.config,attr)))
 
         if hasattr(self.config.authentication_callback, 'callback_name'):
-            self.logger.general(f'Config Parameter -- callback_name: '+ \
+            self.log.general(f'Config Parameter -- callback_name: '+ \
                             getattr(self.config.authentication_callback,
                                 'callback_name'))
             
@@ -176,7 +197,7 @@ class BruteForcer:
         # =================
         
         current_time = BruteTime.current_time(format=str)
-        self.logger.general(f'Beginning attack: {current_time}')
+        self.log.general(f'Beginning attack: {current_time}')
 
         # CREATE A NEW ATTACK
         self.attack = sql.Attack(start_time=BruteTime.current_time())
@@ -267,7 +288,7 @@ class BruteForcer:
                 credential.guessed=True
 
                 recovered = True
-                self.logger.valid(cred)
+                self.log.valid(cred)
 
                 # Update username to "recovered"
                 credential.username.recovered=True
@@ -278,7 +299,7 @@ class BruteForcer:
             # Guess failed for some reason
             elif outcome == -1:
 
-                self.logger.general(
+                self.log.general(
                     f'Failed to guess credential. - {cred}')
 
             # Credentials are no good
@@ -288,7 +309,7 @@ class BruteForcer:
 
                 # Update the credential to invalid
                 credential.valid=False
-                self.logger.invalid(cred)
+                self.log.invalid(cred)
 
             # ================================================
             # MANAGE THE ACTIONABLE ATTRIBUTE FOR THE USERNAME
@@ -297,7 +318,7 @@ class BruteForcer:
             if actionable and not credential.username.actionable:
                 credential.username.actionable = True
             elif not actionable and credential.username.actionable:
-                self.logger.invalid_username(
+                self.log.invalid_username(
                     f'Disabling invalid username - {cred}')
                 credential.username.actionable = False
     
@@ -307,7 +328,7 @@ class BruteForcer:
     
             if events and isinstance(events, list):
                 for event in events:
-                    self.logger.module(event)
+                    self.log.module(event)
 
         # Commit the changes
         self.handler_db_sess.commit()
@@ -443,13 +464,13 @@ class BruteForcer:
         # LOG ATTACK COMPLETION
         # =====================
 
-        self.logger.general('Shutting attack down')
+        self.log.general('Shutting attack down')
 
         self.attack.complete = True
         self.attack.end_time = BruteTime.current_time()
         self.main_db_sess.commit()
 
-        self.logger.general('Closing/joining Processes')
+        self.log.general('Closing/joining Processes')
 
         if self.pool:
             self.pool.close()
@@ -521,7 +542,7 @@ class BruteForcer:
                 username_ids = [r[0] for r in self.main_db_sess.execute(
                         ACTIONABLE_USERNAMES_QUERY.format(
                             priority='true',
-                            future_time=time(),
+                            current_time=time(),
                             limit=limit))]
 
                 # Get non-priority username ids
@@ -531,14 +552,14 @@ class BruteForcer:
                     username_ids += [r[0] for r in self.main_db_sess.execute(
                             ACTIONABLE_USERNAMES_QUERY.format(
                                 priority='false',
-                                future_time=time(),
+                                current_time=time(),
                                 limit=limit-uid_len))]
 
                 # Get the username instances
                 usernames = self.main_db_sess.query(sql.Username) \
                     .filter(
-                        sql.Username.id.in_(username_ids)
-                    ).all()
+                        sql.Username.id.in_(username_ids)) \
+                    .all()
 
                 # Shuffle the username instances
                 if usernames and self.config.randomize_usernames:
@@ -556,7 +577,7 @@ class BruteForcer:
 
                     if u and u.future_time > 60+time():
 
-                        self.logger.general(
+                        self.log.general(
                             f'Sleeping until {BruteTime.float_to_str(u.future_time)}'
                         )
 
@@ -568,7 +589,9 @@ class BruteForcer:
                 # CREATE GET/CREDENTIALS FOR EACH USER
                 # ====================================
 
-                for username in usernames:
+                while usernames:
+
+                    username = usernames.pop(0)
 
                     # ====================================
                     # PULL STRICT CREDENTIALS FOR THE USER
@@ -631,9 +654,11 @@ class BruteForcer:
                         sql.Credential(
                             username_id = username.id,
                             password_id = pid,
+                            guessed = True,
                             guess_time = ctime)
                         for pid in password_ids]
 
+                    # Potential race condition
                     if username.recovered: break
 
                     username.last_time = ctime
@@ -646,7 +671,9 @@ class BruteForcer:
                     # DO THE AUTHENTICATION CALLBACK
                     # ==============================
 
-                    for credential in credentials:
+                    while credentials:
+
+                        credential = credentials.pop(0)
 
                         recovered = self.do_authentication_callback(
                             credential.username.value,
@@ -663,7 +690,7 @@ class BruteForcer:
                 # ============================================
 
                 if recovered and self.config.stop_on_valid:
-                    self.logger.general(
+                    self.log.general(
                         'Valid credentials recovered. Exiting per ' \
                         'stop_on_valid configuration.',
                     )
@@ -703,7 +730,7 @@ class BruteForcer:
 
                 outputs = self.monitor_processes(ready_all=True)
                 self.handle_outputs(outputs)
-                self.logger.general('Attack finished')
+                self.log.general('Attack finished')
     
                 # ========
                 # SHUTDOWN
@@ -735,7 +762,7 @@ class BruteForcer:
                 # Raise to caller
                 else:
 
-                    self.logger.general(
+                    self.log.general(
                         'Unhandled exception occurred. Shutting down attack '\
                         'and returning control to the caller.'
                     )
