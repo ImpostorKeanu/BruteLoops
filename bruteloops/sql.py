@@ -41,7 +41,9 @@ class Password(Base):
         doc='Password value')
     priority = Column(Boolean, default=False,
         doc='Determines if the password is prioritized')
-    usernames = relationship("Username", secondary="credentials")
+    sprayable = Column(Boolean, default=True,
+        doc='Determines if the password can be used as a spray value.')
+	usernames = relationship("Username", secondary="credentials")
     credentials = relationship("Credential", cascade="all, delete")
     __mapper_args__ = {'confirm_deleted_rows': False}
 

@@ -3,8 +3,11 @@ from . import logging
 from pathlib import Path
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.dialects.sqlite import insert
 from io import StringIO,TextIOWrapper
 from sys import stderr
+from functools import wraps
+from inspect import signature
 import csv
 import re
 
@@ -13,6 +16,24 @@ RE_PASSWORD = re.compile('password',re.I)
 
 logger = logging.getLogger('BruteLoops.db_manager',
         log_level=10)
+
+def check_container(f):
+
+    s = signature(f)
+
+    @wraps(f)
+    def wrapper(*args, container=None, **kwargs):
+
+        if 'is_file' in s.parameters.keys() and container and \
+                'is_file' not in kwargs.keys():
+
+            kwargs['is_file'] = isinstance(container, TextIOWrapper)
+
+        return f(*args, **kwargs)
+
+    return wrapper
+
+
 
 def strip_newline(s):
     '''Strips the final character from a string via list comprehension.
@@ -42,7 +63,90 @@ def csv_split(s,delimiter=','):
     if ind == -1: return (None,None,)
     return (s[:ind],s[ind+1:],)
 
+@check_container
+def chunk_container(container, callback,
+        is_file:bool=False, threshold:int=100000, cargs:tuple=None,
+        ckwargs:dict=None):
+    '''Break a container of items down into chunks and pass them
+    to a callback for further processing. Particularly useful when
+    inserting/upserting records into a database.
+
+    Args:
+        container: An iterable containing values to act upon.
+        callback: A callback that will receive the chunked values
+          from container.
+        is_file: Boolean value indicating if the records are
+          originating from a file. If so, newlines are stripped.
+        threshold: The maximum number of records to pass back to
+          `callback`.
+        cargs: Positional arguments passed to `callback`.
+        ckwargs: Keyword arguments passed to `callback.
+    '''
+
+    cargs = cargs if cargs is not None else tuple()
+    ckwargs = ckwargs if ckwargs is not None else dict()
+
+    chunk = []
+    for v in container:
+
+        if is_file and isinstance(v,str):
+
+            # Strip newlines from file strings
+            v = strip_newline(v)
+
+        # Append the item to the chunk
+        chunk.append(v)
+
+        if len(chunk) == threshold:
+            # Call the callback for the chunk
+            callback(*cargs, chunk=chunk, **ckwargs)
+            chunk.clear()
+
+    if chunk:
+        # Process any remaining chunks
+        callback(*cargs, chunk=chunk, **ckwargs)
+
+    if is_file and hasattr(container,'seek'):
+        # Seek any containers back to 0
+        container.seek(0)
+
 class DBMixin:
+
+    def do_upsert(self, model, values:list,
+            index_elements:list=['value'],
+            do_update_where:str=None, update_data:str=None):
+
+        # https://docs.sqlalchemy.org/en/14/dialects/sqlite.html#insert-on-conflict-upsert
+        s = insert(model).values(values)
+
+        if do_update_where and update_data:
+
+            # TODO: Perform checks on do_update where
+            # must be a query, I think.
+
+            if not isinstance(update_data, dict):
+                raise ValueError(
+                    f'update_data must be a dictionary of data')
+
+            s = s.on_conflict_do_update(
+                index_elements=index_elements,
+                where=do_update_where,
+                set_=update_data)
+
+        else:
+
+            s = s.on_conflict_do_nothing(
+                index_elements=index_elements)
+
+        try:
+
+            with self.main_db_sess.begin_nested():
+                self.main_db_sess.execute(s)
+
+        except Exception as e:
+
+            logger.debug(f'Failed to upsert values: {e}')
+            self.main_db_sess.rollback()
 
     def merge_lines(self, container, model):
         '''Merge values from the container into the target model. If
@@ -131,8 +235,11 @@ class DBMixin:
         database. Duplicates will not be inserted.
         '''
 
+        chunk_container(container = container,
+            callback = self.do_upsert)
+        
         self.merge_lines(container, sql.Username)
-        self.associate_spray_values(container, sql.Username)
+        #self.associate_spray_values(container, sql.Username)
 
     def delete_username_records(self, container):
         '''Delete each username value in the container from the target
@@ -185,9 +292,24 @@ class DBMixin:
 
         # Add all the new passwords
         self.merge_lines(container, sql.Password)
-        self.associate_spray_values(container, sql.Password)
+        #self.associate_spray_values(container, sql.Password)
 
-    def associate_spray_values(self, container, container_sql_class):
+    def associate_spray_values(self):
+
+        logger.debug('Associating spray values. '
+            'Depending on the number of records inserted, this may '
+            'take some time.')
+
+        self.main_db_sess.execute(
+            'INSERT INTO credentials (username_id, password_id) '
+            'SELECT usernames.id, passwords.id '
+            'FROM usernames, passwords '
+            'WHERE passwords.sprayable = true '
+            'ON CONFLICT IGNORE;')
+
+        logger.debug('Finished associating spray values!')
+
+    def old_associate_spray_values(self, container, container_sql_class):
 
         # Seek back to the beginning of any file containers
         is_file = container.__class__ == TextIOWrapper
@@ -400,86 +522,138 @@ class DBMixin:
         is_file = container.__class__ == TextIOWrapper
         if is_file: container.seek(0)
 
-        usernames = []        
-        for line in container:
+        def _upsert_values(chunk):
 
-            #logger.debug(
-            #        f'Inserting credential into database: {line}')
+            tuples = chunk
 
-            # Strip newlines if we're working with a file
-            if not IS_DICTREADER and is_file:
-                line = strip_newline(line)
+            # ==================================
+            # BREAK THE RECORDS DOWN INTO TUPLES
+            # ==================================
 
-            # ====================================
-            # GET THE USERNAME AND PASSWORD VALUES
-            # ====================================
+            for i in range(0, len(tuples)):
 
-            if IS_DICTREADER:
+                if IS_DICTREADER:
 
-                # Collect the username and password value from the line
-                username = line[USERNAME_KEY]
-                password = line[PASSWORD_KEY]
-
-            else:
-
-                # Break out the username and password value from the csv
-                # delimiter value
-                username, password = csv_split(line,
-                        credential_delimiter)
-
-            if as_credentials:
-
-                # ===========================
-                # CREATE THE STRICTCREDENTIAL
-                # ===========================
-
-                # Get or create the target username
-                new, username = self.goc(sql.Username, username)
-
-                #if new: usernames.append(username.value)
-
-                new, password = self.goc(sql.Password, password)
-
-                # Look up the credential
-                credential = self.main_db_sess.query(sql.Credential) \
-                        .join(sql.Username) \
-                        .join(sql.Password) \
-                        .filter(
-                            sql.Username.id == username.id,
-                            sql.Password.id == password.id
-                        ).first()
-
-                # If it's there, then we save it as strict
-                if credential and not credential.strict:
-
-                    credential.strict = True
-                    self.main_db_sess.commit()
+                    # Parsed from CSV library because we have a reader
+                    tuples[i] = (
+                        tuples[i][USERNAME_KEY],
+                        tuples[i][PASSWORD_KEY],)
 
                 else:
 
-                    # Create a new strict credential record
-                    cred = sql.Credential(username=username,
-                            password=password,
-                            strict=True)
+                    # Parsed as a non-standard CSV value
+                    tuples[i] = csv_split(
+                        tuples[i],
+                        credential_delimiter)
 
-                    # Try to save the credential record
-                    try:
-                        self.main_db_sess.add(cred)
-                        self.main_db_sess.commit()
-                    except Exception as e:
-                        # Assume the record already exists
-                        self.main_db_sess.rollback()
+            tup_len = len(tuples)
+
+            # ===============================
+            # UPSERT USERNAME/PASSWORD VALUES
+            # ===============================
+
+            usernames, passwords = [], []
+
+            # Unpack the tuples into username and password
+            # values.
+            for i in range(0, tup_len):
+
+                # =========================
+                # CREATE VALUE DICTIONARIES
+                # =========================
+
+                usernames.append(dict(value = tuples[i][0]))
+                passwords.append(dict(
+                        value = tuples[i][1],
+                        sprayable = not as_credentials))
+
+                if not as_credentials:
+
+                    # Free memory if we're not working on credentials
+                    del(tuples[i])
+
+            # Upsert the usernames
+            self.do_upsert(model = sql.Username,
+                values = usernames)
+            del(usernames)
+
+            # Upsert the passwords
+            if as_credentials:
+
+                # Non-sprayable passwords
+                self.do_upsert(model = sql.Password,
+                    values = passwords)
 
             else:
 
-                # ==============================
-                # INSERT THE VALUES FOR SPRAYING
-                # ==============================
-                self.insert_username_records([username])
-                self.insert_password_records([password])
+                # Sprayable passwords
+                  # Also updates currently existing non-sprayable passwords
+                  # to become sprayable.
+                self.do_upsert(model = sql.Password,
+                    values = passwords,
+                    do_update_where = self.main_db.sess.query(
+                        sql.Password.sprayable == False),
+                    update_data=dict(sprayable = True))
 
-        if as_credentials and usernames:
-            self.associate_spray_values(usernames, sql.Username)
+            del(passwords)
+
+            if not as_credentials:
+
+                self.associate_spray_values()
+
+                # Skip credential associations by returning
+                return
+
+            # =============================================
+            # EXTRAPOLATE A DICT OF USER TO PASSWORD VALUES
+            # =============================================
+
+            credentials = {}
+            while tuples:
+
+                username, password = tuples.pop(0)
+
+                if not username in credentials:
+                    credentials[username] = [password]
+                elif not password in credentials[username]:
+                    credentials[username].append(password)
+
+            # ===============================
+            # CREATE CREDENTIAL RECORD VALUES
+            # ===============================
+
+            values = []
+            for username in list(credentials.keys()):
+
+                passwords = credentials[username]
+                del(credentials[username])
+
+                # ===============================
+                # CREATE CREDENTIAL RECORD VALUES
+                # ===============================
+
+                for username, password in self.main_db_sess.query(
+                        sql.Username, sql.Password) \
+                            .filter(
+                                sql.Username.value == username,
+                                sql.Password.value.in_(passwords)):
+
+                    values.append(dict(
+                        username_id = username.id,
+                        password_id = password.id,
+                        strict = True))
+
+            # =============================
+            # UPSERT THE CREDENTIAL RECORDS
+            # =============================
+
+            self.do_upsert(model = sql.Credential,
+                values = values,
+                index_elements=['username_id', 'password_id'])
+
+        chunk_container(container = container,
+            callback = _upsert_values,
+            is_file = not IS_DICTREADER and is_file)
 
     def delete_credential_records(self, container, as_credentials=False,
             credential_delimiter=':'):
@@ -569,11 +743,7 @@ class DBMixin:
             self.main_db_sess.flush()
             return True, instance
 
-    def goc(self, *args, **kwargs):
-        '''Shortcut to get_or_create.
-        '''
-
-        return self.get_or_create(*args, **kwargs)
+    goc = get_or_create
 
     def manage_priorities(self, usernames=None, passwords=None,
             prioritize=False):
@@ -590,8 +760,8 @@ class DBMixin:
             for value in container:
 
                 record = self.main_db_sess.query(model) \
-                        .filter(model.value == value) \
-                        .first()
+                    .filter(model.value == value) \
+                    .first()
 
                 if record:
                     logger.debug(
