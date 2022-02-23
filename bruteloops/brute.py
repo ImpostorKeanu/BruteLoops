@@ -37,30 +37,35 @@ WHERE usernames.priority = {priority}
     AND usernames.recovered = false
     AND usernames.future_time <= {current_time}
     AND (
-            ((
-                SELECT count(password_id)
+            (
+                /*
+                   Find any strict credentials for the username. 
+                */
+                SELECT password_id
                 FROM credentials
                 WHERE credentials.username_id = usernames.id
                     AND credentials.guessed = false
                     AND credentials.strict = true
                 LIMIT 1
-            ) > 0)
+            )
 
             OR
 
-            ((
-                SELECT count(credentials.id)
-                FROM credentials
-                INNER JOIN passwords ON credentials.password_id = passwords.id
-                WHERE credentials.username_id = usernames.id
-                    AND credentials.guessed = true
-                    AND credentials.strict = false
-                    AND passwords.sprayable = true
-            ) < (
-                SELECT count(passwords.id)
-                FROM passwords
-                WHERE passwords.sprayable = true
-            ))
+                /*
+                    Find any sprayable passwords for the username.
+                */
+
+            (
+                    SELECT COUNT(*) FROM (
+                        SELECT credentials.id
+                        FROM credentials
+                        INNER JOIN passwords ON credentials.password_id = passwords.id
+                        WHERE credentials.username_id = usernames.id
+                            AND credentials.guessed = true
+                            AND credentials.strict = false
+                            AND passwords.sprayable = true
+                    )
+            ) < {password_count}
         )
 LIMIT {limit}
 '''
@@ -517,6 +522,8 @@ class BruteForcer:
         # BEGIN BRUTE FORCE ATTACK
         # ========================
 
+        password_count = self.main_db_sess.query(sql.Password).count()
+
         while True:
 
             try:
@@ -542,6 +549,7 @@ class BruteForcer:
                 username_ids = [r[0] for r in self.main_db_sess.execute(
                         ACTIONABLE_USERNAMES_QUERY.format(
                             priority='true',
+                            password_count=password_count,
                             current_time=time(),
                             limit=limit))]
 
@@ -552,6 +560,7 @@ class BruteForcer:
                     username_ids += [r[0] for r in self.main_db_sess.execute(
                             ACTIONABLE_USERNAMES_QUERY.format(
                                 priority='false',
+                                password_count=password_count,
                                 current_time=time(),
                                 limit=limit-uid_len))]
 
