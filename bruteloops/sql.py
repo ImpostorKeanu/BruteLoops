@@ -24,8 +24,11 @@ class Username(Base):
         doc='Last time when username was targeted for authentication')
     future_time = Column(Float, default=-1.0,
         doc='Time when username can be targeted for authentication again')
+
+    # ORM Relationships
     passwords = relationship("Password", secondary="credentials")
     credentials = relationship("Credential", cascade="all, delete")
+
     __mapper_args__ = {'confirm_deleted_rows': False}
 
     def __repr__(self):
@@ -36,15 +39,21 @@ class Username(Base):
 
 class Password(Base):
     __tablename__ = 'passwords'
+
     id = Column(Integer, primary_key=True, doc='Password id')
+
     value = Column(String, nullable=False, unique=True,
         doc='Password value')
     priority = Column(Boolean, default=False,
         doc='Determines if the password is prioritized')
     sprayable = Column(Boolean, default=True,
         doc='Determines if the password can be used as a spray value.')
-	usernames = relationship("Username", secondary="credentials")
-    credentials = relationship("Credential", cascade="all, delete")
+
+    # ORM Relationships
+    usernames = relationship("Username", secondary="credentials")
+    credentials = relationship("Credential", back_populates="password",
+        cascade="all, delete, delete-orphan")
+
     __mapper_args__ = {'confirm_deleted_rows': False}
 
     def __repr__(self):
@@ -53,15 +62,18 @@ class Password(Base):
 
 class Credential(Base):
     __tablename__ = 'credentials'
-    id = Column(Integer, doc='Credential id',
-            autoincrement="auto", primary_key=True)
+    id = Column(Integer, doc='Credential id', autoincrement="auto", primary_key=True)
+
+    # Foreign keys
     username_id = Column(Integer, ForeignKey('usernames.id',
-        ondelete='CASCADE', onupdate='CASCADE'), 
-            doc='Username id',nullable=False)
-    password_id = Column(Integer, ForeignKey('passwords.id'),
-            doc='Password id',nullable=False)
+        ondelete='CASCADE'), doc='Username id', nullable=False)
+    password_id = Column(Integer, ForeignKey('passwords.id',
+        ondelete='CASCADE'), doc='Password id', nullable=False)
+
+    # ORM Relationships
     username = relationship("Username", back_populates="credentials")
     password = relationship("Password", back_populates="credentials")
+
     valid = Column(Boolean, default=False,
         doc='Determines if the credentials are valid')
     strict = Column(Boolean, default=False,
@@ -70,6 +82,7 @@ class Credential(Base):
         doc='Determines if the credentials have been guessed')
     guess_time = Column(Float, default=-1.0,
         doc='Time when the guess occurred')
+
     __mapper_args__ = {'confirm_deleted_rows': False}
     __table_args__ = (
             UniqueConstraint('username_id','password_id',

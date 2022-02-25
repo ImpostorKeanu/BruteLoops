@@ -7,7 +7,7 @@ with open('README.md', 'r', encoding='utf-8') as f:
 
 setuptools.setup(
     name='bruteloops',
-    version='0.4',
+    version='0.4.1',
     author='Justin Angel',
     author_email='justin@arch4ngel.ninja',
     description='A simple password guessing API.',
@@ -23,6 +23,6 @@ setuptools.setup(
     ],
     python_requires='>=3.9',
     install_requires=[
-        'sqlalchemy==1.3.0',
+        'sqlalchemy==1.4.0',
         'billiard==3.6.3.0']
 )
