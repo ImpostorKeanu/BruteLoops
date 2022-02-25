@@ -33,7 +33,7 @@ class Username(Base):
 
     def __repr__(self):
 
-        return f'<Username(id={self.id}, value={self.value}, '\
+        return f'<Username(id={self.id}, value="{self.value}", '\
             f'recovered={self.recovered} last_time={self.last_time} '\
             f'future_time={self.future_time})>'
 
@@ -58,7 +58,7 @@ class Password(Base):
 
     def __repr__(self):
 
-        return f'<Password(id={self.id}, value={self.value})>'
+        return f'<Password(id={self.id}, value="{self.value}")>'
 
 class Credential(Base):
     __tablename__ = 'credentials'
@@ -91,8 +91,9 @@ class Credential(Base):
 
     def __repr__(self):
         return f'<Credential(id={self.id} ' \
-               f'username=({self.username.id}) {self.username.value}' \
-               f' password=({self.password.id}) {self.password.value}) >'
+               f'username=({self.username.id}) "{self.username.value} "' \
+               f'password=({self.password.id}) "{self.password.value} "' \
+               f'guessed={self.guessed}) >'
 
 class Attack(Base):
     __tablename__ = 'attacks'
