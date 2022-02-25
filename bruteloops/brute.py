@@ -486,9 +486,10 @@ class BruteForcer:
 
                 self.main_db_sess.commit()
 
-                uids = [u.id for u in self.main_db_sess.query(sql.Username)
+                uids = [u.username_id for u in self.main_db_sess.query(sql.PriorityUsername)
+                    .join(sql.Username)
                     .join(sql.Credential)
-                    .filter(sql.Username.priority == True,
+                    .filter(
                         sql.Username.recovered == False,
                         sql.Username.future_time <= time(),
                         sql.Username.actionable == True,
@@ -502,17 +503,18 @@ class BruteForcer:
                     # USERNAMES WITH STRICT CREDENTIALS
                     # =================================
 
-                    uids += [u.id for u in self.main_db_sess.query(sql.Username)
-                            .join(sql.Credential)
-                            .filter(
-                                sql.Username.id.not_in(uids),
-                                sql.Username.recovered == False,
-                                sql.Username.priority == False,
-                                sql.Username.future_time <= time(),
-                                sql.Username.actionable == True,
-                                sql.Credential.strict == True,
-                                sql.Credential.guessed == False)
-                            .limit(ulimit-ucount)]
+                    uids += [sc.credential.username_id for sc in
+                            self.main_db_sess.query(sql.StrictCredential)
+                                .join(sql.Credential)
+                                .join(sql.Username)
+                                .filter(
+                                    sql.Username.id.not_in(uids),
+                                    sql.Username.recovered == False,
+                                    sql.Username.priority == False,
+                                    sql.Username.future_time <= time(),
+                                    sql.Username.actionable == True,
+                                    sql.Credential.guessed == False)
+                                .limit(ulimit-ucount)]
 
                 ucount = len(uids)
                 if ucount < ulimit:
@@ -574,14 +576,14 @@ class BruteForcer:
 
                     # Strict credentials
                     cids = [
-                            c.id for c in self.main_db_sess.query(sql.Credential)
-                                .join(sql.Password)
-                                .filter(
-                                    sql.Credential.username_id == uid,
-                                    sql.Credential.strict == True,
-                                    sql.Credential.guess_time == -1
-                                )
-                                .limit(glimit)
+                            sc.credential_id for sc in 
+                                self.main_db_sess.query(sql.StrictCredential)
+                                    .join(sql.Credential)
+                                    .filter(
+                                        sql.Credential.username_id == uid,
+                                        sql.Credential.strict == True,
+                                        sql.Credential.guess_time == -1)
+                                    .limit(glimit)
                             ]
 
                     # Priority credentials
@@ -590,15 +592,14 @@ class BruteForcer:
 
                         cids += [
                             c.id for c in self.main_db_sess.query(sql.Credential)
-                            .join(sql.Password)
-                            .filter(
-                                sql.Password.priority == True,
-                                sql.Credential.guess_time == -1,
-                                sql.Credential.username_id == uid,
-                                sql.Credential.strict == False,
-                                sql.Credential.id.not_in(cids)
-                            )
-                            .limit(glimit-count)
+                                .join(sql.PriorityPassword)
+                                .filter(
+                                    sql.Credential.guess_time == -1,
+                                    sql.Credential.username_id == uid,
+                                    sql.Credential.strict == False,
+                                    sql.Credential.id.not_in(cids)
+                                )
+                                .limit(glimit-count)
                         ]
 
                     # Standard spray credentials

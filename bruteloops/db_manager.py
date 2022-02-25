@@ -321,6 +321,9 @@ class DBMixin:
 
         else: getattr(self, method)(container=container)
 
+        # This method commits :)
+        self.sync_lookup_tables()
+
     # ===========================
     # USERNAME MANAGEMENT METHODS
     # ===========================
@@ -413,6 +416,9 @@ class DBMixin:
             container = container,
             callback = _upsert_values)
 
+        # This method commits :)
+        self.sync_lookup_tables()
+
     def associate_spray_values(self, username_values=None,
             password_values=None):
         '''Create records in the credentials association table for
@@ -499,6 +505,9 @@ class DBMixin:
 
         else: getattr(self, method)(container=container,
                 as_credentials=as_credentials)
+
+        # This method commits :)
+        self.sync_lookup_tables()
 
     @check_container
     def insert_credential_records(self, container, as_credentials=False,
@@ -625,8 +634,56 @@ class DBMixin:
             callback = _upsert_values,
             is_file = not is_dictreader and is_file)
 
+    def sync_lookup_tables(self):
+
+        def _upsert_strict_creds(chunk):
+
+            self.do_upsert(
+                model = sql.StrictCredential,
+                index_elements=['credential_id'],
+                values = [dict(credential_id = c.id)
+                    for c in chunk])
+
+        def _upsert_priority_passwords(chunk):
+
+            self.do_upsert(
+                model = sql.PriorityPassword,
+                index_elements=['password_id'],
+                values = [dict(password_id = p.id)
+                    for p in chunk])
+
+        def _upsert_priority_usernames(chunk):
+
+            self.do_upsert(
+                model = sql.PriorityUsername,
+                index_elements=['username_id'],
+                values = [dict(username_id = u.id)
+                    for u in chunk])
+
         self.main_db_sess.commit()
 
+        logger.general('Linking strict credentials')
+
+        chunk_container(
+            container = self.main_db_sess.query(sql.Credential)
+                .filter(sql.Credential.strict == True),
+            callback = _upsert_strict_creds)
+
+        logger.general('Linking priority passwords')
+
+        chunk_container(
+            container = self.main_db_sess.query(sql.Password)
+                .filter(sql.Password.priority == True),
+            callback = _upsert_priority_passwords)
+
+        logger.general('Linking priority usernames')
+
+        chunk_container(
+            container = self.main_db_sess.query(sql.Username)
+                .filter(sql.Username.priority == True),
+            callback = _upsert_priority_usernames)
+
+        self.main_db_sess.commit()
 
     @check_container
     def delete_credential_records(self, container,
@@ -810,6 +867,9 @@ class DBMixin:
 
         self.main_db_sess.commit()
 
+        # This method commits :)
+        self.sync_lookup_tables()
+
     def manage_db_values(self, insert=True, usernames=None,
             passwords=None, username_files=None, password_files=None,
             credentials=None, credential_files=None,
@@ -894,6 +954,7 @@ class DBMixin:
                     f'Managing CSV credential files: {csv_files}')
             self.manage_credentials(csv_files, is_csv_file=True,
                     as_credentials=as_credentials, insert=insert)
+
 
     def get_valid_credentials(self):
         '''Return valid credentials
