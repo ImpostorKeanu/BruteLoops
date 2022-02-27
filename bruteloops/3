@@ -42,54 +42,32 @@ UNKNOWN_PRIORITIZED_PASSWORD_MSG = (
 # ================
 
 COMMON_USERNAME_WHERE_CLAUSES = CWC = (
-    sql.Username.recovered    == False,
-    sql.Username.actionable   == True,)
-
-HAS_UNGUESSED_SUBQUERY = (
-    select(sql.Credential.id)
-        .where(
-            sql.Username.id == sql.Credential.username_id,
-            sql.Credential.guess_time == -1,
-            sql.Credential.guessed == False)
-        .limit(1)
-).exists()
+    sql.Credential.guessed  == False,
+    sql.Username.recovered  == False,
+    sql.Username.actionable == True,)
 
 QUERY_STRICT_USERNAMES = (
     select(sql.Username.id)
-        .where(
-            *CWC,
-            sql.Username.priority == False,
-            HAS_UNGUESSED_SUBQUERY,
-            (
-                select(sql.StrictCredential)
-                    .join(
-                        sql.Credential,
-                        sql.StrictCredential.credential_id ==
-                            sql.Credential.id)
-                    .where(
-                        sql.Credential.username_id ==
-                            sql.Username.id)
-                    .limit(1)
-            ).exists()
-        )
-        .distinct()
+        .join(
+            sql.StrictCredential,
+            sql.StrictCredential.credential_id == sql.Credential.id)
+        .join(
+            sql.Username,
+            sql.Credential.username_id == sql.Username.id)
+        .where(*CWC)
 )
 
 QUERY_PRIORITY_USERNAMES = (
     select(sql.Username.id)
-        .where(
-            *CWC,
-            sql.Username.priority == True,
-            HAS_UNGUESSED_SUBQUERY)
-        .distinct()
+        .join(
+            sql.PriorityCredential,
+            sql.PriorityCredential.credential_id == sql.Credential.id)
+        .where(*CWC)
 )
 
 QUERY_USERNAMES = (
     select(sql.Username.id)
-        .where(
-            *CWC,
-            HAS_UNGUESSED_SUBQUERY)
-        .distinct()
+    .where(*CWC)
 )
 
 # ==================
@@ -97,33 +75,14 @@ QUERY_USERNAMES = (
 # ==================
 
 COMMON_CREDENTIAL_WHERE_CLAUSES = CCWC = (
-    sql.Credential.guess_time == -1,
     sql.Credential.guessed == False,
 )
 
 QUERY_STRICT_CREDENTIALS = (
-    select(sql.StrictCredential)
-        .join(
-            sql.Credential,
-            sql.StrictCredential.credential_id == sql.Credential.id)
-        .where(*CCWC)
-)
-
-QUERY_PRIORITY_CREDENTIALS = (
-    select(sql.PriorityCredential)
-        .join(
-            sql.Credential,
-            sql.PriorityCredential.credential_id == sql.Credential.id)
-        .join(
-            sql.Password,
-            sql.Credential.password_id == sql.Password.id)
-        .where(
-            *CCWC,
-            sql.Password.priority == True)
-)
-
-QUERY_CREDENTIALS = (
     select(sql.Credential.id)
+        .join(
+            sql.StrictCredential,
+            sql.StrictCredential.credential_id == sql.Credential.id)
         .join(
             sql.Username,
             sql.Credential.username_id == sql.Username.id)
@@ -133,21 +92,31 @@ QUERY_CREDENTIALS = (
         .where(*CCWC)
 )
 
-def attr_list(container, attr='id'):
-    for i in range(0, len(container)):
-        container[i] = getattr(container[i], attr)
+QUERY_PRIORITY_CREDENTIALS = (
+    select(sql.Credential.id)
+        .join(
+            sql.PriorityCredential,
+            sql.PriorityCredential.credential_id == sql.Credential.id)
+        .join(
+            sql.Password,
+            sql.Credential.password_id == sql.Password.id)
+        .where(*CCWC)
+)
+
+QUERY_CREDENTIALS = (
+    select(sql.Credential.id)
+        .join(
+            sql.Username,
+            sql.Credential.username_id == sql.Username.id)
+        .where(*CCWC)
+)
+
+def id_copy(c):
+    return [v.id for v in c]
 
 def flatten_list(c):
     for i in range(0, len(c)):
         c[i] = c[i][0]
-
-def peel_credential_ids(container):
-    for i in range(0, len(container)):
-        container[i] = container[i].credential.id
-
-def peel_username_ids(container):
-    for i in range(0, len(container)):
-        container[i] = container[i].credential.username_id
 
 class BruteForcer:
     '''Base object from which all other brute forcers will inherit.
@@ -579,49 +548,52 @@ class BruteForcer:
                 # PRIORITY USERNAMES
                 # ==================
 
-                priorities = self.main_db_sess.execute(
-                        QUERY_PRIORITY_USERNAMES
-                            .where(sql.Username.future_time <= time())
-                            .limit(ulimit)
-                        ).scalars().all()
+                print('yup')
+
+                uids = flatten_list(
+                    self.main_db_sess.execute(QUERY_PRIORITY_USERNAMES)
+                        .where(
+                            sql.Username.future_time <= time(),
+                            sql.Username.priority == True)
+                        .limit(ulimit))
 
                 # =================================
                 # USERNAMES WITH STRICT CREDENTIALS
                 # =================================
 
-                if len(priorities) < ulimit:
+                if len(uids) < ulimit:
 
-                    priorities += self.main_db_sess.execute(
-                            QUERY_STRICT_USERNAMES
-                                .where(
-                                    sql.Username.future_time <= time(),
-                                    sql.Username.id.not_in(priorities))
-                                .limit(ulimit-len(priorities))
-                            ).scalars().all()
+                    uids += flatten_list(
+                        self.main_db_sess.execute(QUERY_STRICT_USERNAMES)
+                            .where(
+                                sql.Username.priority == False,
+                                sql.Username.future_time <= time(),
+                                sql.Username.id.not_in(uids))
+                            .limit(ulimit-len(uids)))
 
                 # =======================
                 # GET GUESSABLE USERNAMES
                 # =======================
 
-                if len(priorities) < ulimit:
+                if len(uids) < ulimit:
 
-                    guessable = self.main_db_sess.execute(
-                            QUERY_USERNAMES
-                                .where(
-                                    sql.Username.priority == False,
-                                    sql.Username.future_time <= time(),
-                                    sql.Username.id.not_in(priorities))
-                                .limit(ulimit-len(priorities))
-                            ).scalars().all()
+                    uids += flatten_list(
+                        self.main_db_sess.execute(QUERY_USERNAMES)
+                            .where(
+                                sql.Username.priority == False,
+                                sql.Username.future_time <= time(),
+                                sql.Username.id.not_in(uids))
+                            .limit(ulimit-len(uids)))
 
+                embed()
+                exit()
+    
                 # ===================
                 # RANDOMIZE USERNAMES
                 # ===================
 
                 if self.config.randomize_usernames:
-                    shuffle(guessable)
-
-                uids = priorities + guessable
+                    shuffle(uids)
 
                 # Logging sleep events
                 if not uids and not sleeping:
@@ -658,32 +630,26 @@ class BruteForcer:
                     # GET STRICT CREDENTIAL IDs
                     # =========================
                     
-                    cids = self.main_db_sess.execute(
-                        QUERY_STRICT_CREDENTIALS
-                            .where(
-                                sql.Credential.username_id == uid)
-                            .limit(glimit)
-                        ).scalars().all()
-
-                    peel_credential_ids(cids)
-
+                    cids = flatten_list(
+                        self.main_db_sess.execute(
+                            QUERY_STRICT_CREDENTIALS
+                                .where(sql.Password.priority == False)
+                                .limit(glimit)))
+    
                     if len(cids) < glimit:
     
                         # ===========================
                         # GET PRIORITY CREDENTIAL IDs
                         # ===========================
     
-                        buff = self.main_db_sess.execute(
-                            QUERY_PRIORITY_CREDENTIALS
-                                .where(
-                                    sql.Credential.username_id == uid,
-                                    sql.Credential.id.not_in(cids),
-                                )
-                                .limit(glimit-len(cids))
-                            ).scalars().all()
-
-                        peel_credential_ids(buff)
-                        cids += buff
+                        cids += flatten_list(
+                                self.main_db_sess.execute(
+                                    QUERY_PRIORITY_CREDENTIALS
+                                    .where(
+                                        sql.Credential.id.not_in(cids),
+                                        sql.Password.priority == True
+                                    )
+                                    .limit(glimit-len(cids))))
     
                     if len(cids) < glimit:
     
@@ -691,16 +657,13 @@ class BruteForcer:
                         # GET NORMAL CREDENTIAL IDs
                         # =========================
     
-                        buff = self.main_db_sess.execute(
+                        cids += self.main_db_sess.execute(
                             QUERY_CREDENTIALS
                                 .where(
-                                    sql.Credential.username_id == uid,
                                     sql.Credential.id.not_in(cids),
+                                    sql.Password.priority == False
                                 )
-                                .limit(glimit-len(cids))
-                            ).scalars().all()
-
-                        cids += buff
+                                .limit(glimit-len(cids)))
 
                     # ===================
                     # GET THE CREDENTIALS
@@ -710,7 +673,8 @@ class BruteForcer:
                         .filter(sql.Credential.id.in_(cids)) \
                         .all()
 
-                    cids.clear()
+                    embed()
+                    exit()
     
                     shuffle(credentials)
 
@@ -746,9 +710,9 @@ class BruteForcer:
                         # Update the Username/Credential object with relevant
                         # attributes and commit
 
-                        credential.guess_time           = ctime
-                        credential.username.last_time   = ctime
-                        credential.username.future_time = ftime
+                        credential.guess_time=ctime
+                        credential.username.last_time=ctime
+                        credential.username.future_time=ftime
                         self.main_db_sess.commit()
 
                         # Do the authentication callback
@@ -766,7 +730,6 @@ class BruteForcer:
                 # ============================================
                 # STOP ATTACK DUE TO STOP_ON_VALID_CREDENTIALS
                 # ============================================
-
                 if recovered and self.config.stop_on_valid:
                         self.log.general(
                             'Valid credentials recovered. Exiting per ' \

@@ -29,9 +29,6 @@ class Username(Base):
     passwords = relationship("Password", secondary="credentials")
     credentials = relationship("Credential", cascade="all, delete")
 
-    priority_username = relationship("PriorityUsername",
-        cascade="all, delete, delete-orphan")
-
     __mapper_args__ = {'confirm_deleted_rows': False}
 
     def __repr__(self):
@@ -55,10 +52,6 @@ class Password(Base):
     # ORM Relationships
     usernames = relationship("Username", secondary="credentials")
     credentials = relationship("Credential", back_populates="password",
-        cascade="all, delete, delete-orphan")
-
-    priority_password = relationship("PriorityPassword",
-        back_populates="password",
         cascade="all, delete, delete-orphan")
 
     __mapper_args__ = {'confirm_deleted_rows': False}
@@ -101,8 +94,8 @@ class Credential(Base):
 
     def __repr__(self):
         return f'<Credential(id={self.id} ' \
-               f'username=({self.username.id}) "{self.username.value} "' \
-               f'password=({self.password.id}) "{self.password.value} "' \
+               f'username=({self.username.id}) "{self.username.value}" ' \
+               f'password=({self.password.id}) "{self.password.value}" ' \
                f'guessed={self.guessed}) >'
 
 class StrictCredential(Base):
@@ -122,35 +115,21 @@ class StrictCredential(Base):
                 name='_unique_credential_id'),
         )
 
-class PriorityPassword(Base):
-    __tablename__ = 'priority_passwords'
+class PriorityCredential(Base):
+    __tablename__ = 'priority_credentials'
 
-    id = Column(Integer, doc='Priority password id',
+    id = Column(Integer, doc='Priority credential id',
             autoincrement="auto", primary_key=True)
 
-    password_id = Column(Integer, ForeignKey('passwords.id',
-        ondelete='CASCADE'), doc='Password id', nullable=False)
+    credential_id = Column(Integer, ForeignKey('credentials.id',
+        ondelete='CASCADE'), doc='Credential id', nullable=False)
 
-    password = relationship("Password")
+    credential = relationship("Credential")
 
     __mapper_args__ = dict(confirm_deleted_rows=False)
     __table_args__ = (
-            UniqueConstraint('password_id',
-                name='_unique_password_id'),
-        )
-
-class PriorityUsername(Base):
-    __tablename__ = 'priority_usernames'
-
-    id = Column(Integer, doc='Priority username id',
-            autoincrement="auto", primary_key=True)
-
-    username_id = Column(Integer, ForeignKey('usernames.id',
-        ondelete='CASCADE'), doc='Username id', nullable=False)
-
-    __mapper_args__ = dict(confirm_deleted_rows=False)
-    __table_args__ = (
-            UniqueConstraint('username_id', name='_unique_username_id'),
+            UniqueConstraint('credential_id',
+                name='_unique_credential_id'),
         )
 
 class Attack(Base):

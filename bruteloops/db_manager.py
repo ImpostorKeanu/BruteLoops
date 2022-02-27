@@ -19,6 +19,9 @@ from inspect import signature
 import csv
 import re
 
+from IPython import embed
+from sys import exit
+
 RE_USERNAME = re.compile('username',re.I)
 RE_PASSWORD = re.compile('password',re.I)
 
@@ -644,21 +647,13 @@ class DBMixin:
                 values = [dict(credential_id = c.id)
                     for c in chunk])
 
-        def _upsert_priority_passwords(chunk):
+        def _upsert_priority_creds(chunk):
 
             self.do_upsert(
-                model = sql.PriorityPassword,
-                index_elements=['password_id'],
-                values = [dict(password_id = p.id)
-                    for p in chunk])
-
-        def _upsert_priority_usernames(chunk):
-
-            self.do_upsert(
-                model = sql.PriorityUsername,
-                index_elements=['username_id'],
-                values = [dict(username_id = u.id)
-                    for u in chunk])
+                model = sql.PriorityCredential,
+                index_elements=['credential_id'],
+                values = [dict(credential_id = c[0])
+                    for c in chunk])
 
         self.main_db_sess.commit()
 
@@ -669,19 +664,23 @@ class DBMixin:
                 .filter(sql.Credential.strict == True),
             callback = _upsert_strict_creds)
 
-        logger.general('Linking priority passwords')
+        logger.general('Linking priority credentials')
+
+        priority_query = (select(sql.Credential.id)
+            .where(
+                sql.Credential.password_id.in_(
+                    select(sql.Password.id).where(
+                        sql.Password.priority == True)
+                ) |
+                sql.Credential.username_id.in_(
+                    select(sql.Username.id).where(
+                        sql.Username.priority == True)
+                )
+            ))
 
         chunk_container(
-            container = self.main_db_sess.query(sql.Password)
-                .filter(sql.Password.priority == True),
-            callback = _upsert_priority_passwords)
-
-        logger.general('Linking priority usernames')
-
-        chunk_container(
-            container = self.main_db_sess.query(sql.Username)
-                .filter(sql.Username.priority == True),
-            callback = _upsert_priority_usernames)
+            container = self.main_db_sess.execute(priority_query),
+            callback = _upsert_priority_creds)
 
         self.main_db_sess.commit()
 
