@@ -205,7 +205,7 @@ def csv_split(s,delimiter=','):
 
 @check_container
 def chunk_container(container, callback,
-        is_file:bool=False, threshold:int=100000, cargs:tuple=None,
+        is_file:bool=False, threshold:int=10000, cargs:tuple=None,
         ckwargs:dict=None):
     '''Break a container of items down into chunks and pass them
     to a callback for further processing. Particularly useful when
@@ -303,7 +303,8 @@ class DBMixin:
             container = container,
             callback = _delete_values)
 
-    def manage_values(self, model, container, is_file=False, insert=True):
+    def manage_values(self, model, container, is_file=False,
+            insert=True, associate_spray_values=True):
         '''Manage username values by iterating over a target container.
         The action taken for the container is indicated by the `insert`
         parameter, which is set to `True` by default. Setting this
@@ -315,14 +316,20 @@ class DBMixin:
         method = ('insert' if insert else 'delete') + '_' + \
                 ('username' if model == sql.Username else 'password') +\
                 '_records'
-        
+
+        kwargs = dict(
+                associate_spray_values = (
+                    method.startswith('insert') and
+                    associate_spray_values))
+
         # Call the proper method
         if is_file:
             for f in container:
                 with open(f) as container:
-                    getattr(self, method)(container=container)
+                    getattr(self, method)(container=container,
+                            **kwargs)
 
-        else: getattr(self, method)(container=container)
+        else: getattr(self, method)(container=container, **kwargs)
 
         # This method commits :)
         self.sync_lookup_tables()
@@ -331,7 +338,8 @@ class DBMixin:
     # USERNAME MANAGEMENT METHODS
     # ===========================
 
-    def insert_username_records(self, container):
+    def insert_username_records(self, container,
+            associate_spray_values=True):
         '''Insert each username value in the container into the target
         database. Duplicates will not be inserted.
         '''
@@ -343,7 +351,9 @@ class DBMixin:
                 values = [dict(value = v) for v in chunk])
 
             self.main_db_sess.commit()
-            self.associate_spray_values(username_values=chunk)
+
+            if associate_spray_values:
+                self.associate_spray_values(username_values=chunk)
 
         chunk_container(container = container,
             callback = _upsert_values)
@@ -387,7 +397,8 @@ class DBMixin:
     # PASSWORD MANAGEMENT METHODS
     # ===========================
 
-    def insert_password_records(self, container):
+    def insert_password_records(self, container,
+            associate_spray_values=True):
         '''Insert individual password records. Additional processing must
         occur on individual passwords in order to make the associations
         with username values.
@@ -413,7 +424,9 @@ class DBMixin:
                 update_data = dict(sprayable = True))
 
             self.main_db_sess.commit()
-            self.associate_spray_values(password_values=chunk)
+
+            if associate_spray_values:
+                self.associate_spray_values(password_values=chunk)
 
         chunk_container(
             container = container,
@@ -476,7 +489,8 @@ class DBMixin:
     # =============================
 
     def manage_credentials(self, container, is_file=False,
-            as_credentials=False, insert=True, is_csv_file=False):
+            as_credentials=False, insert=True, is_csv_file=False,
+            associate_spray_values=True):
         '''Manage credential values. This logic is distinct because inputs
         can be treated as individual username or password values for
         spray attacks, or as individual credential records -- the latter
@@ -492,29 +506,33 @@ class DBMixin:
         # Derive the target method to call based on action
         method = ('insert' if insert else 'delete') + '_credential_records'
 
+        kwargs = dict(as_credentials = as_credentials)
+
+        if method.startswith('insert'):
+            kwargs['associate_spray_values'] = associate_spray_values
+
         # Call the proper method
         if is_csv_file:
             for f in container:
                 with open(f, newline='') as container:
                     reader = csv.DictReader(container)
                     getattr(self, method)(container=reader,
-                        as_credentials=as_credentials)
+                        **kwargs)
 
         elif is_file:
             for f in container:
                 with open(f) as container:
-                    getattr(self, method)(container=container,
-                        as_credentials=as_credentials)
+                    getattr(self, method)(container=container, **kwargs)
 
-        else: getattr(self, method)(container=container,
-                as_credentials=as_credentials)
+        else: getattr(self, method)(container=container, **kwargs)
 
         # This method commits :)
         self.sync_lookup_tables()
 
     @check_container
     def insert_credential_records(self, container, as_credentials=False,
-            credential_delimiter=':', is_file=False, is_dictreader=False):
+            credential_delimiter=':', is_file=False, is_dictreader=False,
+            associate_spray_values=True):
         '''Insert credential records into the database. If as_credentials
         is True, then only StrictCredential records will be created
         for each username to password value. Records will otherwise be
@@ -592,9 +610,10 @@ class DBMixin:
                 flatten_dict_values(passwords)
 
                 # Associate the newly inserted values
-                self.associate_spray_values(
-                    username_values=usernames,
-                    password_values=passwords)
+                if associate_spray_values:
+                    self.associate_spray_values(
+                        username_values=usernames,
+                        password_values=passwords)
 
                 # Skip credential associations by returning
                 return
@@ -873,7 +892,7 @@ class DBMixin:
             passwords=None, username_files=None, password_files=None,
             credentials=None, credential_files=None,
             credential_delimiter=':', as_credentials=False,
-            csv_files=None):
+            csv_files=None, associate_spray_values=True):
 
         # ===============
         # VALIDATE INPUTS
@@ -917,21 +936,25 @@ class DBMixin:
 
         if usernames:
             logger.debug(f'Managing usernames: {usernames}')
-            self.manage_values(sql.Username, usernames, insert=insert)
+            self.manage_values(sql.Username, usernames, insert=insert,
+                    associate_spray_values=associate_spray_values)
 
         if passwords:
             logger.debug(f'Managing passwords: {passwords}')
-            self.manage_values(sql.Password, passwords, insert=insert)
+            self.manage_values(sql.Password, passwords, insert=insert,
+                    associate_spray_values=associate_spray_values)
 
         if username_files:
             logger.debug(f'Managing username files: {username_files}')
             self.manage_values(sql.Username, username_files,
-                    is_file=True, insert=insert)
+                    is_file=True, insert=insert,
+                    associate_spray_values=associate_spray_values)
 
         if password_files:
             logger.debug(f'Managing password files: {password_files}')
             self.manage_values(sql.Password, password_files,
-                    is_file=True, insert=insert)
+                    is_file=True, insert=insert,
+                    associate_spray_values=associate_spray_values)
 
         # ========================
         # HANDLE CREDENTIAL VALUES
@@ -940,19 +963,22 @@ class DBMixin:
         if credentials:
             logger.debug(f'Managing credentials: {credentials}')
             self.manage_credentials(credentials,
-                    as_credentials=as_credentials, insert=insert)
+                    as_credentials=as_credentials, insert=insert,
+                    associate_spray_values=associate_spray_values)
 
         if credential_files:
             logger.debug(
                     f'Managing credential files: {credential_files}')
             self.manage_credentials(credential_files, is_file=True,
-                    as_credentials=as_credentials, insert=insert)
+                    as_credentials=as_credentials, insert=insert,
+                    associate_spray_values=associate_spray_values)
 
         if csv_files:
             logger.debug(
                     f'Managing CSV credential files: {csv_files}')
             self.manage_credentials(csv_files, is_csv_file=True,
-                    as_credentials=as_credentials, insert=insert)
+                    as_credentials=as_credentials, insert=insert,
+                    associate_spray_values=associate_spray_values)
 
 
     def get_valid_credentials(self):

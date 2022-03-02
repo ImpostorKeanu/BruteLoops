@@ -1,4 +1,6 @@
 import argparse
+from zoneinfo import ZoneInfo
+from time import strptime
 
 class BoolAction(argparse.Action):
 
@@ -6,6 +8,44 @@ class BoolAction(argparse.Action):
         setattr(namespace, self.dest, False)
         if values in ['true','True']:
             setattr(namespace, self.dest, True)
+
+class TimezoneAction(argparse.Action):
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        try:
+
+            values = ZoneInfo(values)
+
+        except Exception:
+
+            raise ValueError(
+                'Invalid timezone value supplied. See the '
+                '"TZ database name" column of the following resource '
+                'for valid values: '
+                'https://en.wikipedia.org/wiki/List_of_tz_database_ti'
+                'me_zones')
+
+        setattr(namespace, self.dest, values)
+
+class BlackoutAction(argparse.Action):
+
+    def __call__(self, parser, namespace, values, option_string=None):
+
+        values = values.split('-')
+
+        if not len(values) == 2:
+
+            raise ValueError(
+                f'Invalid format used for blackout window: {values}. '
+                'It must be a hyphen delimited pair of time ranges in '
+                'H:M:S format.'
+            )
+
+        start = strptime(values[0], '%H:%M:%S')
+        stop  = strptime(values[1], '%H:%M:%S')
+
+        setattr(namespace, 'blackout_start', start)
+        setattr(namespace, 'blackout_stop', stop)
 
 # ==================
 # GENERAL PARAMETERS
@@ -37,44 +77,68 @@ PRIORITY_PASSWORDS = \
 them to the front of the guess queue.
 '''
 
+TIMEZONE = \
+'''Timezone used while deriving timestamps. Be sure to use a
+consistent value for this configuration across restarts, otherwise
+lockouts may occur. See the "TZ database name" column in this 
+resource for valid values: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones 
+. (Required: %(required)s)
+'''
+
+BLACKOUT_WINDOW = (
+'Window of time where no additional guesses should be performed at '
+'all. Useful in situation where attacks are to be restricted to '
+'specific testing windows. The range format should be two time values '
+'"H:M:S" separated by a hyphen ("-") character. Hours should be '
+'provided in 24-hour format, eg 13 for 1PM. Example: '
+'17:00:00-09:00:00')
+
 gp = general_parser = argparse.ArgumentParser(add_help=False)
 gg = general_group = gp.add_argument_group('General Parameters',
         'Options used to configure general attack parameters')
 gg.add_argument('--parallel-guess-count','-pgc',
-        type=int,
-        default=1,
-        help=PARALLEL_GUESS_COUNT,
-        dest='process_count')
+    type=int,
+    default=1,
+    help=PARALLEL_GUESS_COUNT,
+    dest='process_count')
 gg.add_argument('--auth-threshold','-at',
-        type=int,
-        default=1,
-        help=AUTH_THRESHOLD,
-        dest='max_auth_tries')
+    type=int,
+    default=1,
+    help=AUTH_THRESHOLD,
+    dest='max_auth_tries')
 gg.add_argument('--stop-on-valid','-sov',
-        action=argparse.BooleanOptionalAction,
-        default=False,
-        help=STOP_ON_VALID)
+    action=argparse.BooleanOptionalAction,
+    default=False,
+    help=STOP_ON_VALID)
+gg.add_argument('--timezone','-tz',
+    action=TimezoneAction,
+    required=False,
+    help=TIMEZONE)
+gg.add_argument('--blackout-window', '-bw',
+    required=False,
+    action=BlackoutAction,
+    help=BLACKOUT_WINDOW)
 
 # ===============================
 # SCHEDULING TWEAK CONFIGURATIONS
 # ===============================
 
 stp = scheduling_tweaks_parser = argparse.ArgumentParser(
-        add_help=False)
+    add_help=False)
 stg = scheduling_tweaks_group = stp.add_argument_group(
-        'Scheduling Tweak Parameters',
-        'Options used to prioritize username or password values')
+    'Scheduling Tweak Parameters',
+    'Options used to prioritize username or password values')
 stg.add_argument('--prioritize',
-        action=argparse.BooleanOptionalAction,
-        default=True,
-        help='Determine if values should be prioritized or '
-            'unprioritized. Default: %(default)s')
+    action=argparse.BooleanOptionalAction,
+    default=True,
+    help='Determine if values should be prioritized or '
+        'unprioritized. Default: %(default)s')
 stg.add_argument('--usernames',
-        nargs='+',
-        help='Usernames to manage')
+    nargs='+',
+    help='Usernames to manage')
 stg.add_argument('--passwords',
-        nargs='+',
-        help='Passwords to manage')
+    nargs='+',
+    help='Passwords to manage')
 
 # =====================
 # JITTER CONFIGURATIONS
@@ -121,10 +185,10 @@ jg.add_argument('--auth-jitter-max','-ajmax',
         default='1s',
         help=AUTH_JITTER_MAXIMUM)
 jg.add_argument('--threshold-jitter-min','-tjmin',
-        default='10m',
+        default='1.5h',
         help=THRESHOLD_JITTER_MINIMUM)
 jg.add_argument('--threshold-jitter-max','-tjmax',
-        default='30m',
+        default='2.5h',
         help=THRESHOLD_JITTER_MAXIMUM)
 
 # =====================

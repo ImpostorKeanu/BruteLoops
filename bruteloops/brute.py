@@ -16,7 +16,8 @@ from pathlib import Path
 from uuid import uuid4
 from collections import namedtuple
 from copy import deepcopy
-from time import sleep,time
+from time import sleep, time, gmtime
+from datetime import datetime, timedelta
 from types import FunctionType, MethodType
 import traceback
 import re
@@ -28,21 +29,32 @@ from IPython import embed
 from sys import exit
 
 UNKNOWN_PRIORITIZED_USERNAME_MSG = (
-'Prioritized username value supplied during configuration that does'
-' not appear in the database. Insert this value or remove it from '
+'Prioritized username value supplied during configuration that does '
+'not appear in the database. Insert this value or remove it from '
 'the configuration: {username}')
 
 UNKNOWN_PRIORITIZED_PASSWORD_MSG = (
-'Prioritized password value supplied during configuration that does'
-' not appear in the database. Insert this value or remove it from '
+'Prioritized password value supplied during configuration that does '
+'not appear in the database. Insert this value or remove it from '
 'the configuration: {password}')
 
+# Simple named tuple to represent output from authentication
+# callbacks.
+Output = namedtuple(
+    typename='Output', 
+    field_names=('outcome', 'username', 'password', 'actionable',
+        'events',),
+    defaults=(True, list(),))
+
 class Queries:
+    '''Namespace to contain SQL queries.
+    '''
     
     # ================
     # USERNAME QUERIES
     # ================
-    
+
+    # Where clauses applicable to to all Username queries.
     COMMON_USERNAME_WHERE_CLAUSES = CWC = (
         sql.Username.recovered    == False,
         sql.Username.actionable   == True,)
@@ -55,7 +67,7 @@ class Queries:
                 sql.Credential.guessed == False)
             .limit(1)
     ).exists()
-    
+
     strict_usernames = (
         select(sql.Username.id)
             .where(
@@ -135,7 +147,15 @@ class Queries:
             .where(*CCWC)
     )
 
+
 def peel_credential_ids(container):
+    '''For each element in the container, traverse the "credential"
+    relationship and collect the ID value.
+
+    Args:
+        container: Iterable of SQLAlchemy ORM instances.
+    '''
+
     for i in range(0, len(container)):
         container[i] = container[i].credential.id
 
@@ -166,10 +186,8 @@ class BruteForcer:
         self.pool     = None
         self.attack   = None
         self.log   = logging.getLogger(
-            name='BruteLoops.BruteForcer',
-            log_level=config.log_level,
-            log_file=config.log_file,
-            log_stdout=config.log_stdout,
+            name='BruteLoops.BruteForcer', log_level=config.log_level,
+            log_file=config.log_file, log_stdout=config.log_stdout,
             log_stderr=config.log_stderr)
 
         self.log.general(f'Initializing {config.process_count} process(es)')
@@ -181,20 +199,16 @@ class BruteForcer:
         self.log.general('Logging attack configuration parameters')
 
         config_attrs = [
-                'authentication_jitter',
-                'max_auth_jitter',
-                'max_auth_tries',
-                'stop_on_valid',
-                'db_file',
-                'log_file',
-                'log_level',
-                'log_stdout',
-                'log_stderr',
-                'randomize_usernames'
+                'authentication_jitter', 'max_auth_jitter',
+                'max_auth_tries', 'stop_on_valid',
+                'db_file', 'log_file', 'log_level',
+                'log_stdout', 'log_stderr', 'randomize_usernames'
         ]
 
         for attr in config_attrs:
-            self.log.general(f'Config Parameter -- {attr}: '+str(getattr(self.config,attr)))
+
+            self.log.general(f'Config Parameter -- {attr}: ' + 
+                    str(getattr(self.config,attr)))
 
         if hasattr(self.config.authentication_callback, 'callback_name'):
             self.log.general(f'Config Parameter -- callback_name: '+ \
@@ -215,21 +229,29 @@ class BruteForcer:
         else:
 
             from multiprocessing.pool import Pool
-
             self.pool = Pool(processes=config.process_count)
 
         if not KeyboardInterrupt in self.config.exception_handlers:
 
+            # =================================
+            # DEFINE THE DEFAULT SIGINT HANDLER
+            # =================================
+
             def handler(sig,exception):
+
                 print('SIGINT Captured -- Shutting down ' \
                       'attack\n')
-                self.shutdown()
+                self.shutdown(complete=False)
                 print('Exiting')
                 exit(sig)
 
             self.config.exception_handlers[KeyboardInterrupt] = handler
 
         if KeyboardInterrupt in self.config.exception_handlers:
+
+            # =================================
+            # SET A USER-DEFINED SIGINT HANDLER
+            # =================================
 
             sigint_handler = config.exception_handlers[KeyboardInterrupt]
 
@@ -269,27 +291,64 @@ class BruteForcer:
         # Realign future jitter times with the current configuration
         self.realign_future_time()
 
-    def handle_outputs(self, outputs):
+    def handle_outputs(self, outputs:list) -> bool:
         '''Handle outputs from the authentication callback. It expects a list of
-        tuples/lists conforming to the following format:
+        tuples/lists conforming to the blow format.
 
-        ```
-        outputs = [{
+        Args:
+            outputs: A list of dict objects.
+
+        Note:
+            Each dict in `outputs` can have the following elements:
+
+            - `outcome`
+              - Required: True
+              - Description: Determines the outcome of the authentication
+                attempt.
+              - Valid Values:
+                - `-1`: Indicates failed authentication attempt. Unless
+                  `actionable` is set to False, credentials marked with
+                  this value will be guessed again upon the next
+                  iteration.
+                -  `0`: Indicates invalid credentials.
+                -  `1`: Indicates valid credentials.
+            - `username`
+              - Required: True
+              - Description `str` username value of the credentials.
+            - `password`
+              - Required: True
+              - Descrption: `str` password value of the credentials.
+            - `actionable`
+              - Required: False
+              - Valid Values:
+                - `True`: Indicates that the username value is
+                    actionable.
+                - `False`: Indicates that the username value should
+                  skipped during future guesses.
+              - Description: Field determines if the username is
+                valid, allowing authentication callbacks to disable
+                invalid usernames while preserving a record of the last
+                attempt.
+            - `events`
+              - Required: False
+              - Valid Values: `[str]`
+              - Description: A list of string events to log.
+
+        Template:
+            ```
+            {
                 'outcome': int,
                 'username': str,
                 'password': str,
                 'actionable': bool,
                 'events': [str]
-            }]
-        ```
+            }
+            ```
 
-        In the structure below:
-
-        - `OUTCOME` - is an integer value indicating if authentication was
-        successful (-1 for "incomplete", 1 for true, 0 for false)
-        - `USERNAME` - string value of the username
-        - `PASSWORD` - string value of the password
-        - `ACTIONABLE` - Boolean value determining if the record should be disabled.
+        Returns:
+            `bool` value determinine if at least one credential was
+            valid in the list of outputs. This is useful when working
+            with the "stop on valid" flag.
         '''
 
         # ==================================================
@@ -299,27 +358,28 @@ class BruteForcer:
         recovered = False
         for output in outputs:
 
-            # Stop being lazy
-            # Make this a named tuple, or something
-            outcome = output.get('outcome', 0)
-            username = output.get('username', None)
-            password = output.get('password', None)
-            actionable = output.get('actionable', True)
-            events = output.get('events', [])
+            if not isinstance(output, dict):
+
+                raise ValueError(
+                    'Authentication callbacks must return a dictionary,'
+                    f' got: {type(output)}')
+
+
+            output = Output(**output)
 
             # ===============================
             # QUERY FOR THE TARGET CREDENTIAL
             # ===============================
 
             credential = self.handler_db_sess \
-                    .query(sql.Credential) \
-                    .join(sql.Username) \
-                    .join(sql.Password) \
-                    .filter(
-                        sql.Username.value == username,
-                        sql.Password.value == password,
-                        sql.Username.recovered == False) \
-                    .first()
+                .query(sql.Credential) \
+                .join(sql.Username) \
+                .join(sql.Password) \
+                .filter(
+                    sql.Username.value == output.username,
+                    sql.Password.value == output.password,
+                    sql.Username.recovered == False) \
+                .first()
 
             if not credential: continue
 
@@ -337,27 +397,31 @@ class BruteForcer:
                 - Mitigates likelihood of locking out accounts.
                 '''
 
-                credential.username.future_time = \
-                    self.config.max_auth_jitter.get_jitter_future()
+                credential.username.future_time = (
+                    self
+                      .config
+                      .max_auth_jitter
+                      .get_jitter_future())
 
-            cred = f'{output["username"]}:{output["password"]}'
+            cred = f'{output.username}:{output.password}'
 
             # Handle valid credentials
-            if outcome == 1:
+            if output.outcome == 1:
 
-                credential.guessed=True
+                credential.guessed = True
 
                 recovered = True
+
                 self.log.valid(cred)
 
                 # Update username to "recovered"
-                credential.username.recovered=True
+                credential.username.recovered = True
 
                 # Update the credential to valid
-                credential.valid=True
+                credential.valid = True
 
             # Guess failed for some reason
-            elif outcome == -1:
+            elif output.outcome == -1:
 
                 self.log.general(
                     f'Failed to guess credential. - {cred}')
@@ -375,9 +439,9 @@ class BruteForcer:
             # MANAGE THE ACTIONABLE ATTRIBUTE FOR THE USERNAME
             # ================================================
     
-            if actionable and not credential.username.actionable:
+            if output.actionable and not credential.username.actionable:
                 credential.username.actionable = True
-            elif not actionable and credential.username.actionable:
+            elif not output.actionable and credential.username.actionable:
                 self.log.invalid_username(
                     f'Disabling invalid username - {cred}')
                 credential.username.actionable = False
@@ -386,8 +450,8 @@ class BruteForcer:
             # WRITE MODULE EVENTS
             # ===================
     
-            if events and isinstance(events, list):
-                for event in events:
+            if output.events and isinstance(output.events, list):
+                for event in output.events:
                     self.log.module(event)
 
         # Commit the changes
@@ -425,24 +489,17 @@ class BruteForcer:
         # Commit the changes to the database
         self.main_db_sess.commit()
 
-    def monitor_processes(self,ready_all=False):
-        '''Iterate over each process in ```self.presults``` and wait
-        for a process to complete execution. ```ready_all```
-        indciates that monitoring will continue looping until all
-        processes complete execution, otherwise a list of outputs
-        will be returned after a single process is finished.
+    def monitor_processes(self, ready_all=False):
+        '''Iterate over each process in `self.presults` and wait
+        for a process to complete execution.
 
-        Returns a list of output objects from the
-        ```self.authentication_callback``` function and the first
-        three elements should follow the pattern below:
+        Args:
+            ready_all: indciates that monitoring will continue looping until all
+              processes complete execution, otherwise a list of outputs
+              will be returned after a single process is finished.
 
-        ```
-        output = [
-            0,        # indicator of successful authentication; 0=failure, 1=success
-            username, # string representing the username used during authentication
-            password  # string representing the password used during authentication
-        ]
-        ```
+        Returns:
+            A list of output dicts from the authentication callback.
         '''
        
         outputs = []
@@ -475,13 +532,21 @@ class BruteForcer:
             else:
                 return outputs
 
-
     def do_authentication_callback(self, username, password, stop_on_valid=False, 
-            *args, **kwargs):
-        '''
-        Call the authentication callback from a distinct process. Will monitor
-        processes for completion if all are currently occupied with a previous
-        callback request.
+            *args, **kwargs) -> bool:
+        '''Call the authentication callback from a distinct process.
+        Will monitor processes for completion if all are currently
+        occupied with a previous callback request.
+
+        Args:
+            username: Username to guess.
+            password: Password to guess.
+            stop_on_valid: Boolean value determining if the attack
+              should be halted when valid credentials are observed.
+
+        Returns:
+            Boolean value determining if a valid set of credentials
+            was discovered.
         '''
 
         '''
@@ -497,14 +562,25 @@ class BruteForcer:
         recovered = False
         if len(self.presults) == self.config.process_count:
 
+            # ==================================
+            # HANDLE WHEN ALL PROCESSES ARE BUSY
+            # ==================================
+
             # monitor result objects
             outputs = self.monitor_processes()
+
+            # Deteremine if at least one credential was valid.
             recovered = self.handle_outputs(outputs)
 
         if recovered and stop_on_valid:
+
+            # ==============================================
+            # STOP ISSUING AUTH CALLBACKS WHEN STOP ON VALID
+            # ==============================================
+
             return recovered
 
-        # initiate a brute in a process within the pool
+        # initiate a guess in a process within the pool
         self.presults.append(
             self.pool.apply_async(
                 self.config.authentication_callback,
@@ -516,8 +592,13 @@ class BruteForcer:
 
         return recovered
 
-    def shutdown(self):
-        '''Close & join the process pool, followed by closing input/output files.
+    def shutdown(self, complete:bool):
+        '''Close & join the process pool, followed by closing
+        input/output files.
+
+        Args:
+            complete: Determines if the attack was fully completed,
+              i.e. all guesses were performed.
         '''
 
         # =====================
@@ -526,7 +607,7 @@ class BruteForcer:
 
         self.log.general('Shutting attack down')
 
-        self.attack.complete = True
+        self.attack.complete = complete
         self.attack.end_time = BruteTime.current_time()
         self.main_db_sess.commit()
 
@@ -539,8 +620,8 @@ class BruteForcer:
         close_all_sessions()
 
     def launch(self):
-        """Launch a horitontal brute force attack.
-        """
+        '''Launch the attack.
+        '''
 
         if self.config.max_auth_tries:
 
@@ -554,8 +635,8 @@ class BruteForcer:
 
         ulimit = user_limit = self.config.process_count
       
-        sleeping  = False # determine if the brute attack is sleeping
-        recovered = False # track if a valid credentials has been recovered
+        last_logged  = -1    # track the last time a sleep log event was emitted
+        recovered    = False # track if a valid credentials has been recovered
 
         # ========================
         # BEGIN BRUTE FORCE ATTACK
@@ -565,20 +646,73 @@ class BruteForcer:
 
             try:
 
-                # ==================
-                # PRIORITY USERNAMES
-                # ==================
+                # ======================
+                # MANAGE BLACKOUT WINDOW
+                # ======================
 
+                if self.config.blackout_start and self.config.blackout_stop:
+
+                    now = datetime.now()
+
+                    b_start = datetime(
+                        year=now.year,
+                        month=now.month,
+                        day=now.day,
+                        hour=self.config.blackout_start.tm_hour,
+                        minute=self.config.blackout_start.tm_min,
+                        second=self.config.blackout_start.tm_sec)
+
+                    b_stop = datetime(
+                        year=now.year,
+                        month=now.month,
+                        day=now.day,
+                        hour=self.config.blackout_stop.tm_hour,
+                        minute=self.config.blackout_stop.tm_min,
+                        second=self.config.blackout_stop.tm_sec)
+
+                    if (now >= b_start) and (now < b_stop):
+
+                        # Allow outstanding processes to complete
+                        outputs = self.monitor_processes(ready_all=True)
+                        recovered = self.handle_outputs(outputs)
+                        if recovered and self.config.stop_on_valid:
+                            break
+
+                        # =============================
+                        # SLEEP THROUGH BLACKOUT WINDOW
+                        # =============================
+
+                        dstart = timedelta(hours=now.hour,
+                            minutes=now.minute,
+                            seconds=now.second)
+
+                        dstop = timedelta(
+                            hours=self.config.blackout_stop.tm_hour,
+                            minutes=self.config.blackout_stop.tm_min,
+                            seconds=self.config.blackout_stop.tm_sec)
+
+                        ts = (dstop-dstart).total_seconds()
+                        ft = time()+ts
+
+                        self.log.general('Engaging blackout')
+                        self.log.general(
+                            'Sleeping until ' +
+                            BruteTime.float_to_str(ft))
+                        sleep(ts)
+                        self.log.general('Disengaging blackout')
+
+                # ========================
+                # GET ACTIONABLE USERNAMES
+                # ========================
+
+                # PRIORITY USERNAMES
                 priorities = self.main_db_sess.execute(
                         Queries.priority_usernames
                             .where(sql.Username.future_time <= time())
                             .limit(ulimit)
                         ).scalars().all()
 
-                # =================================
                 # USERNAMES WITH STRICT CREDENTIALS
-                # =================================
-
                 if len(priorities) < ulimit:
 
                     priorities += self.main_db_sess.execute(
@@ -589,10 +723,8 @@ class BruteForcer:
                                 .limit(ulimit-len(priorities))
                             ).scalars().all()
 
-                # =======================
                 # GET GUESSABLE USERNAMES
-                # =======================
-
+                guessable = []
                 if len(priorities) < ulimit:
 
                     guessable = self.main_db_sess.execute(
@@ -604,36 +736,60 @@ class BruteForcer:
                                 .limit(ulimit-len(priorities))
                             ).scalars().all()
 
-                # ===================
                 # RANDOMIZE USERNAMES
-                # ===================
-
-                if self.config.randomize_usernames:
+                if guessable and self.config.randomize_usernames:
                     shuffle(guessable)
 
                 uids = priorities + guessable
 
                 # Logging sleep events
-                if not uids and not sleeping:
+                if not uids:
 
-                    u = (
-                            self.main_db_sess.query(sql.Username)
-                                .filter(sql.Username.recovered == False)
-                                .order_by(sql.Username.future_time.desc())
+                    outputs = self.monitor_processes(ready_all=True)
+                    recovered = self.handle_outputs(outputs)
+                    if recovered and self.config.stop_on_valid:
+                        break
+
+                    q = (
+                            select(sql.Username)
+                                .where(
+                                    sql.Username.recovered == False,
+                                    sql.Username.actionable == True,
+                                    sql.Username.future_time > -1,
+                                    sql.Username.future_time > time(),
+                                    (
+                                        (select(sql.Credential.id)
+                                            .where(
+                                                sql.Credential.username_id ==
+                                                    sql.Username.id,
+                                                sql.Credential.guessed ==
+                                                    False,)
+                                            .limit(1)).exists()
+                                    ))
+                                .order_by(sql.Username.future_time.asc())
                                 .limit(1)
-                                .first()
                         )
 
-                    sleeping = True
 
-                    if u and u.future_time > 60+time():
-                        self.log.general(
-                            f'Sleeping until {BruteTime.float_to_str(u.future_time)}'
-                        )
+                    u = self.main_db_sess.execute(q) \
+                        .scalars() \
+                        .first()
 
-                elif uids and sleeping:
+                    if u and u.future_time:
 
-                    sleeping = False
+                        sleep_time = u.future_time - time()
+
+                        # Log sleep events when a downtime of 60
+                        # seconds or greater is observed.
+                        if sleep_time >= 60:
+
+                            self.log.general(
+                                f'Sleeping until {u.value}\'s '
+                                'threshold time expires: ' +
+                                BruteTime.float_to_str(u.future_time))
+
+                        if sleep_time > 0:
+                            sleep(sleep_time)
 
                 # =========================
                 # BRUTE FORCE EACH USERNAME
@@ -644,10 +800,7 @@ class BruteForcer:
                  # id
                 for uid in uids:
 
-                    # =========================
                     # GET STRICT CREDENTIAL IDs
-                    # =========================
-                    
                     cids = self.main_db_sess.execute(
                         Queries.strict_credentials
                             .where(
@@ -659,10 +812,7 @@ class BruteForcer:
 
                     if len(cids) < glimit:
     
-                        # ===========================
                         # GET PRIORITY CREDENTIAL IDs
-                        # ===========================
-    
                         buff = self.main_db_sess.execute(
                             Queries.priority_credentials
                                 .where(
@@ -677,10 +827,7 @@ class BruteForcer:
     
                     if len(cids) < glimit:
     
-                        # =========================
                         # GET NORMAL CREDENTIAL IDs
-                        # =========================
-    
                         buff = self.main_db_sess.execute(
                             Queries.credentials
                                 .where(
@@ -692,10 +839,7 @@ class BruteForcer:
 
                         cids += buff
 
-                    # ===================
                     # GET THE CREDENTIALS
-                    # ===================
-    
                     credentials = self.main_db_sess.query(sql.Credential) \
                         .filter(sql.Credential.id.in_(cids)) \
                         .all()
@@ -721,16 +865,32 @@ class BruteForcer:
                             # Default effectively asserting that no jitter will occur.
                             ftime = -1.0
 
-                        # Avoid race condition
-                            # also prevents checking of additional passwords if a valid
-                            # password has been recovered in the distinct process
+                        # ==================================
+                        # DETECT POTENTIAL DUPLICATE GUESSES
+                        # ==================================
+
+                        skip_msg = None
                         if credential.username.recovered:
-                            self.log.general(
-                                'Skipping recovered credentials: '
+
+                            skip_msg = 'Skipping recovered credentials: ' \
                                 '{username}:{password}'
-                                .format(
+
+                        elif credential.guess_time != -1 or credential.guessed:
+
+                            skip_msg = 'Skipping duplicate credential guess: ' \
+                                '{username}:{password}'
+
+                        if skip_msg:
+
+                            # ============================
+                            # AVOID DUPLICATES BY SKIPPING
+                            # ============================
+
+                            self.log.general(
+                                skip_msg.format(
                                     username=credential.username.value,
                                     password=credential.password.value))
+
                             continue
 
                         # Update the Username/Credential object with relevant
@@ -760,9 +920,8 @@ class BruteForcer:
                 if recovered and self.config.stop_on_valid:
                         self.log.general(
                             'Valid credentials recovered. Exiting per ' \
-                            'stop_on_valid configuration.',
-                        )
-                        self.shutdown()
+                            'stop_on_valid configuration.')
+                        self.shutdown(complete=False)
                         break
 
                 # ===============================================
@@ -775,6 +934,7 @@ class BruteForcer:
                     .join(sql.Credential) \
                     .filter(sql.Username.recovered == False,
                             sql.Username.actionable == True,
+                            sql.Credential.guess_time == -1,
                             sql.Credential.guessed == False) \
                     .limit(1) \
                     .first()
@@ -800,7 +960,7 @@ class BruteForcer:
                 # SHUTDOWN
                 # ========
    
-                self.shutdown()
+                self.shutdown(complete=True)
                 break
                 
             # ==================
@@ -831,5 +991,4 @@ class BruteForcer:
                         'and returning control to the caller.'
                     )
 
-                    self.shutdown()
                     raise e

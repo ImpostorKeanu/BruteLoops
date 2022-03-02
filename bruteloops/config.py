@@ -7,6 +7,8 @@ from . import logging as BL
 from pathlib import Path
 from sys import stdout,stderr
 from .db_manager import Session
+from time import struct_time
+import datetime
 import inspect
 import logging
 
@@ -61,19 +63,15 @@ class Config:
     '''
 
     def __init__(self,
-            process_count=1,                # NUMBER OF CHILD PROCESSES TO RUN
-            authentication_callback=None,   # AUTHENTICATION CALLBACK
-            authentication_jitter=None,     # JITTER AFTER EACH AUTHENTICATION ATTEMPT
-            max_auth_jitter=None,           # JITTER AFTER EACH PASSWORD ITERATION
-            max_auth_tries=1,               # JITTER ONLY AFTER A THRESHOLD
-            stop_on_valid=False,            # STOP AFTER A SINGLE CREDENTIAL IS RECOVERED
-            db_file=None,                   # SQLITE DATABASE FILE
-            log_level=False,                # LOGGING LEVEL
-            log_file=False,                 # FILE TO RECEIVE ADDITIONAL LOGS
-            log_stdout=False,               # LOG EVENTS TO STDOUT
-            log_stderr=False,               # LOG EVENTS TO STDERR
-            randomize_usernames=True,       # RANDOMIZE ORDERING OF USERNAMES
-            exception_handlers=None):       # DICTIONARY OF EXCEPTION HANDLERS: {class:exception_handler}
+            process_count:int=1, authentication_callback=None,
+            authentication_jitter:str=None, max_auth_jitter:str=None,
+            max_auth_tries:int=1, stop_on_valid:bool=False,
+            db_file:str=None, log_level:int=False, log_file:str=False,
+            log_stdout:bool=False, log_stderr:bool=False,
+            randomize_usernames:bool=True,
+            exception_handlers:dict=None, timezone:str=None,
+            blackout_start:struct_time=None,
+            blackout_stop:struct_time=None):
 
         self.process_count              = process_count
         self.authentication_callback    = authentication_callback
@@ -87,40 +85,69 @@ class Config:
         self.log_stdout                 = log_stdout
         self.log_stderr                 = log_stderr
         self.randomize_usernames        = randomize_usernames
-        self.exception_handlers         = exception_handlers if \
-            exception_handlers else {}
-        self.log_level                  = 90 if \
-            not self.log_level else self.log_level
+        self.timezone                   = timezone
+        self.blackout_start             = blackout_start
+        self.blackout_stop              = blackout_stop
         self.validated                  = False
+        self.exception_handlers         = exception_handlers
+        self.log_level                  = log_level
 
     def validate(self):
+        '''Validate configuration values.
+        '''
 
-        # ==========================
-        # ASSERT REQUIRED PARAMETERS
-        # ==========================
-        assert self.process_count, 'A Config object requires a process_count'
-        assert self.process_count.__class__ == int, (
-            'Process count must be an integer value'
-        )
-        assert self.db_file, 'A path to a SQLite database is required. '\
-            'Library will create one should the file itself not yet exist.'
-        assert self.authentication_callback, (
-            'A callback must be set on the Config object'
-        )
+        # Process count
+        if self.process_count is None or not (
+                isinstance(self.process_count, int)):
 
-        if self.exception_handlers:
-
-            assert type(self.exception_handlers) == dict, (
-                'exception_handlers is intended to be a dictionary, where\n'\
-                'each key is an exception class and the value a function\n'\
-                'which the exception will execute. The current brute object\n'\
-                'will be passed to the function as an argument.\n'\
-                f'Current type: {type(self.exception_handlers)}'
+            raise ValueError(
+                'Config objects require a process_count integer.'
             )
+
+        # Database file
+        if self.db_file is None:
+
+            raise ValueError(
+                'A path to a SQLite database is required. Library will '
+                'create one should the file itself not yet exist.')
+
+        # Authentication callback
+        if self.authentication_callback is None or not \
+                hasattr(self.authentication_callback, '__call__'):
+            raise ValueError(
+                'A callback must be set on the Config object')
+
+        # Exception handlers
+        if self.exception_handlers and not \
+                isinstance(self.exception_handlers, dict):
+
+            raise ValueError(
+                'exception_handlers is intended to be a dictionary, '
+                'where each key is an exception class and the value '
+                'a function which the exception will execute. The '
+                'current brute object will be passed to the function '
+                'as an argument. '
+                f'Current type: {type(self.exception_handlers)}')
+
+        elif self.exception_handlers is None:
+
+            self.exception_handlers = {}
+
+        # Blackout_start/stop
+        if self.blackout_start and not self.blackout_stop:
+
+            raise ValueError(
+                'Blackout values must be supplied as a start/stop '
+                'pair.')
+
+        # Log level
+        if self.log_level is None:
+            self.log_level = 90
 
         # ===============================
         # SET THE AUTHENTICATION_CALLBACK
         # ===============================
+
         self.authentication_callback = Callback(
             self.authentication_callback,
             self.authentication_jitter
@@ -129,7 +156,46 @@ class Config:
         # =====================
         # SQLITE INITIALIZATION
         # =====================
+
         self.session_maker = Session(self.db_file)
 
         # UPDATE THE OBJECT TO REFLECT VALIDATED STATE
         self.validated = True
+
+        if self.timezone != None:
+            BruteTime.set_timezone(self.timezone)
+
+        # =====================
+        # HANDLE BLACKOUT RANGE
+        # =====================
+
+        if (self.blackout_start or self.blackout_stop) and not (
+                self.blackout_start and self.blackout_stop):
+
+            raise ValueError(
+                'blackout_start must always be paired with a '
+                'blackout_stop')
+
+        elif self.blackout_start and self.blackout_stop:
+
+            if not isinstance(self.blackout_start, struct_time) or not \
+                    isinstance(self.blackout_stop, struct_time):
+                
+                raise ValueError(
+                    'blackout_start and blackout_stop values must '
+                    'be of type "time.struct_time".'
+                )
+
+                # ==================================================
+                # CONVERT BLACKOUT VALUES TO datetime.time INSTANCES
+                # ==================================================
+
+                self.blackout_start = datetime.time(
+                    hour=blackout_start.tm_hour,
+                    minute=blackout_start.tm_min,
+                    second=blackout_start.tm_sec)
+
+                self.blackout_stop = datetime.time(
+                    hour=blackout_stop.tm_hour,
+                    minute=blackout_stop.tm_min,
+                    second=blackout_stop.tm_sec)
