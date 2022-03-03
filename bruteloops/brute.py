@@ -16,7 +16,7 @@ from pathlib import Path
 from uuid import uuid4
 from collections import namedtuple
 from copy import deepcopy
-from time import sleep, time, gmtime
+from time import sleep, time, gmtime, strftime
 from datetime import datetime, timedelta
 from types import FunctionType, MethodType
 import traceback
@@ -188,7 +188,10 @@ class BruteForcer:
         self.log   = logging.getLogger(
             name='BruteLoops.BruteForcer', log_level=config.log_level,
             log_file=config.log_file, log_stdout=config.log_stdout,
-            log_stderr=config.log_stderr)
+            log_stderr=config.log_stderr, timezone=config.timezone)
+
+        if config.timezone:
+            BruteTime.set_timezone(config.timezone)
 
         self.log.general(f'Initializing {config.process_count} process(es)')
         
@@ -202,13 +205,26 @@ class BruteForcer:
                 'authentication_jitter', 'max_auth_jitter',
                 'max_auth_tries', 'stop_on_valid',
                 'db_file', 'log_file', 'log_level',
-                'log_stdout', 'log_stderr', 'randomize_usernames'
+                'log_stdout', 'log_stderr', 'randomize_usernames',
+                'timezone', 'blackout_start', 'blackout_stop'
         ]
+
+        conf_temp = 'Config Parameter -- {attr}: {val}'
+        strftime_temp = '%H:%M:%S'
 
         for attr in config_attrs:
 
-            self.log.general(f'Config Parameter -- {attr}: ' + 
-                    str(getattr(self.config,attr)))
+            if attr.startswith('blackout') and getattr(config, attr):
+                
+                self.log.general(
+                    conf_temp.format(attr=attr, val=strftime(
+                        strftime_temp,
+                        getattr(self.config,attr))))
+
+            else:
+
+                self.log.general(f'Config Parameter -- {attr}: ' + 
+                        str(getattr(self.config,attr)))
 
         if hasattr(self.config.authentication_callback, 'callback_name'):
             self.log.general(f'Config Parameter -- callback_name: '+ \
@@ -652,7 +668,11 @@ class BruteForcer:
 
                 if self.config.blackout_start and self.config.blackout_stop:
 
-                    now = datetime.now()
+                    now = BruteTime.current_time(datetime)
+
+                    # ==============================
+                    # GET DATETIME OBJECTS FOR MATHS
+                    # ==============================
 
                     b_start = datetime(
                         year=now.year,
@@ -660,7 +680,8 @@ class BruteForcer:
                         day=now.day,
                         hour=self.config.blackout_start.tm_hour,
                         minute=self.config.blackout_start.tm_min,
-                        second=self.config.blackout_start.tm_sec)
+                        second=self.config.blackout_start.tm_sec,
+                        tzinfo=BruteTime.timezone)
 
                     b_stop = datetime(
                         year=now.year,
@@ -668,7 +689,8 @@ class BruteForcer:
                         day=now.day,
                         hour=self.config.blackout_stop.tm_hour,
                         minute=self.config.blackout_stop.tm_min,
-                        second=self.config.blackout_stop.tm_sec)
+                        second=self.config.blackout_stop.tm_sec,
+                        tzinfo=BruteTime.timezone)
 
                     if (now >= b_start) and (now < b_stop):
 
@@ -692,7 +714,7 @@ class BruteForcer:
                             seconds=self.config.blackout_stop.tm_sec)
 
                         ts = (dstop-dstart).total_seconds()
-                        ft = time()+ts
+                        ft = BruteTime.future_time(seconds=ts)
 
                         self.log.general('Engaging blackout')
                         self.log.general(
@@ -705,10 +727,13 @@ class BruteForcer:
                 # GET ACTIONABLE USERNAMES
                 # ========================
 
+                # Current time
+                ctime = BruteTime.current_time()
+
                 # PRIORITY USERNAMES
                 priorities = self.main_db_sess.execute(
                         Queries.priority_usernames
-                            .where(sql.Username.future_time <= time())
+                            .where(sql.Username.future_time <= ctime)
                             .limit(ulimit)
                         ).scalars().all()
 
@@ -718,7 +743,7 @@ class BruteForcer:
                     priorities += self.main_db_sess.execute(
                             Queries.strict_usernames
                                 .where(
-                                    sql.Username.future_time <= time(),
+                                    sql.Username.future_time <= ctime,
                                     sql.Username.id.not_in(priorities))
                                 .limit(ulimit-len(priorities))
                             ).scalars().all()
@@ -731,7 +756,7 @@ class BruteForcer:
                             Queries.usernames
                                 .where(
                                     sql.Username.priority == False,
-                                    sql.Username.future_time <= time(),
+                                    sql.Username.future_time <= ctime,
                                     sql.Username.id.not_in(priorities))
                                 .limit(ulimit-len(priorities))
                             ).scalars().all()
@@ -745,6 +770,8 @@ class BruteForcer:
                 # Logging sleep events
                 if not uids:
 
+                    ctime = BruteTime.current_time()
+
                     outputs = self.monitor_processes(ready_all=True)
                     recovered = self.handle_outputs(outputs)
                     if recovered and self.config.stop_on_valid:
@@ -756,7 +783,7 @@ class BruteForcer:
                                     sql.Username.recovered == False,
                                     sql.Username.actionable == True,
                                     sql.Username.future_time > -1,
-                                    sql.Username.future_time > time(),
+                                    sql.Username.future_time > ctime,
                                     (
                                         (select(sql.Credential.id)
                                             .where(
@@ -777,7 +804,7 @@ class BruteForcer:
 
                     if u and u.future_time:
 
-                        sleep_time = u.future_time - time()
+                        sleep_time = u.future_time - ctime
 
                         # Log sleep events when a downtime of 60
                         # seconds or greater is observed.

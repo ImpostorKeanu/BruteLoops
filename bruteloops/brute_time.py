@@ -1,7 +1,7 @@
 import time
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
-
+from .errors import TimezoneError
 
 class BruteTime:
 
@@ -24,7 +24,10 @@ class BruteTime:
         '''
 
         if isinstance(key, str):        
-            BruteTime.timezone = ZoneInfo(key)
+            try:
+                BruteTime.timezone = ZoneInfo(key)
+            except Exception as e:
+                raise TimezoneError.invalidTZ(key)
         elif isinstance(key, ZoneInfo):
             BruteTime.timezone = key
         else:
@@ -75,11 +78,14 @@ class BruteTime:
             - When `str` is supplied to `format`, a formatted string
               is returned.
             - When `float` is supplied to `format`, a float is returned.
+            - when `datetime`, a `datetime` object is returned.
         '''
 
         dt = datetime.now(BruteTime.timezone)
         if format == str:
             return dt.strftime(str_format)
+        if format in (datetime, 'datetime',):
+            return dt
         else:
             return dt.timestamp()
 

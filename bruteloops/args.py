@@ -77,14 +77,6 @@ PRIORITY_PASSWORDS = \
 them to the front of the guess queue.
 '''
 
-TIMEZONE = \
-'''Timezone used while deriving timestamps. Be sure to use a
-consistent value for this configuration across restarts, otherwise
-lockouts may occur. See the "TZ database name" column in this 
-resource for valid values: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones 
-. (Required: %(required)s)
-'''
-
 BLACKOUT_WINDOW = (
 'Window of time where no additional guesses should be performed at '
 'all. Useful in situation where attacks are to be restricted to '
@@ -110,14 +102,28 @@ gg.add_argument('--stop-on-valid','-sov',
     action=argparse.BooleanOptionalAction,
     default=False,
     help=STOP_ON_VALID)
-gg.add_argument('--timezone','-tz',
-    action=TimezoneAction,
-    required=False,
-    help=TIMEZONE)
 gg.add_argument('--blackout-window', '-bw',
     required=False,
     action=BlackoutAction,
     help=BLACKOUT_WINDOW)
+
+# ===============
+# TIMEZONE PARSER
+# ===============
+
+TIMEZONE = \
+'''Timezone used while deriving timestamps. Be sure to use a
+consistent value for this configuration across restarts, otherwise
+lockouts may occur. See the "TZ database name" column in this 
+resource for valid values: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones 
+. (Required: %(required)s)
+'''
+
+timezone_parser = tz_p = argparse.ArgumentParser(add_help=False)
+tz_p.add_argument('--timezone','-tz',
+    action=TimezoneAction,
+    required=False,
+    help=TIMEZONE)
 
 # ===============================
 # SCHEDULING TWEAK CONFIGURATIONS
