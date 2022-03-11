@@ -19,9 +19,6 @@ from inspect import signature
 import csv
 import re
 
-from IPython import embed
-from sys import exit
-
 RE_USERNAME = re.compile('username',re.I)
 RE_PASSWORD = re.compile('password',re.I)
 
