@@ -9,10 +9,12 @@ from pathlib import Path
 from sys import stdout,stderr
 from .db_manager import Session
 from time import struct_time
+from dataclasses import dataclass
 import datetime
 import inspect
 import logging
 
+@dataclass
 class Config:
     '''
     Configuration object that is consumed by BruteForce objects. Configurations
@@ -63,50 +65,37 @@ class Config:
     - `log_general` - `boolean` value - Log all relevant events to each destination.
     '''
 
-    def __init__(self,
-            process_count:int=1, authentication_callback=None,
-            authentication_jitter:str=None, max_auth_jitter:str=None,
-            max_auth_tries:int=1, stop_on_valid:bool=False,
-            db_file:str=None, log_level:int=False, log_file:str=False,
-            log_stdout:bool=False, log_stderr:bool=False,
-            randomize_usernames:bool=True,
-            exception_handlers:dict=None, timezone:str=None,
-            blackout_start:struct_time=None,
-            blackout_stop:struct_time=None):
-
-        self.process_count              = process_count
-        self.authentication_callback    = authentication_callback
-        self.authentication_jitter      = authentication_jitter
-        self.max_auth_jitter            = max_auth_jitter
-        self.max_auth_tries             = max_auth_tries
-        self.stop_on_valid              = stop_on_valid
-        self.db_file                    = db_file
-        self.log_level                  = log_level
-        self.log_file                   = log_file
-        self.log_stdout                 = log_stdout
-        self.log_stderr                 = log_stderr
-        self.randomize_usernames        = randomize_usernames
-        self.timezone                   = timezone
-        self.blackout_start             = blackout_start
-        self.blackout_stop              = blackout_stop
-        self.validated                  = False
-        self.exception_handlers         = exception_handlers
-        self.log_level                  = log_level
+    process_count:int               = 1
+    authentication_callback:object  = None
+    authentication_jitter:str       = None
+    max_auth_jitter:str             = None
+    max_auth_tries:int              = 1
+    stop_on_valid:bool              = False
+    db_file:str                     = None
+    log_level:int                   = False
+    log_file:str                    = False
+    log_stdout:bool                 = False
+    log_stderr:bool                 = False
+    randomize_usernames:bool        = True
+    timezone:str                    = None
+    blackout_start:struct_time      = None
+    blackout_stop:struct_time       = None
+    validated:bool                  = False
+    exception_handlers:dict         = None
 
     def validate(self):
         '''Validate configuration values.
         '''
 
         # Process count
-        if self.process_count is None or not (
-                isinstance(self.process_count, int)):
+        if not (isinstance(self.process_count, int) and
+                self.process_count >= 1):
 
             raise ValueError(
-                'Config objects require a process_count integer.'
-            )
+                'Config objects require a process_count integer.')
 
         # Database file
-        if self.db_file is None:
+        if not isinstance(self.db_file, str):
 
             raise ValueError(
                 'A path to a SQLite database is required. Library will '

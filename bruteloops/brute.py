@@ -24,8 +24,6 @@ import re
 import signal
 from time import time
 from random import shuffle
-
-from IPython import embed
 from sys import exit
 
 UNKNOWN_PRIORITIZED_USERNAME_MSG = (
@@ -309,7 +307,7 @@ class BruteForcer:
 
     def handle_outputs(self, outputs:list) -> bool:
         '''Handle outputs from the authentication callback. It expects a list of
-        tuples/lists conforming to the blow format.
+        dicts conforming to the blow format.
 
         Args:
             outputs: A list of dict objects.
@@ -380,7 +378,6 @@ class BruteForcer:
                     'Authentication callbacks must return a dictionary,'
                     f' got: {type(output)}')
 
-
             output = Output(**output)
 
             # ===============================
@@ -425,9 +422,7 @@ class BruteForcer:
             if output.outcome == 1:
 
                 credential.guessed = True
-
                 recovered = True
-
                 self.log.valid(cred)
 
                 # Update username to "recovered"

@@ -5,6 +5,7 @@ from time import strptime
 class BoolAction(argparse.Action):
 
     def __call__(self, parser, namespace, values, option_string=None):
+
         setattr(namespace, self.dest, False)
         if values in ['true','True']:
             setattr(namespace, self.dest, True)
@@ -12,6 +13,7 @@ class BoolAction(argparse.Action):
 class TimezoneAction(argparse.Action):
 
     def __call__(self, parser, namespace, values, option_string=None):
+
         try:
 
             values = ZoneInfo(values)
