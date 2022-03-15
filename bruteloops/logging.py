@@ -11,9 +11,7 @@ from .errors import TimezoneError, LoggingError
 # ================
 
 LOG_FORMAT='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-DEFAULT_TZ = datetime.now(TZ.utc) \
-    .astimezone() \
-    .tzname()
+DEFAULT_TZ = 'UTC'
 
 # =====================
 # DEFINE LOGGING LEVELS

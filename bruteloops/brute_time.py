@@ -10,8 +10,7 @@ class BruteTime:
     str_format = '%H:%M:%S %Z (%y/%m/%d)'
 
     # Get the default timezone.
-    timezone = ZoneInfo(
-        datetime.now(timezone.utc).astimezone().tzname())
+    timezone = ZoneInfo('UTC')
 
     @staticmethod
     def set_timezone(key):
