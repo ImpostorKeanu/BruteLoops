@@ -16,6 +16,7 @@ from io import StringIO,TextIOWrapper
 from sys import stderr
 from functools import wraps
 from inspect import signature
+from typing import Union
 import csv
 import re
 
@@ -496,8 +497,9 @@ class DBMixin:
     # =============================
 
     def manage_credentials(self, container, is_file=False,
-            as_credentials=False, insert=True, is_csv_file=False,
-            associate_spray_values=True, logger=None):
+            credential_delimiter=':', as_credentials=False,
+            insert=True, is_csv_file=False, associate_spray_values=True,
+            logger=None):
         '''Manage credential values. This logic is distinct because inputs
         can be treated as individual username or password values for
         spray attacks, or as individual credential records -- the latter
@@ -513,7 +515,10 @@ class DBMixin:
         # Derive the target method to call based on action
         method = ('insert' if insert else 'delete') + '_credential_records'
 
-        kwargs = dict(as_credentials = as_credentials)
+        kwargs = dict(
+            as_credentials = as_credentials,
+            credential_delimiter = credential_delimiter
+        )
 
         if method.startswith('insert'):
             kwargs['associate_spray_values'] = associate_spray_values
@@ -986,7 +991,8 @@ class DBMixin:
             self.manage_credentials(credentials,
                     as_credentials=as_credentials, insert=insert,
                     associate_spray_values=associate_spray_values,
-                    logger=logger)
+                    logger=logger,
+                    credential_delimiter=credential_delimiter)
 
         if credential_files:
             if logger:
@@ -995,6 +1001,7 @@ class DBMixin:
             self.manage_credentials(credential_files, is_file=True,
                     as_credentials=as_credentials, insert=insert,
                     associate_spray_values=associate_spray_values,
+                    credential_delimiter=credential_delimiter,
                     logger=logger)
 
         if csv_files:
@@ -1004,8 +1011,8 @@ class DBMixin:
             self.manage_credentials(csv_files, is_csv_file=True,
                     as_credentials=as_credentials, insert=insert,
                     associate_spray_values=associate_spray_values,
+                    credential_delimiter=credential_delimiter,
                     logger=logger)
-
 
     def get_valid_credentials(self):
         '''Return valid credentials
@@ -1018,13 +1025,22 @@ class DBMixin:
 
         return valids
 
-    def get_strict_credentials(self,credential_delimiter=':'):
-        '''Return strict credential records
+    def get_credentials(self, strict:Union[bool, None]=False):
+        '''
         '''
 
-        return self.main_db_sess.query(sql.Credential) \
-                .filter(sql.Credential.strict == True) \
-                .all()
+        query = self.main_db_sess.query(sql.Credential)
+
+        if strict is not None:
+            query = query.filter(sql.Credential.strict == strict)
+
+        return query.all()
+
+    def get_strict_credentials(self):
+        '''Return strict credential records.
+        '''
+
+        return self.get_credentials(strict=True)
 
 class Manager(DBMixin):
 
