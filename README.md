@@ -41,7 +41,7 @@ lockout policies can be matched 1-to-1 using BruteLoop's parameters:
 - **Attack resumption** - Stopping and resuming an attack is possible
   without worrying about losing your place in the attack or locking accounts.
 - **Multiprocessing** - Speed up attacks using multiprocessing! By configuring
-  the`parallel guess count, you're effectively telling BruteLoops how many
+  the parallel guess count, you're effectively telling BruteLoops how many
   usernames to guess in parallel.
 - **Logging** - Each authentication event can optionally logged to disk.
   This information can be useful during red teams by providing customers
