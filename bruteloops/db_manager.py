@@ -263,7 +263,7 @@ class DBMixin:
         # https://docs.sqlalchemy.org/en/14/dialects/sqlite.html#insert-on-conflict-upsert
         s = insert(model).values(values)
 
-        if do_update_where and update_data:
+        if do_update_where is not None and update_data:
 
             # TODO: Perform checks on do_update where
             # must be a query, I think.

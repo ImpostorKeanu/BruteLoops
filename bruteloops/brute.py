@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 from . import logging
 from .brute_time import BruteTime
 from . import sql
@@ -25,6 +23,9 @@ import signal
 from time import time
 from random import shuffle
 from sys import exit
+from pydantic import BaseModel
+from typing import List, Union, Optional, Callable, Any
+from .models import OutputsModel, BreakersModel
 
 UNKNOWN_PRIORITIZED_USERNAME_MSG = (
 'Prioritized username value supplied during configuration that does '
@@ -35,14 +36,6 @@ UNKNOWN_PRIORITIZED_PASSWORD_MSG = (
 'Prioritized password value supplied during configuration that does '
 'not appear in the database. Insert this value or remove it from '
 'the configuration: {password}')
-
-# Simple named tuple to represent output from authentication
-# callbacks.
-Output = namedtuple(
-    typename='Output', 
-    field_names=('outcome', 'username', 'password', 'actionable',
-        'events',),
-    defaults=(True, list(),))
 
 class Queries:
     '''Namespace to contain SQL queries.
@@ -305,50 +298,26 @@ class BruteForcer:
         # Realign future jitter times with the current configuration
         self.realign_future_time()
 
-    def handle_outputs(self, outputs:list) -> bool:
+        # =========================================
+        # DEFINE THE ERROR CALLBACK FOR APPLY_ASYNC
+        # =========================================
+
+        def error_callback(e:Exception):
+            for b in self.breakers:
+                if type(e) in b.exception_classes:
+                    b.handle(e=e, log=self.log)
+
+        self._error_callback = error_callback
+
+    def handle_outputs(self, outputs:List[dict]) -> bool:
         '''Handle outputs from the authentication callback. It expects a list of
         dicts conforming to the blow format.
 
         Args:
-            outputs: A list of dict objects.
+            outputs: A list of dict objects matching the Output
+                structured defined by `class Output`.
 
-        Note:
-            Each dict in `outputs` can have the following elements:
 
-            - `outcome`
-              - Required: True
-              - Description: Determines the outcome of the authentication
-                attempt.
-              - Valid Values:
-                - `-1`: Indicates failed authentication attempt. Unless
-                  `actionable` is set to False, credentials marked with
-                  this value will be guessed again upon the next
-                  iteration.
-                -  `0`: Indicates invalid credentials.
-                -  `1`: Indicates valid credentials.
-            - `username`
-              - Required: True
-              - Description `str` username value of the credentials.
-            - `password`
-              - Required: True
-              - Descrption: `str` password value of the credentials.
-            - `actionable`
-              - Required: False
-              - Valid Values:
-                - `True`: Indicates that the username value is
-                    actionable.
-                - `False`: Indicates that the username value should
-                  skipped during future guesses.
-              - Description: Field determines if the username is
-                valid, allowing authentication callbacks to disable
-                invalid usernames while preserving a record of the last
-                attempt.
-            - `events`
-              - Required: False
-              - Valid Values: `[str]`
-              - Description: A list of string events to log.
-
-        Template:
             ```
             {
                 'outcome': int,
@@ -369,16 +338,18 @@ class BruteForcer:
         # DETERMINE AND HANDLE VALID_CREDENTIALS CREDENTIALS
         # ==================================================
 
+        outputs = OutputsModel.parse_obj(outputs)
+
         recovered = False
-        for output in outputs:
+        for output in outputs.__root__:
 
-            if not isinstance(output, dict):
-
-                raise ValueError(
-                    'Authentication callbacks must return a dictionary,'
-                    f' got: {type(output)}')
-
-            output = Output(**output)
+#            if not isinstance(output, dict):
+#
+#                raise ValueError(
+#                    'Authentication callbacks must return a dictionary,'
+#                    f' got: {type(output)}')
+#
+#            output = Output(**output)
 
             # ===============================
             # QUERY FOR THE TARGET CREDENTIAL
@@ -527,6 +498,15 @@ class BruteForcer:
                         result.get()
                     )
 
+                    if not isinstance(outputs[-1], dict):
+
+                        raise Exception(
+                            'Authentication callbacks must return '
+                            'a dict value matching the following '
+                            f'schema, not a {type(outputs[-1])}: ' +
+                            str(Output.schema())
+                        )
+
                     # remove the finished result
                     del(
                         self.presults[
@@ -543,8 +523,8 @@ class BruteForcer:
             else:
                 return outputs
 
-    def do_authentication_callback(self, username, password, stop_on_valid=False, 
-            *args, **kwargs) -> bool:
+    def do_authentication_callback(self, username:str, password:str,
+            stop_on_valid=False) -> bool:
         '''Call the authentication callback from a distinct process.
         Will monitor processes for completion if all are currently
         occupied with a previous callback request.
@@ -594,10 +574,11 @@ class BruteForcer:
         # initiate a guess in a process within the pool
         self.presults.append(
             self.pool.apply_async(
-                self.config.authentication_callback,
-                (
-                    (username,password,)
-                )
+                func = self.config.authentication_callback,
+                args = (
+                    (username, password,)
+                ),
+                error_callback = self._error_callback
             )
         )
 
@@ -633,6 +614,10 @@ class BruteForcer:
     def launch(self):
         '''Launch the attack.
         '''
+
+        # =================================================
+        # TODO: DEFINE error_callback FUNCTION FOR BREAKERS
+        # =================================================
 
         if self.config.max_auth_tries:
 
@@ -882,7 +867,9 @@ class BruteForcer:
                         # Get the future time when this user can be targeted later
                         if self.config.max_auth_jitter:
                             # Derive from the password jitter
-                            ftime = self.config.max_auth_jitter.get_jitter_future()
+                            ftime = self.config \
+                                    .max_auth_jitter \
+                                    .get_jitter_future()
                         else:
                             # Default effectively asserting that no jitter will occur.
                             ftime = -1.0

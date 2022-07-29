@@ -25,5 +25,6 @@ setuptools.setup(
     install_requires=[
         'sqlalchemy>=1.4.0',
         'billiard>=3.6.3.0',
-        'pytest']
+        'pytest',
+        'pydantic']
 )

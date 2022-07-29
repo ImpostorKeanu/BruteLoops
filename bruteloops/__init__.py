@@ -6,6 +6,9 @@ from . import config
 from . import jitter
 from . import logging
 from . import sql
+from . import errors
+from . import models
+from . import breakers
 
 __all__ = ['args','brute','brute_time','callback','config','helpers',
-        'jitter','logging','sql']
+        'jitter','logging','sql','models', 'breakers']

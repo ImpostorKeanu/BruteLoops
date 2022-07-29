@@ -128,3 +128,6 @@ class LoggingError(Error):
         '''
 
         return LoggingError, 'Invalid logging level supplied: {level}'
+
+class BreakerThrownError(Error):
+    pass

@@ -1,5 +1,4 @@
-#!/usr/bin/env python3
-
+from .models import BreakersModel
 from .jitter import Jitter
 from . import sql
 from .callback import Callback
@@ -9,7 +8,7 @@ from pathlib import Path
 from sys import stdout,stderr
 from .db_manager import Session
 from time import struct_time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import datetime
 import inspect
 import logging
@@ -82,6 +81,7 @@ class Config:
     blackout_stop:struct_time       = None
     validated:bool                  = False
     exception_handlers:dict         = None
+    breakers:BreakersModel          = field(default_factory=list)
 
     def validate(self):
         '''Validate configuration values.
