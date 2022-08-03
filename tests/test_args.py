@@ -19,7 +19,7 @@ def test_general_parser():
     # BLACKOUT WINDOW
     # ===============
 
-    # Blackout window
+    # BlackoutModel window
     bw_args = ['--blackout-window', '17:00:00-09:00:00']
     parse(bw_args)
 

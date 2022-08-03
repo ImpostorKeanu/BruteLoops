@@ -36,7 +36,8 @@ def check_container(f):
         if 'is_file' in pkeys and container and \
                 'is_file' not in kkeys:
 
-            kwargs['is_file'] = isinstance(container, TextIOWrapper)
+            kwargs['is_file'] = \
+                    isinstance(container, (TextIOWrapper,StringIO,))
 
         if 'is_dictreader' in pkeys and container and \
                 'is_dictreader' not in kkeys:
@@ -257,8 +258,21 @@ class DBMixin:
 
     def do_upsert(self, model, values:list,
             index_elements:list=['value'],
-            do_update_where:str=None, update_data:str=None,
+            do_update_where:str=None, update_data:dict=None,
             logger=None):
+        '''Insert values into a model (database table) via upsert.
+
+        Args:
+            model: SQLAlchemy ORM model.
+            values: Values to insert into the database table.
+            do_update_where: Condition that determines if records
+                should be updated during the upsert, e.g.
+                sql.Password.sprayable == False. When supplied, only
+                records matching the condition will be altered.
+            update_data: Dictionary of field to value mappings used to
+                update fields.
+            logger: Logger instance used to send log events.
+        '''
 
         # https://docs.sqlalchemy.org/en/14/dialects/sqlite.html#insert-on-conflict-upsert
         s = insert(model).values(values)
@@ -318,24 +332,38 @@ class DBMixin:
         the database.
         '''
 
+        # ================================
+        # DERIVE METHOD AND PREPARE KWARGS
+        # ================================
+
         # Derive the target method to call based on action
         method = ('insert' if insert else 'delete') + '_' + \
-                ('username' if model == sql.Username else 'password') +\
+                ('username' if model == sql.Username else 'password') + \
                 '_records'
+        method = getattr(self, method)
 
+        # Prepare kwargs
         kwargs = dict(
                 associate_spray_values = (
-                    method.startswith('insert') and
-                    associate_spray_values))
+                    method.__name__.startswith('insert')
+                    and associate_spray_values
+                )
+        )
 
-        # Call the proper method
+        # ===================================
+        # CALL THE METHOD BASED ON INPUT TYPE
+        # ===================================
+
         if is_file:
-            for f in container:
-                with open(f) as container:
-                    getattr(self, method)(container=container,
-                            **kwargs)
 
-        else: getattr(self, method)(container=container, **kwargs)
+            for f in container:
+
+                with open(f) as container:
+                    method(container=container, **kwargs)
+
+        else:
+
+            method(container=container, **kwargs)
 
         # This method commits :)
         self.sync_lookup_tables(logger=logger)
@@ -469,13 +497,13 @@ class DBMixin:
 
             query += AND_TEMP.format(
                     table='usernames',
-                    values=','.join(username_values))
+                    values='","'.join(username_values))
 
         if password_values:
 
             query += AND_TEMP.format(
                     table='passwords',
-                    values=','.join(password_values))
+                    values='","'.join(password_values))
 
         query += ' ON CONFLICT DO NOTHING;'
 
@@ -512,31 +540,50 @@ class DBMixin:
         password value and will be used in the form of a spray. When True,
         it is imported as a strict credential as described above.
         '''
-        # Derive the target method to call based on action
+
+        # ================================
+        # DERIVE METHOD AND PREPARE KWARGS
+        # ================================
+
         method = ('insert' if insert else 'delete') + '_credential_records'
+        method = getattr(self, method)
 
         kwargs = dict(
             as_credentials = as_credentials,
             credential_delimiter = credential_delimiter
         )
 
-        if method.startswith('insert'):
+        if method.__name__.startswith('insert'):
             kwargs['associate_spray_values'] = associate_spray_values
 
-        # Call the proper method
+        # ===================================
+        # CALL THE METHOD BASED ON INPUT TYPE
+        # ===================================
+
         if is_csv_file:
+
+            # ===============================
+            # TREAT EACH RECORD AS A CSV FILE
+            # ===============================
+
             for f in container:
                 with open(f, newline='') as container:
                     reader = csv.DictReader(container)
-                    getattr(self, method)(container=reader,
-                        **kwargs)
+                    method(container=reader, **kwargs)
 
         elif is_file:
+
+            # ===========================
+            # TREAT EACH RECORD AS A FILE
+            # ===========================
+
             for f in container:
                 with open(f) as container:
-                    getattr(self, method)(container=container, **kwargs)
+                    method(container=container, **kwargs)
 
-        else: getattr(self, method)(container=container, **kwargs)
+        else:
+
+            method(container=container, **kwargs)
 
         # This method commits :)
         self.sync_lookup_tables(logger=logger)
@@ -560,7 +607,8 @@ class DBMixin:
 
         username_key, password_key = None, None
         if is_dictreader:
-            username_key, password_key = scan_dictreader(container, as_credentials)
+            username_key, password_key = \
+                    scan_dictreader(container, as_credentials)
 
         def _upsert_values(chunk):
 
@@ -582,119 +630,155 @@ class DBMixin:
             self.do_upsert(model = sql.Username,
                 values = usernames)
 
-            if as_credentials:
-
-                # Free up memory
-                del(usernames)
-
             # ================
             # UPSERT PASSWORDS
             # ================
 
-            # Upsert the passwords
-            if as_credentials:
-
-                # Non-sprayable passwords
-                self.do_upsert(model = sql.Password,
-                    values = passwords)
-
-            else:
+            if not as_credentials:
 
                 # Sprayable passwords
                   # Also updates currently existing non-sprayable passwords
                   # to become sprayable.
                 self.do_upsert(model = sql.Password,
                     values = passwords,
-                    do_update_where = sql.Password.sprayable == False,
+                    do_update_where =
+                        (sql.Password.sprayable == False),
                     update_data=dict(sprayable = True))
 
-            if as_credentials:
-
-                # Free up memory
-                del(passwords)
-
-            else:
+                # ======================
+                # ASSOCIATE SPRAY VALUES
+                # ======================
 
                 # Commit current database changes
                 self.main_db_sess.commit()
 
+                # Translate lists of dictionaries to
+                # lists of strings
                 flatten_dict_values(usernames)
                 flatten_dict_values(passwords)
 
                 # Associate the newly inserted values
                 if associate_spray_values:
+
                     self.associate_spray_values(
                         username_values=usernames,
                         password_values=passwords)
 
-                # Skip credential associations by returning
-                return
+            else:
 
-            # ===============================
-            # CREATE CREDENTIAL RECORD VALUES
-            # ===============================
+                # Non-sprayable passwords
+                self.do_upsert(model = sql.Password,
+                    values = passwords)
+    
+                # Free up memory
+                del(usernames)
+                del(passwords)
 
-            values = []
-            for username in list(credentials.keys()):
-
-                passwords = credentials[username]
-                del(credentials[username])
-
+                # Commit database changes
+                self.main_db_sess.commit()
+    
                 # ===============================
                 # CREATE CREDENTIAL RECORD VALUES
                 # ===============================
+    
+                values = []
+                for username in list(credentials.keys()):
+    
+                    passwords = credentials[username]
+                    del(credentials[username])
+    
+                    # ===============================
+                    # CREATE CREDENTIAL RECORD VALUES
+                    # ===============================
+    
+                    username = self.main_db_sess.query(sql.Username) \
+                        .filter(sql.Username.value == username) \
+                        .first()
+    
+                    for password in self.main_db_sess.query(sql.Password) \
+                            .filter(sql.Password.value.in_(passwords)):
+    
+                        values.append(dict(
+                            username_id = username.id,
+                            password_id = password.id,
+                            strict = True))
+    
+                # =============================
+                # UPSERT THE CREDENTIAL RECORDS
+                # =============================
 
-                username = self.main_db_sess.query(sql.Username) \
-                    .filter(sql.Username.value == username) \
-                    .first()
-
-                for password in self.main_db_sess.query(sql.Password) \
-                        .filter(sql.Password.value.in_(passwords)):
-
-                    values.append(dict(
-                        username_id = username.id,
-                        password_id = password.id,
-                        strict = True))
-
-            # =============================
-            # UPSERT THE CREDENTIAL RECORDS
-            # =============================
-
-            self.do_upsert(model = sql.Credential,
-                values = values,
-                index_elements=['username_id', 'password_id'])
+                self.do_upsert(model = sql.Credential,
+                    values = values,
+                    index_elements=['username_id', 'password_id'])
 
         chunk_container(container = container,
             callback = _upsert_values,
             is_file = not is_dictreader and is_file)
 
     def sync_lookup_tables(self, logger=None):
+        '''Update the sql.StrictCredential and sql.PriorityCredential tables
+        with reference to the proper credential values.
+
+        sql.StrictCredential and sql.PriorityCredential are lookup tables
+        intended to be more efficiently refrenced than sql.Credental, which
+        contains all possible credential records. This means quicker query
+        response.
+
+        Args:
+            logger: Logger instance to support event logging.
+        '''
 
         def _upsert_strict_creds(chunk):
 
             self.do_upsert(
                 model = sql.StrictCredential,
                 index_elements=['credential_id'],
-                values = [dict(credential_id = c.id)
-                    for c in chunk])
+                values = [
+                    dict(credential_id = c.id) for c in chunk
+                ])
 
         def _upsert_priority_creds(chunk):
 
             self.do_upsert(
                 model = sql.PriorityCredential,
                 index_elements=['credential_id'],
-                values = [dict(credential_id = c[0])
-                    for c in chunk])
+                values = [
+                    dict(credential_id = c[0]) for c in chunk
+                ])
 
         self.main_db_sess.commit()
+
+        # ==============================
+        # TODO: MAKE THIS MORE EFFICIENT
+        # ==============================
+
+        # Clear the lookup tables to start fresh
+        #  - We do this because some passwords may have been altered
+        #    since the last run
+        for m in (sql.StrictCredential, sql.PriorityCredential,):
+            self.main_db_sess.execute(delete(m))
+        self.main_db_sess.commit()
+
+        # ==================
+        # STRICT CREDENTIALS
+        # ==================
 
         if logger:
             logger.general('Linking strict credentials')
 
+        strict_query = (
+            self.main_db_sess
+                .query(sql.Credential)
+                .filter(sql.Credential.strict == True)
+        )
+
         chunk_container(
-            container = self.main_db_sess.query(sql.Credential)
-                .filter(sql.Credential.strict == True),
+            container = strict_query,
             callback = _upsert_strict_creds)
+
+        # ====================
+        # PRIORITY CREDENTIALS
+        # ====================
 
         if logger:
             logger.general('Linking priority credentials')
@@ -1061,7 +1145,7 @@ class Session:
         # SQLITE INITIALIZATION
         # =====================
 
-        engine = create_engine('sqlite:///'+db_file,echo=echo)
+        engine = create_engine('sqlite:///'+db_file, echo=echo)
 
         event.listen(engine, 'connect', _fk_pragma_on_connect)
 

@@ -1,31 +1,21 @@
-from . import logging
-from .brute_time import BruteTime
-from . import sql
-from .config import Config
-from .db_manager import *
-from sqlalchemy import (
-    select,
-    delete,
-    join,
-    update,
-    not_)
-from sqlalchemy.orm.session import close_all_sessions
-from pathlib import Path
-from uuid import uuid4
-from collections import namedtuple
-from copy import deepcopy
-from time import sleep, time, gmtime, strftime
-from datetime import datetime, timedelta
-from types import FunctionType, MethodType
 import traceback
 import re
 import signal
-from time import time
+from calendar import monthrange
+from . import logging
+from .brute_time import BruteTime
+from .db_manager import *
+from . import queries as Queries
+from .errors import BreakerTrippedError
+from sqlalchemy.orm.session import close_all_sessions
+from pathlib import Path
+from time import sleep, time, gmtime, strftime
+from datetime import datetime, timedelta
 from random import shuffle
 from sys import exit
-from pydantic import BaseModel
-from typing import List, Union, Optional, Callable, Any
-from .models import OutputsModel, BreakersModel
+from typing import List
+from types import FunctionType, MethodType
+from .models import Output, ExceptionHandler
 
 UNKNOWN_PRIORITIZED_USERNAME_MSG = (
 'Prioritized username value supplied during configuration that does '
@@ -37,107 +27,25 @@ UNKNOWN_PRIORITIZED_PASSWORD_MSG = (
 'not appear in the database. Insert this value or remove it from '
 'the configuration: {password}')
 
-class Queries:
-    '''Namespace to contain SQL queries.
+def wrapped_callback(func, username, password):
+    '''Implement a wrapped function to make authentication callbacks,
+    enabling us to capture and act on exceptions accordingly.
     '''
-    
-    # ================
-    # USERNAME QUERIES
-    # ================
 
-    # Where clauses applicable to to all Username queries.
-    COMMON_USERNAME_WHERE_CLAUSES = CWC = (
-        sql.Username.recovered    == False,
-        sql.Username.actionable   == True,)
-    
-    HAS_UNGUESSED_SUBQUERY = (
-        select(sql.Credential.id)
-            .where(
-                sql.Username.id == sql.Credential.username_id,
-                sql.Credential.guess_time == -1,
-                sql.Credential.guessed == False)
-            .limit(1)
-    ).exists()
+    try:
 
-    strict_usernames = (
-        select(sql.Username.id)
-            .where(
-                *CWC,
-                sql.Username.priority == False,
-                HAS_UNGUESSED_SUBQUERY,
-                (
-                    select(sql.StrictCredential)
-                        .join(
-                            sql.Credential,
-                            sql.StrictCredential.credential_id ==
-                                sql.Credential.id)
-                        .where(
-                            sql.Credential.username_id ==
-                                sql.Username.id)
-                        .limit(1)
-                ).exists()
-            )
-            .distinct()
-    )
-    
-    priority_usernames = (
-        select(sql.Username.id)
-            .where(
-                *CWC,
-                sql.Username.priority == True,
-                HAS_UNGUESSED_SUBQUERY)
-            .distinct()
-    )
-    
-    usernames = (
-        select(sql.Username.id)
-            .where(
-                *CWC,
-                HAS_UNGUESSED_SUBQUERY)
-            .distinct()
-    )
-    
-    # ==================
-    # CREDENTIAL QUERIES
-    # ==================
-    
-    COMMON_CREDENTIAL_WHERE_CLAUSES = CCWC = (
-        sql.Credential.guess_time == -1,
-        sql.Credential.guessed == False,
-    )
-    
-    strict_credentials = (
-        select(sql.StrictCredential)
-            .join(
-                sql.Credential,
-                sql.StrictCredential.credential_id == sql.Credential.id)
-            .where(*CCWC)
-    )
-    
-    priority_credentials = (
-        select(sql.PriorityCredential)
-            .join(
-                sql.Credential,
-                sql.PriorityCredential.credential_id == sql.Credential.id)
-            .join(
-                sql.Password,
-                sql.Credential.password_id == sql.Password.id)
-            .where(
-                *CCWC,
-                sql.Password.priority == True)
-    )
-    
-    credentials = (
-        select(sql.Credential.id)
-            .join(
-                sql.Username,
-                sql.Credential.username_id == sql.Username.id)
-            .join(
-                sql.Password,
-                sql.Credential.password_id == sql.Password.id)
-            .where(*CCWC)
-    )
+        return func(username, password)
 
+    except Exception as e:
+
+        # Return the output dictionary
+        return Output(
+            outcome=-1,
+            username=username,
+            password=password,
+            events=[f'Handling exception: {e}'],
+            exception=e
+        )
 
 def peel_credential_ids(container):
     '''For each element in the container, traverse the "credential"
@@ -161,8 +69,6 @@ class BruteForcer:
         - config - A BruteLoops.config.Config object providing all
         configuration parameters to proceed with the attack.
         '''
-
-        if not config.validated: config.validate()
 
         # DB SESSION FOR MAIN PROCESS
         self.main_db_sess = config.session_maker.new()
@@ -192,27 +98,14 @@ class BruteForcer:
 
         self.log.general('Logging attack configuration parameters')
 
-        config_attrs = [
+        conf_temp = 'Config Parameter -- {attr}: {val}'
+
+        for attr in [
                 'authentication_jitter', 'max_auth_jitter',
                 'max_auth_tries', 'stop_on_valid',
                 'db_file', 'log_file', 'log_level',
                 'log_stdout', 'log_stderr', 'randomize_usernames',
-                'timezone', 'blackout_start', 'blackout_stop'
-        ]
-
-        conf_temp = 'Config Parameter -- {attr}: {val}'
-        strftime_temp = '%H:%M:%S'
-
-        for attr in config_attrs:
-
-            if attr.startswith('blackout') and getattr(config, attr):
-                
-                self.log.general(
-                    conf_temp.format(attr=attr, val=strftime(
-                        strftime_temp,
-                        getattr(self.config,attr))))
-
-            else:
+                'timezone', 'blackout']:
 
                 self.log.general(f'Config Parameter -- {attr}: ' + 
                         str(getattr(self.config,attr)))
@@ -238,13 +131,18 @@ class BruteForcer:
             from multiprocessing.pool import Pool
             self.pool = Pool(processes=config.process_count)
 
-        if not KeyboardInterrupt in self.config.exception_handlers:
+        ki_handler = None
+        for eh in self.config.exception_handlers:
+            if eh.exception_class == KeyboardInterrupt:
+                ki_handler = eh.exception_class
+
+        if not ki_handler:
 
             # =================================
             # DEFINE THE DEFAULT SIGINT HANDLER
             # =================================
 
-            def handler(sig,exception):
+            def handler(sig, exception):
 
                 print('SIGINT Captured -- Shutting down ' \
                       'attack\n')
@@ -252,34 +150,19 @@ class BruteForcer:
                 print('Exiting')
                 exit(sig)
 
-            self.config.exception_handlers[KeyboardInterrupt] = handler
+            self.config.exception_handlers.append(
+                ExceptionHandler(
+                    exception_class = KeyboardInterrupt,
+                    handler = handler)
+            )
 
-        if KeyboardInterrupt in self.config.exception_handlers:
+        else:
 
             # =================================
             # SET A USER-DEFINED SIGINT HANDLER
             # =================================
 
-            sigint_handler = config.exception_handlers[KeyboardInterrupt]
-
-            sigint_class = sigint_handler.__class__
-
-            if sigint_class != MethodType and sigint_class != FunctionType:
-
-                assert '__call__' in sigint_handler.__dict__, (
-                    'Exception handler must implement __call__'
-                )
-
-                call_class = sigint_handler.__getattribute__('__call__').__class__
-
-                assert call_class == FunctionType or call_class == MethodType, (
-                    '__call__ must be of type FunctionType or MethodType'
-                )
-
-            signal.signal(signal.SIGINT, sigint_handler)
-
-
-        else: signal.signal(signal.SIGINT, original_sigint_handler)
+            signal.signal(signal.SIGINT, ki_handler)
 
         # =================
         # HANDLE THE ATTACK
@@ -293,21 +176,8 @@ class BruteForcer:
         self.main_db_sess.add(self.attack)
         self.main_db_sess.commit()
 
-        self.config = config
-
         # Realign future jitter times with the current configuration
         self.realign_future_time()
-
-        # =========================================
-        # DEFINE THE ERROR CALLBACK FOR APPLY_ASYNC
-        # =========================================
-
-        def error_callback(e:Exception):
-            for b in self.breakers:
-                if type(e) in b.exception_classes:
-                    b.handle(e=e, log=self.log)
-
-        self._error_callback = error_callback
 
     def handle_outputs(self, outputs:List[dict]) -> bool:
         '''Handle outputs from the authentication callback. It expects a list of
@@ -338,18 +208,18 @@ class BruteForcer:
         # DETERMINE AND HANDLE VALID_CREDENTIALS CREDENTIALS
         # ==================================================
 
-        outputs = OutputsModel.parse_obj(outputs)
-
         recovered = False
-        for output in outputs.__root__:
+        for output in outputs:
 
-#            if not isinstance(output, dict):
-#
-#                raise ValueError(
-#                    'Authentication callbacks must return a dictionary,'
-#                    f' got: {type(output)}')
-#
-#            output = Output(**output)
+            # ==================
+            # IMPLEMENT BREAKERS
+            # ==================
+
+            if output.exception is not None:
+
+                # Call breakers
+                for b in self.config.breakers:
+                    b.check(output.exception, log=self.log)
 
             # ===============================
             # QUERY FOR THE TARGET CREDENTIAL
@@ -406,7 +276,7 @@ class BruteForcer:
             elif output.outcome == -1:
 
                 self.log.general(
-                    f'Failed to guess credential. - {cred}')
+                    f'Failed to guess credential: {cred}')
 
             # Credentials are no good
             else: 
@@ -432,9 +302,8 @@ class BruteForcer:
             # WRITE MODULE EVENTS
             # ===================
     
-            if output.events and isinstance(output.events, list):
-                for event in output.events:
-                    self.log.module(event)
+            for event in output.events:
+                self.log.module(event)
 
         # Commit the changes
         self.handler_db_sess.commit()
@@ -497,15 +366,6 @@ class BruteForcer:
                     outputs.append(
                         result.get()
                     )
-
-                    if not isinstance(outputs[-1], dict):
-
-                        raise Exception(
-                            'Authentication callbacks must return '
-                            'a dict value matching the following '
-                            f'schema, not a {type(outputs[-1])}: ' +
-                            str(Output.schema())
-                        )
 
                     # remove the finished result
                     del(
@@ -574,11 +434,12 @@ class BruteForcer:
         # initiate a guess in a process within the pool
         self.presults.append(
             self.pool.apply_async(
-                func = self.config.authentication_callback,
-                args = (
-                    (username, password,)
-                ),
-                error_callback = self._error_callback
+                func = wrapped_callback,
+                kwds = dict(
+                    func = self.config.authentication_callback,
+                    username = username,
+                    password = password,
+                )
             )
         )
 
@@ -615,10 +476,6 @@ class BruteForcer:
         '''Launch the attack.
         '''
 
-        # =================================================
-        # TODO: DEFINE error_callback FUNCTION FOR BREAKERS
-        # =================================================
-
         if self.config.max_auth_tries:
 
             # Handle manually configured lockout threshold
@@ -628,6 +485,11 @@ class BruteForcer:
 
             # Set a sane default otherwise
             glimit = guess_limit = 1
+
+        if self.config.randomize_usernames:
+            rand_multi = 10
+        else:
+            rand_multi = 1
 
         ulimit = user_limit = self.config.process_count
       
@@ -646,7 +508,7 @@ class BruteForcer:
                 # MANAGE BLACKOUT WINDOW
                 # ======================
 
-                if self.config.blackout_start and self.config.blackout_stop:
+                if self.config.blackout:
 
                     now = BruteTime.current_time(datetime)
 
@@ -658,18 +520,46 @@ class BruteForcer:
                         year=now.year,
                         month=now.month,
                         day=now.day,
-                        hour=self.config.blackout_start.tm_hour,
-                        minute=self.config.blackout_start.tm_min,
-                        second=self.config.blackout_start.tm_sec,
+                        hour=self.config.blackout.start.hour,
+                        minute=self.config.blackout.start.minute,
+                        second=self.config.blackout.start.second,
                         tzinfo=BruteTime.timezone)
 
+                    # ========================================
+                    # DETERMINE IF BLACKOUT ENDS FOLLOWING DAY
+                    # ========================================
+
+                    if (self.config.blackout.start.hour > 
+                             self.config.blackout.stop.hour):
+                        tomorrow = 1
+                    else:
+                        tomorrow = 0
+
+                    # Future datetime variables
+                    f_year = now.year
+                    f_month = now.month
+                    f_day = now.day + tomorrow
+
+                    # ====================
+                    # CALCULATE FUTURE DAY
+                    # ====================
+
+                    if f_day > monthrange(now.year, now.month)[1]:
+                        # BlackoutModel ends in following month
+
+                        f_month += 1
+                        f_day = 1
+
+                        if f_month > 12:
+                            # BlackoutModel ends in following year
+                            f_month = 1
+                            f_year += 1
+
                     b_stop = datetime(
-                        year=now.year,
-                        month=now.month,
-                        day=now.day,
-                        hour=self.config.blackout_stop.tm_hour,
-                        minute=self.config.blackout_stop.tm_min,
-                        second=self.config.blackout_stop.tm_sec,
+                        year=f_year, month=f_month, day=f_day,
+                        hour=self.config.blackout.stop.hour,
+                        minute=self.config.blackout.stop.minute,
+                        second=self.config.blackout.stop.second,
                         tzinfo=BruteTime.timezone)
 
                     if (now >= b_start) and (now < b_stop):
@@ -689,9 +579,10 @@ class BruteForcer:
                             seconds=now.second)
 
                         dstop = timedelta(
-                            hours=self.config.blackout_stop.tm_hour,
-                            minutes=self.config.blackout_stop.tm_min,
-                            seconds=self.config.blackout_stop.tm_sec)
+                            days=tomorrow,
+                            hours=self.config.blackout.stop.hour,
+                            minutes=self.config.blackout.stop.minute,
+                            seconds=self.config.blackout.stop.second)
 
                         ts = (dstop-dstart).total_seconds()
                         ft = BruteTime.future_time(seconds=ts)
@@ -700,6 +591,7 @@ class BruteForcer:
                         self.log.general(
                             'Sleeping until ' +
                             BruteTime.float_to_str(ft))
+
                         sleep(ts)
                         self.log.general('Disengaging blackout')
 
@@ -729,21 +621,28 @@ class BruteForcer:
                             ).scalars().all()
 
                 # GET GUESSABLE USERNAMES
-                guessable = []
                 if len(priorities) < ulimit:
 
+                    # Get guessable usernames
                     guessable = self.main_db_sess.execute(
                             Queries.usernames
                                 .where(
                                     sql.Username.priority == False,
                                     sql.Username.future_time <= ctime,
                                     sql.Username.id.not_in(priorities))
-                                .limit(ulimit-len(priorities))
+                                .limit(ulimit*rand_multi)
                             ).scalars().all()
 
-                # RANDOMIZE USERNAMES
-                if guessable and self.config.randomize_usernames:
-                    shuffle(guessable)
+                    # Randomize usernames
+                    if self.config.randomize_usernames:
+                        shuffle(guessable)
+
+                    # Trim down to guessable size
+                    guessable = guessable[:ulimit-len(priorities)]
+
+                else:
+
+                    guessable = list()
 
                 uids = priorities + guessable
 
@@ -868,8 +767,8 @@ class BruteForcer:
                         if self.config.max_auth_jitter:
                             # Derive from the password jitter
                             ftime = self.config \
-                                    .max_auth_jitter \
-                                    .get_jitter_future()
+                                .max_auth_jitter \
+                                .get_jitter_future()
                         else:
                             # Default effectively asserting that no jitter will occur.
                             ftime = -1.0
@@ -978,26 +877,20 @@ class BruteForcer:
     
             except Exception as e:
     
-                # =========================
-                # DEFAULT EXCEPTION HANDLER
-                # =========================
-                #
-                # - check if an exception handler has been provided for
-                #   a given exception class
-                # - if not, then shut down the brute forcer and raise
-                #   the exception for the caller to handle
+                if isinstance(e, BreakerTrippedError):
+
+                    self.log.general('Exiting due to breaker trip')
+                    return
     
                 # Allow registered handlers to trigger
-                if e in self.config.exception_handlers:
-    
-                    self.config.exception_handlers[e](self)
-    
+                for eh in self.config.exception_handlers:
+                    if eh.exception_class == e:
+                        eh.handler(self)
+
                 # Raise to caller
-                else:
+                self.log.general(
+                    'Unhandled exception occurred. Shutting down attack '\
+                    'and returning control to the caller.'
+                )
 
-                    self.log.general(
-                        'Unhandled exception occurred. Shutting down attack '\
-                        'and returning control to the caller.'
-                    )
-
-                    raise e
+                raise e

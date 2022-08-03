@@ -71,10 +71,11 @@ def lookup_log_level(level:str) -> int:
 
     return LEVEL_LOOKUP[level_key]
             
-def init_handler(logger, klass, formatter, *args, **kwargs):
+def init_handler(logger, klass, formatter, log_format=LOG_FORMAT,
+        *args, **kwargs):
 
     handler = klass(*args, **kwargs)
-    handler.setFormatter(formatter(LOG_FORMAT))
+    handler.setFormatter(formatter(log_format))
     logger.addHandler(handler)
 
 def do_log(level):
@@ -199,7 +200,7 @@ def formatterFactory(timezone:str=None):
 
 DEFAULT_FORMATTER = formatterFactory()
             
-def getLogger(name, log_level='invalid',
+def getLogger(name, log_level='invalid', log_format=LOG_FORMAT,
         log_file=None, log_stdout=False, log_stderr=True,
         timezone=None, formatter=DEFAULT_FORMATTER):
     '''Configure a logger for the library.
@@ -225,21 +226,24 @@ def getLogger(name, log_level='invalid',
         init_handler(logger,
             logging.FileHandler,
             formatter,
-            log_file)
+            log_file,
+            log_format=log_format)
 
     if log_stdout:
 
         init_handler(logger,
             logging.StreamHandler,
             formatter,
-            stdout)
+            stdout,
+            log_format=log_format)
 
     if log_stderr:
 
         init_handler(logger,
             logging.StreamHandler,
             formatter,
-            stderr)
+            stderr,
+            log_format=log_format)
 
     # =================
     # SET LOGGING LEVEL

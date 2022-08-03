@@ -1,6 +1,7 @@
 import argparse
 from zoneinfo import ZoneInfo
 from time import strptime
+from .logging import LOG_FORMAT
 
 class BoolAction(argparse.Action):
 
@@ -29,7 +30,7 @@ class TimezoneAction(argparse.Action):
 
         setattr(namespace, self.dest, values)
 
-class BlackoutAction(argparse.Action):
+class BlackoutModelAction(argparse.Action):
 
     def __call__(self, parser, namespace, values, option_string=None):
 
@@ -106,7 +107,7 @@ gg.add_argument('--stop-on-valid','-sov',
     help=STOP_ON_VALID)
 gg.add_argument('--blackout-window', '-bw',
     required=False,
-    action=BlackoutAction,
+    action=BlackoutModelAction,
     help=BLACKOUT_WINDOW)
 
 # ===============
@@ -216,6 +217,12 @@ LOG_LEVEL = \
 '''Determines the logging level. Default: %(default)s
 '''
 
+LOG_FORMAT = \
+'''Logging format string. Default %(default)s . See this URL for
+information on the available attributes: 
+https://docs.python.org/3/library/logging.html#logrecord-attributes
+'''
+
 op = output_parser = argparse.ArgumentParser(add_help=False)
 og = output_group = op.add_argument_group('Output Parameters',
         'Options related to output and logging targets')
@@ -227,12 +234,15 @@ og.add_argument('--log-stdout',
         default=True,
         help=LOG_STDOUT,
         dest='log_stdout')
+og.add_argument('--log-format',
+        default=LOG_FORMAT,
+        help=LOG_FORMAT)
 og.add_argument('--log-level',
         choices=('general',
             'valid-credentials',
             'invalid-credentials',
             'invalid-usernames'),
-        default='valid-credentials',
+        default='invalid-usernames',
         help=LOG_LEVEL)       
 
 # ==============

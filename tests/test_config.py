@@ -1,50 +1,39 @@
 import pytest
 import bruteloops as BL
-Config = BL.config.Config
+from bruteloops.models import *
+from bruteloops import db_manager
+from bruteloops.brute import BruteForcer
+from uuid import uuid4
+from pathlib import Path
 
-def test_validate():
+def cback(username, password):
 
-    config = Config()
+    outcome = dict(
+        outcome=0,
+        username=username,
+        password=password)
 
-    # Empty config
-    with pytest.raises(ValueError):
-        config.validate()
+    if username == 'u3' and password == 'p2':
+        outcome['outcome'] = 1
 
-    # Bad process count
-    with pytest.raises(ValueError):
-        config.process_count = -1 
-        config.validate()
-    config.process_count = 1
+    return outcome
 
-    # Bad db_file
-    with pytest.raises(ValueError):
-        config.db_file = 86
-        config.validate()
-    config.db_file = 'junk'
+def test_config_model(config_kwargs):
 
-    # =============
-    # AUTH CALLBACK
-    # =============
-
-    class Test:
-        pass
+    config_kwargs['authentication_callback'] = cback
+    config_kwargs['process_count'] = 'bad'
 
     with pytest.raises(ValueError):
-        config.authentication_callback = Test()
-        config.validate()
+        Config(**config_kwargs)
 
-    # Bad auth callback
-    Test.__call__ = lambda: None
-    config.authentication_callback = Test()
+    config_kwargs['process_count'] = 1
 
-    config.validate()
+    config = Config(**config_kwargs)
 
-    # Bad exception handlers
-    with pytest.raises(ValueError):
-        config.exception_handlers = 'junk'
-        config.validate()
+    dbm = db_manager.Manager(config.db_file)
 
-    config.exception_handlers = {
-            Exception:(lambda: True)}
-    config.validate()
+    dbm.insert_username_records(['u1', 'u2', 'u3'], False)
+    dbm.insert_password_records(['p1', 'p2', 'p3', 'p4', 'p5'], False)
+    dbm.associate_spray_values()
 
+    BruteForcer(config=config).launch()    

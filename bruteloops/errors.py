@@ -129,5 +129,5 @@ class LoggingError(Error):
 
         return LoggingError, 'Invalid logging level supplied: {level}'
 
-class BreakerThrownError(Error):
+class BreakerTrippedError(Error):
     pass
