@@ -7,10 +7,10 @@ with open('README.md', 'r', encoding='utf-8') as f:
 
 setuptools.setup(
     name='bruteloops',
-    version='0.5.4',
+    version='1.0.0',
     author='Justin Angel',
     author_email='justin@arch4ngel.ninja',
-    description='A simple password guessing API.',
+    description='A password guessing API.',
     long_description=long_description,
     long_description_content_type='text/markdown',
     url='https://github.com/arch4ngel/bruteloops',
