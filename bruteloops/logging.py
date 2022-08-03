@@ -72,9 +72,11 @@ def lookup_log_level(level:str) -> int:
     return LEVEL_LOOKUP[level_key]
             
 def init_handler(logger, klass, formatter, log_format=LOG_FORMAT,
-        *args, **kwargs):
+        klass_args=None):
 
-    handler = klass(*args, **kwargs)
+    klass_args = klass_args if klass_args else list()
+
+    handler = klass(*klass_args)
     handler.setFormatter(formatter(log_format))
     logger.addHandler(handler)
 
@@ -182,7 +184,7 @@ def formatterFactory(timezone:str=None):
         else:
             timezone = ZoneInfo(timezone)
     except Exception as e:
-        raise(TimezoneError.invalidTZ(timezone, extra=e))
+        raise TimezoneError.invalidTZ(timezone, extra=e)
 
     class Formatter(logging.Formatter):
 
@@ -223,26 +225,29 @@ def getLogger(name, log_level='invalid', log_format=LOG_FORMAT,
 
     if log_file:
 
-        init_handler(logger,
-            logging.FileHandler,
-            formatter,
-            log_file,
+        init_handler(
+            logger=logger,
+            klass=logging.FileHandler,
+            klass_args=[log_file],
+            formatter=formatter,
             log_format=log_format)
 
     if log_stdout:
 
-        init_handler(logger,
-            logging.StreamHandler,
-            formatter,
-            stdout,
+        init_handler(
+            logger=logger,
+            klass=logging.StreamHandler,
+            klass_args=[stderr],
+            formatter=formatter,
             log_format=log_format)
 
     if log_stderr:
 
-        init_handler(logger,
-            logging.StreamHandler,
-            formatter,
-            stderr,
+        init_handler(
+            logger=logger,
+            klass=logging.StreamHandler,
+            klass_args=[stderr],
+            formatter=formatter,
             log_format=log_format)
 
     # =================

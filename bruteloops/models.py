@@ -557,7 +557,10 @@ class Config(BaseModel):
     def v_timezone(cls, tz):
         'Set and return the BruteTime timezone.'
 
-        return BruteTime.set_timezone(tz)
+        if tz is not None:
+            BruteTime.set_timezone(tz)
+
+        return tz
 
     @validator('log_level')
     def v_log_level(cls, v):
@@ -571,7 +574,3 @@ class Config(BaseModel):
 
         # Session maker
         self.session_maker = Session(self.db_file)
-
-        # Timezone settings
-        if self.timezone is not None:
-            BruteTime.set_timezone(self.timezone)

@@ -26,7 +26,7 @@ class BruteTime:
             try:
                 BruteTime.timezone = ZoneInfo(key)
             except Exception as e:
-                raise TimezoneError.invalidTZ(key)
+                raise TimezoneError.invalidTZ(key, extra=e)
         elif isinstance(key, ZoneInfo):
             BruteTime.timezone = key
         else:

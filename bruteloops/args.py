@@ -17,7 +17,7 @@ class TimezoneAction(argparse.Action):
 
         try:
 
-            values = ZoneInfo(values)
+            ZoneInfo(values)
 
         except Exception:
 
@@ -49,6 +49,33 @@ class BlackoutModelAction(argparse.Action):
 
         setattr(namespace, 'blackout_start', start)
         setattr(namespace, 'blackout_stop', stop)
+
+
+class ParseJitterAction(argparse.Action):
+
+    def __call__(self, parser, namespace, values, option_string=None):
+
+        if hasattr(namespace, self.dest):
+
+            # If it has already been set, then the jitter has probably
+            # been disabled.
+            pass
+
+        else:
+
+            base_handle = '_'.join(self.dest.split('_')[0:2])
+
+            if values in ('None','none','0','null','false','False',):
+
+                # Set both the min and max to None when set to these
+                # values.
+                for v in ('min', 'max',):
+                    setattr(namespace, base_handle+f'_{v}', None)
+
+            else:
+
+                # Isn't disabled, so we set the value
+                setattr(namespace, self.dest, values)
 
 # ==================
 # GENERAL PARAMETERS
@@ -158,8 +185,10 @@ JITTER_URL = 'https://github.com/arch4ngel/brute_loops/wiki/'
 JITTER_DESCRIPTION = \
 f'''Options used to configure jitter between authentication attempts.
 Expects each value expects a specially formatted value like their
-defaults. Please see the "Jitter Time Format Specification" section
-of the Wiki URL for more information on this format: {JITTER_URL}
+defaults. Disable a given form of jitter by setting either the min
+or max to one of the following: -1, null, none, false. Please see the
+"Jitter Time Format Specification" section of the Wiki URL for more
+information on this format: {JITTER_URL}
 '''
 
 AUTH_JITTER_MINIMUM = \
@@ -191,7 +220,7 @@ jg.add_argument('--auth-jitter-min','-ajmin',
         default='1s',
         help=AUTH_JITTER_MINIMUM)
 jg.add_argument('--auth-jitter-max','-ajmax',
-        default='1s',
+        default='1.1s',
         help=AUTH_JITTER_MAXIMUM)
 jg.add_argument('--threshold-jitter-min','-tjmin',
         default='1.5h',

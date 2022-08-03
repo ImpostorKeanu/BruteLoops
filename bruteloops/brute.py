@@ -107,8 +107,8 @@ class BruteForcer:
                 'log_stdout', 'log_stderr', 'randomize_usernames',
                 'timezone', 'blackout']:
 
-                self.log.general(f'Config Parameter -- {attr}: ' + 
-                        str(getattr(self.config,attr)))
+            self.log.general(f'Config Parameter -- {attr}: ' + 
+                    str(getattr(self.config,attr)))
 
         if hasattr(self.config.authentication_callback, 'callback_name'):
             self.log.general(f'Config Parameter -- callback_name: '+ \
