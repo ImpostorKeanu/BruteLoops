@@ -1,3 +1,8 @@
+'''
+This module contains the primary logic to execute and control a brute
+force attack.
+'''
+
 import traceback
 import re
 import signal
@@ -7,13 +12,14 @@ from .brute_time import BruteTime
 from .db_manager import *
 from . import queries as Queries
 from .errors import BreakerTrippedError
+from . import models
 from sqlalchemy.orm.session import close_all_sessions
 from pathlib import Path
 from time import sleep, time, gmtime, strftime
 from datetime import datetime, timedelta
 from random import shuffle
 from sys import exit
-from typing import List
+from typing import List, Callable
 from types import FunctionType, MethodType
 from .models import Output, ExceptionHandler
 
@@ -27,9 +33,19 @@ UNKNOWN_PRIORITIZED_PASSWORD_MSG = (
 'not appear in the database. Insert this value or remove it from '
 'the configuration: {password}')
 
-def wrapped_callback(func, username, password):
+def wrapped_callback(func:Callable[[str,str], dict], username:str,
+        password:str) -> models.Output:
     '''Implement a wrapped function to make authentication callbacks,
     enabling us to capture and act on exceptions accordingly.
+
+    Args:
+      func: A callable used to authenticate the credentials.
+      username: Username to authenticate.
+      password: Password to check against the user.
+
+    Returns:
+      A py::`models.Output` instance populated with output from the call to
+        func.
     '''
 
     try:
@@ -52,22 +68,25 @@ def peel_credential_ids(container):
     relationship and collect the ID value.
 
     Args:
-        container: Iterable of SQLAlchemy ORM instances.
+      container: Iterable of SQLAlchemy ORM instances.
     '''
 
     for i in range(0, len(container)):
         container[i] = container[i].credential.id
 
 class BruteForcer:
-    '''Base object from which all other brute forcers will inherit.
-    Provides all basic functionality, less brute force logic.
+    '''The BruteForcer object is responsible for orchestrating and
+    executing a brute force attack against a target.
     '''
 
-    def __init__(self, config, use_billiard=False):
-        '''Initialize the BruteForcer object, including processes.
+    def __init__(self, config:models.Config, use_billiard:bool=False):
+        '''Initialize the BruteForcer object.
 
-        - config - A BruteLoops.config.Config object providing all
-        configuration parameters to proceed with the attack.
+        Args:
+          config: Initialized models.Config object.
+          use_billiard: Determines if Billiard's Pool module should be
+              used instead of Python's native module. Billiard's better
+              handles daemonized processes.
         '''
 
         # DB SESSION FOR MAIN PROCESS
@@ -179,29 +198,17 @@ class BruteForcer:
         # Realign future jitter times with the current configuration
         self.realign_future_time()
 
-    def handle_outputs(self, outputs:List[dict]) -> bool:
+    def handle_outputs(self, outputs:List[models.Output]) -> bool:
         '''Handle outputs from the authentication callback. It expects a list of
         dicts conforming to the blow format.
 
         Args:
-            outputs: A list of dict objects matching the Output
-                structured defined by `class Output`.
-
-
-            ```
-            {
-                'outcome': int,
-                'username': str,
-                'password': str,
-                'actionable': bool,
-                'events': [str]
-            }
-            ```
+          outputs: A list of dict objects matching the models.Output type.
 
         Returns:
-            `bool` value determinine if at least one credential was
-            valid in the list of outputs. This is useful when working
-            with the "stop on valid" flag.
+          `bool` value determinine if at least one credential was valid in the
+            list of outputs. This is useful when working with the "stop on valid"
+            flag.
         '''
 
         # ==================================================
@@ -313,6 +320,10 @@ class BruteForcer:
     def realign_future_time(self):
         '''Iterate over each imported username value and rejitter
         the future time based on the current max_authentication_jitter
+
+        Notes:
+          - Primrily useful when strarting a brute force attack.
+          - Ensures proper alignment of timestamps.
         '''
         
         # Get all relevant username values
@@ -340,17 +351,17 @@ class BruteForcer:
         # Commit the changes to the database
         self.main_db_sess.commit()
 
-    def monitor_processes(self, ready_all=False):
+    def monitor_processes(self, ready_all:bool=False) -> List[models.Output]:
         '''Iterate over each process in `self.presults` and wait
         for a process to complete execution.
 
         Args:
-            ready_all: indciates that monitoring will continue looping until all
-              processes complete execution, otherwise a list of outputs
-              will be returned after a single process is finished.
+          ready_all: indciates that monitoring will continue looping until all
+            processes complete execution, otherwise a list of outputs
+            will be returned after a single process is finished.
 
         Returns:
-            A list of output dicts from the authentication callback.
+          A list of output dicts from the authentication callback.
         '''
        
         outputs = []
@@ -384,7 +395,7 @@ class BruteForcer:
                 return outputs
 
     def do_authentication_callback(self, username:str, password:str,
-            stop_on_valid=False) -> bool:
+            stop_on_valid:bool=False) -> bool:
         '''Call the authentication callback from a distinct process.
         Will monitor processes for completion if all are currently
         occupied with a previous callback request.
@@ -393,7 +404,7 @@ class BruteForcer:
             username: Username to guess.
             password: Password to guess.
             stop_on_valid: Boolean value determining if the attack
-              should be halted when valid credentials are observed.
+                should be halted when valid credentials are observed.
 
         Returns:
             Boolean value determining if a valid set of credentials
@@ -446,12 +457,11 @@ class BruteForcer:
         return recovered
 
     def shutdown(self, complete:bool):
-        '''Close & join the process pool, followed by closing
-        input/output files.
+        '''Close & join the process pool.
 
         Args:
-            complete: Determines if the attack was fully completed,
-              i.e. all guesses were performed.
+          complete: Determines if the attack was fully completed,
+            i.e. all guesses were performed.
         '''
 
         # =====================

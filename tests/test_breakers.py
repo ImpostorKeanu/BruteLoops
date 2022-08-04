@@ -1,6 +1,7 @@
 import pytest
 import bruteloops as BL
 from pathlib import Path
+from time import sleep
 
 class FakeError(Exception):
     pass
@@ -27,6 +28,24 @@ def test_threshold_breaker():
 
     with pytest.raises(BL.errors.BreakerTrippedError):
         for n in range(0,t+1):
+            breaker.check(fake)
+
+def test_threshold_breaker_reset():
+
+    t = 5
+
+    breaker = BL.models.ThresholdBreaker(
+        threshold=t,
+        exception_classes=[FakeError],
+        reset_spec='2s')
+
+    fake = FakeError('TestoReseto')
+    for n in range(0, 5):
+        breaker.check(fake)
+    sleep(2.5)
+    breaker.check(fake)
+    with pytest.raises(BL.errors.BreakerTrippedError):
+        for n in range(0, 5):
             breaker.check(fake)
 
 def test_threshold_breaker_in_loop(setup):

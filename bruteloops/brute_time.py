@@ -39,29 +39,37 @@ class BruteTime:
         '''Calculate the future time from current time.
 
         Args:
-            seconds: Number of seconds into the future.
-            format: Value indicating the desired format. Supported
-              values: `str`, "struct_time".
-            str_format: Format string when `str` is supplied
-              to format.
+          seconds: Number of seconds into the future.
+          format: Value indicating the desired format. Supported
+            values: `str`, "struct_time".
+          str_format: Format string when `str` is supplied
+            to format.
 
         Returns:
-            - When `str` is supplied to `format`, a formatted string
-              is returned.
-            - When "struct_time" is supplied, a `datetime.time.timetuple`
-              instance is returned.
-            - Otherwise, a `float` is returned.
+          - When `str` is supplied to `format`, a formatted string
+            is returned.
+          - When "struct_time" is supplied, a `datetime.time.timetuple`
+            instance is returned.
+          - Otherwise, a `float` is returned.
         '''
 
         future = BruteTime.current_time()+seconds
 
         if format == str:
+
             return BruteTime.float_to_str(future, str_format)
-        elif format == 'struct_time':
-            return datetime \
-                    .fromtimestamp(future, BruteTime.timezone) \
-                    .timetuple()
+
+        elif format in (datetime, 'struct_time', 'datetime',):
+
+            dt = datetime \
+                    .fromtimestamp(future, BruteTime.timezone)
+            if format in (datetime, 'datetime',):
+                return dt
+            elif format == 'struct_time':
+                return dt.timetuple()
+
         else:
+
             return future
 
     @staticmethod
@@ -69,15 +77,15 @@ class BruteTime:
         '''Return the current time in the specified format.
 
         Args:
-            format: Specifies the return format. Supply `str` to
-              return a formatted string.
-            str_format: The format string to use.
+          format: Specifies the return format. Supply `str` to
+            return a formatted string.
+          str_format: The format string to use.
 
         Returns:
-            - When `str` is supplied to `format`, a formatted string
-              is returned.
-            - When `float` is supplied to `format`, a float is returned.
-            - when `datetime`, a `datetime` object is returned.
+          - When `str` is supplied to `format`, a formatted string
+            is returned.
+          - When `float` is supplied to `format`, a float is returned.
+          - when `datetime`, a `datetime` object is returned.
         '''
 
         dt = datetime.now(BruteTime.timezone)

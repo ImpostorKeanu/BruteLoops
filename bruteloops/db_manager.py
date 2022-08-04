@@ -16,14 +16,30 @@ from io import StringIO,TextIOWrapper
 from sys import stderr
 from functools import wraps
 from inspect import signature
-from typing import Union
+from typing import (
+    Union,
+    Callable,
+    Any,
+    Tuple,
+    List,
+    Dict)
+from logging import Logger
 import csv
 import re
 
+# TODO: This is stupid. See notes in "scan_dictreader"
 RE_USERNAME = re.compile('username',re.I)
 RE_PASSWORD = re.compile('password',re.I)
 
-def check_container(f):
+def check_container(
+        f:Callable[Union[TextIOWrapper, csv.DictReader], Any]):
+    '''Determine if the container argument is a file-like
+    object and update the `is_file` and `is_dictreader`
+    keyword aguments accordingly.
+
+    Args:
+      f: Callable to decorate.
+    '''
 
     s = signature(f)
 
@@ -48,7 +64,29 @@ def check_container(f):
 
     return wrapper
 
-def scan_dictreader(container, as_credentials) -> (str, str,):
+def scan_dictreader(container:csv.DictReader, as_credentials:bool) -> Tuple[str, str]:
+    '''Scan the container and find the username and password keys.
+
+    Args:
+      container: Dictreader to scan username/password key from.
+      as_credentials: Determines if a ValueError exception should be
+        raised when the keys are not enumerated.
+
+    Returns:
+      Tuple containing the enumerated keys.
+
+    Notes:
+      - This is a terribly stupid function.
+      - Suspect I'd initially thought of searching all headers and
+      hitting on any that contained the "username" and "password"
+      strings.
+
+    Todo:
+      - Remove this function and all references in future versions.
+    '''
+
+    # TODO: Update this such that the user can specify the
+    # columns for the username/password values.
 
     # Iterate over each field name and find the username
     # and password field
@@ -80,44 +118,53 @@ def scan_dictreader(container, as_credentials) -> (str, str,):
 
     return username_key, password_key
 
-def flatten_dict_values(a:list):
-    '''Accept a list of dictionaries with a "value" element and
-    "flatten":it such that it becomes a list of individual string
+def flatten_dict_values(lst:List[Dict[str, str]]):
+    '''Modify a list of dictionaries with a "value" element and
+    "flatten" it such that it becomes a list of individual string
     values.
+
+    Args:
+      lst: List of dictionary values.
+
+    Warnings:
+      - `lst` is modified inline.
     '''
 
-    for i in range(0, len(a)):
-        a[i] = a[i]['value']
+    for i in range(0, len(lst)):
+        lst[i] = lst[i]['value']
 
 def split_credential_container(container:list, username_key:bool=None,
-        password_key:bool=None, credential_delimiter=':',
-        as_credentials=False, non_cred_format=dict) -> (dict, list, list,):
+        password_key:bool=None, credential_delimiter:str=':',
+        as_credentials:bool=False,
+        non_cred_format:Union[list,dict]=dict) -> Tuple[dict, list, list]:
     '''Split a container of credential values into three containers and
     return them.
 
     Args:
-        container: A container of credential values to handle.
-        username_key: When working on a csv.DictReader object, the header
-          for the username column.
-        password_key: When working on a csv.DictReader object, the header
-          for the password column.
-        as_credentials: Determines if the values should be strict credentials.
-        credential_delimiter: Character/sequence used to delimit username and
-          password values.
-        non_cred_format: Dictates the output format of non-credential values,
-          i.e. usernames or passwords. Expects either `dict` or `list`. When
-          `dict` is supplied, password values will also include the proper
-          "sprayable" attribute value in accordance with the value supplied
-          for `as_credentials`. In both cases, `dict` format produces a
-          structure like `{"value":"username or password"}`, making `dict`
-          the most suitable input when preparing to insert records. When
-          `list` is supplied, a list of string values will be returned.
+      container: A container of credential values to handle.
+      username_key: When working on a csv.DictReader object, the header
+        for the username column.
+      password_key: When working on a csv.DictReader object, the header
+        for the password column.
+      as_credentials: Determines if the values should be strict credentials.
+      credential_delimiter: Character/sequence used to delimit username and
+        password values.
+      non_cred_format: Dictates the output format of non-credential values,
+        i.e. usernames or passwords. Expects either `dict` or `list`. When
+        `dict` is supplied, password values will also include the proper
+        "sprayable" attribute value in accordance with the value supplied
+        for `as_credentials`. In both cases, `dict` format produces a
+        structure like `{"value":"username or password"}`, making `dict`
+        the most suitable input when preparing to insert records. When
+        `list` is supplied, a list of string values will be returned.
 
     Returns:
-        A tuple:
-            - Element 1: dictionary of credential values, organized by username.
-            - Element 2: A list of username or dictionary values.
-            - Element 3: A list of password or dictionary values.
+      A tuple:
+
+
+        - Element 1: dictionary of credential values, organized by username.
+        - Element 2: A list of username or dictionary values.
+        - Element 3: A list of password or dictionary values.
     '''
 
     is_dictreader = isinstance(container, csv.DictReader)
@@ -208,7 +255,7 @@ def csv_split(s,delimiter=','):
     return (s[:ind],s[ind+1:],)
 
 @check_container
-def chunk_container(container, callback,
+def chunk_container(container:Any, callback:Callable,
         is_file:bool=False, threshold:int=10000, cargs:tuple=None,
         ckwargs:dict=None):
     '''Break a container of items down into chunks and pass them
@@ -216,15 +263,15 @@ def chunk_container(container, callback,
     inserting/upserting records into a database.
 
     Args:
-        container: An iterable containing values to act upon.
-        callback: A callback that will receive the chunked values
-          from container.
-        is_file: Boolean value indicating if the records are
-          originating from a file. If so, newlines are stripped.
-        threshold: The maximum number of records to pass back to
-          `callback`.
-        cargs: Positional arguments passed to `callback`.
-        ckwargs: Keyword arguments passed to `callback.
+      container: An iterable containing values to act upon.
+      callback: A callback that will receive the chunked values
+        from container.
+      is_file: Boolean value indicating if the records are
+        originating from a file. If so, newlines are stripped.
+      threshold: The maximum number of records to pass back to
+        `callback`.
+      cargs: Positional arguments passed to `callback`.
+      ckwargs: Keyword arguments passed to `callback.
     '''
 
     cargs = cargs if cargs is not None else tuple()
@@ -255,23 +302,145 @@ def chunk_container(container, callback,
         container.seek(0)
 
 class DBMixin:
+    '''This class provides methods for managing SQLite databases
+    supporting brute force attacks.
+
+    # Resource Records
+
+    Three (3) types of resources can be managed directly via this
+    mixin:
+
+    1. `usernames` - Representing accounts.
+    2. `passwords` - Passwords that are to be guessed for a username.
+    3. `credentials` - A unit consisting of both a `username` and a
+      password pair.
+
+    Additional records establishing relationships between usernames
+    and passwords are managed by this module as well, though they're
+    managed seamlessly at runtime. These records effectively join
+    these values to form `credentials`.
+
+    - `Credential` - Represents a relationship between a `username`
+      and a `password`.
+    - `StrictCredential` - Similar to a `Credential` but the
+      password is not sprayable. These records are maintained as an
+      efficient lookup table, thus minimizing query times during
+      attack execution.
+
+    The above association records are created when the `as_credentials`
+    flags are passed to various methods.
+
+    ## Methods for Creating Resource Records
+
+    There are individual methods for creating resource records:
+
+    - `insert_username_records`
+    - `insert_password_records`
+    - `insert_credential_records` (`as_credentials` set to `False`)
+
+    `insert_username_records` and `insert_password_records` have an
+    obvious purpose: they insert records into their respective
+    database table.
+
+    However, `insert_credential_records` deserves greater explanation.
+    This method:
+
+    - Accepts a container of delimited strings, e.g. `username:password`
+    - The string is broken out into individual username and password
+      record values and then inserted into the database.
+    - When the `as_credentials` argument is `False`, the values are
+      imported and treated as spray values, i.e. the passwords will
+      be tried for all usernames.
+    - When the `as_credentials` argument is set to `True`, they will be
+      be treated as `StrictCredentials`, i.e. the password will be
+      guessed for usernames which it has been expressly configured for.
+        - However, all other passwords will be guessed for the username
+          after all `StrictCredentials` have been exhausted.
+
+    ## Methods for Deleting Resource Records
+
+    The following methods follow the same semantics described above,
+    except they delete records from the database.
+
+    - `delete_username_records`
+    - `delete_password_records`
+    - `delete_credential_records`
+
+    ## Resource Management Methods
+
+    These methods compliment previously described methods by providing
+    logic to handle containers of various types:
+
+    _Methods:_
+
+    - `manage_values` - Inserts/deletes usernames and passwords.
+    - `manage_credentials` - Inserts/deletes credentials.
+
+    _Container Types:_
+
+    Management methods always accept a list of strings and a flag that
+    determines how values in the list should be treated, e.g. the
+    `is_file` flag indicates that each value points to a file of
+    values.
+
+    - When no `is_file` or `is_csv_file` flag is set, the values
+      are treated as the records to import.
+    - When `is_file` is `True`: values are file paths to newline
+      delimited files for opening.
+    - When `is_csv_file` is `True`: values are file paths to CSV
+      files for parsing. (`manage_credential_values` only)
+
+    ### Example: Usernames from a File, Passwords from List
+
+    _The Username File (`/tmp/usernames.txt`)_
+
+    ```
+    user1
+    user2
+    ```
+
+    _Calling the Method_
+
+    This would populate the database with:
+
+    - 2 usernames from file
+    - 3 spray passwords directly
+    - Produce a total of 6 credentials to guess
+      - `usernames*passwords=total_credentials`
+      - `2*3=6`
+
+    ```python
+    # Import the usernames from disk first
+    dbm.manage_values(
+        model='username',
+        container=['/tmp/usernames.txt'],
+        is_file=True,
+        associate_spray_values=False)
+
+    # Import passwords and associate them with all usernames
+    dbm.manage_values(
+        model='password',
+        container=['p1', 'p2', 'p3'],
+        associate_spray_values=True)
+    ```
+    '''
 
     def do_upsert(self, model, values:list,
-            index_elements:list=['value'],
+            index_elements:List[str]=['value'],
             do_update_where:str=None, update_data:dict=None,
-            logger=None):
+            logger:Logger=None):
         '''Insert values into a model (database table) via upsert.
 
         Args:
-            model: SQLAlchemy ORM model.
-            values: Values to insert into the database table.
-            do_update_where: Condition that determines if records
-                should be updated during the upsert, e.g.
-                sql.Password.sprayable == False. When supplied, only
-                records matching the condition will be altered.
-            update_data: Dictionary of field to value mappings used to
-                update fields.
-            logger: Logger instance used to send log events.
+          model: SQLAlchemy ORM model.
+          values: Values to insert into the database table.
+          do_update_where: Condition that determines if records
+            should be updated during the upsert, e.g.
+            sql.Password.sprayable == False. When supplied, only
+            records matching the condition will be altered.
+          update_data: Dictionary of field to value mappings used to
+            update fields.
+          logger: Logger instance used to send log events.
         '''
 
         # https://docs.sqlalchemy.org/en/14/dialects/sqlite.html#insert-on-conflict-upsert
@@ -322,14 +491,37 @@ class DBMixin:
             container = container,
             callback = _delete_values)
 
-    def manage_values(self, model, container, is_file=False,
-            insert=True, associate_spray_values=True,
-            logger=None):
-        '''Manage username values by iterating over a target container.
-        The action taken for the container is indicated by the `insert`
-        parameter, which is set to `True` by default. Setting this
-        value to `False` results in each username being deleted from
-        the database.
+    def manage_values(self, model:Union['username','password'],
+            container:List[str],
+            is_file:bool=False, insert:bool=True,
+            associate_spray_values:bool=True,
+            logger:Logger=None):
+        '''Manage username and password database records in a database.
+        It serves the same purpose as other `insert_` methods while
+        also handling containers of various file types.
+
+        Args:
+          model: Name of the model to target, i.e. username or
+            password.
+          container: A list of string values.
+          insert: Determines if values should be inserted (`True`) or
+            deleted (`False`).
+          is_file: Indicates if container values point to string file
+            paths. When `True`, each file will be accessed and
+            imported to the database.
+          associate_spray_values: Determines if association records
+            should be created for the newly imported values. This
+            can often be delayed until the final passwords have been
+            imported.
+          logger: Used to log events.
+
+        Notes:
+          - This method is used to import spray values into the
+            database.
+          - Use `DBMixin.manage_credentials` to import credential
+            values in the database.
+            - Yes, `manage_credentials` can be used to treat credential
+              records as spray values, too.
         '''
 
         # ================================
@@ -469,15 +661,25 @@ class DBMixin:
         # This method commits :)
         self.sync_lookup_tables()
 
-    def associate_spray_values(self, username_values=None,
-            password_values=None, logger=None):
+    def associate_spray_values(self, username_values:List[str]=None,
+            password_values:List[str]=None, logger:Logger=None):
         '''Create records in the credentials association table for
         spray values.
 
+        When called _without_ `username` and/or `password` values,
+        association records will be created for all sprayable
+        passwords and accounts that have not yet been recovered.
+
+        When called with `username` and/or `password` arguments,
+        only create association records where their values are
+        matched in their respective tables. This makes insertion
+        significantly more efficient.
+
         Args:
-            username_values: A list of username values to associate.
-            password_values: A list of string password values to
-              associate.
+          username_values: A list of username values to associate.
+          password_values: A list of string password values to
+            associate.
+          logger: Logger instance.
         '''
 
         AND_TEMP = ' AND {table}.value IN ("{values}")'
@@ -524,22 +726,39 @@ class DBMixin:
     # CREDENTIAL MANAGEMENT RECORDS
     # =============================
 
-    def manage_credentials(self, container, is_file=False,
-            credential_delimiter=':', as_credentials=False,
-            insert=True, is_csv_file=False, associate_spray_values=True,
-            logger=None):
-        '''Manage credential values. This logic is distinct because inputs
-        can be treated as individual username or password values for
-        spray attacks, or as individual credential records -- the latter
-        meaning that the username and password will each be inserted into
-        the proper tables BUT will result in only a single credential record
-        in credentials table.
+    def manage_credentials(self, container:List[str], is_file:bool=False,
+            credential_delimiter:str=':', as_credentials:bool=False,
+            insert:bool=True, is_csv_file:bool=False,
+            associate_spray_values:bool=True, logger:Logger=None):
+        '''Manage credential values in the database.
 
-        as_credentials indicates if each record is considered a credential.
-        When False, the record is considered an individual username and
-        password value and will be used in the form of a spray. When True,
-        it is imported as a strict credential as described above.
+        Args:
+          container: A list of string values to manage.
+          credential_delimiter: The sequenct to split credential
+            records on.
+          as_credentials: Determines if values being imported should
+            be treated as strict credentials.
+          is_file: When `True`, treat each value in `container` as a
+            path to a newline delimited file for processing.
+          is_csv_file: When `True`, treat each value in `container` as
+            a CSV file for processing.
+          associate_spray_values: Indicates if spray values should be
+            associated after execution.
+          logger: Logger for events.
+
+        Raises:
+          - `Exception` when `is_file` and `is_csv_file` are set.
+
+        Notes:
+          - `is_file` and `is_csv_file` are mutually exclusive.
+          - When both `is_file` and `is_csv_file` are `False`, values
+            in container are imported directly as credential values.
         '''
+        
+
+        if is_file and is_csv_file:
+            raise Exception('is_file and is_csv_file are mutually '
+                'exclusive.')
 
         # ================================
         # DERIVE METHOD AND PREPARE KWARGS

@@ -116,6 +116,27 @@ def check_exceptions(*kwargs:List[str]):
 
     return outer
 
+def jitter_str_to_float(s:str, field_name:str) -> float:
+    '''Convert a jitter string to a float value for maths.
+
+    Returns:
+      Float value representing the number of seconds derived
+        from s.
+
+    Raises:
+      ValueError when an improperly formatted s is supplied.
+    '''
+
+    match = JitterTime.validate_time(s)
+
+    if not match:
+
+        raise ValueError(
+            f'{field_name} is an invalid format: {s}'
+        )
+
+    return JitterTime.conv_time_match(match.groupdict())
+
 class Jitter(BaseModel):
     '''Jitter objects are used to determine the amount of time to
     wait between authentication attempts and after the lockout
@@ -134,13 +155,7 @@ class Jitter(BaseModel):
     @validator('min','max')
     def val_attr(cls, v, field, values):
 
-        match = JitterTime.validate_time(v)
-        if not match:
-            raise ValueError(
-                f'{field.name} is an invalid format: {v}'
-            )
-
-        jt = JitterTime.conv_time_match(match.groupdict())
+        jt = jitter_str_to_float(v, field.name)
 
         if field.name == 'max' and values['min'] > jt:
             raise ValueError(
@@ -391,36 +406,100 @@ class Callback(BaseModel):
 
 class ThresholdBreaker(Breaker):
     '''A breaker that throws only when an event has occurred more
-    than "threshold" times.'''
+    than "threshold" times.
+
+    Set the `reset_spec` attribute to a string conforming to the
+    jitter timing specification to allow the threshold to timeout
+    after a given period of time.
+
+    # Example
+
+    This could configure a breaker that would reset the count after
+    10 minutes of no `ConnectionErrors`.
+
+    ```python
+    breakers = [ThresholdBreaker(
+        threshold=5,
+        exception_classes=[ConnectionError],
+        reset_spec='10m')]
+
+    config = Config(
+        ...
+        breakers=breakers
+        ...)
+    ```
+    '''
 
     class Config:
-        'Ensure that count is validated each time it\'s set.'
 
         validate_assignment = True
+        'Ensure that count is validated each time it\'s set.'
 
     threshold: int = Field(1, gt=0)
     ('Maximum number of times the breaker can be handled before '
     'throwing an exception.')
 
-    count: int = 0
+    reset_after: str = Field(None, regex=JITTER_RE, alias='reset_spec')
+    ('Reset threshold counter after this period of time. Format '
+     'follows the same specification as Jitter. Value is converted to '
+     'an integer representing the number of seconds upon validation.')
+
+    last_time: datetime.datetime = None
+    'The last time that count was incremented.'
+
+    count: int = Field(0, gt=-1)
     'Count of times handle has been called.'
 
-    @validator('count')
-    def v_count(cls, c, values):
-        'Count must be positive or zero.'
+    def __setattr__(self, name:str, value:Any):
+        '''Override such that additional checks/modifications are
+        performed when the count attribute is incremented.
 
-        if c < 0:
+        Args:
+          name: Name of the attribute to set.
+          value: Value that is set to the attribute.
 
-            raise ValidationError(
-                f'count must be >-1, got {c}')
+        Raises:
+          OverflowError when `self.count` > `self.threshold`
 
-        elif c > values['threshold']:
+        Notes:
+          - Time-based resets are managed here.
+        '''
 
-            raise OverflowError(
-                'Breaker threshold broken '
-                f'({c} > {values["threshold"]})')
+        super().__setattr__(name, value)
 
-        return c
+        if name == 'count':
+
+            if self.reset_after:
+
+                # Take the current time
+                now = BruteTime.current_time(format='datetime')
+    
+                # Check if we should reset the breaker
+                  # - Has to have been checked at least once before
+                  # - Value should be greater than 1
+                  # - delta between now and last time must be greater than
+                  #   self.reset_after
+                if self.last_time and (value > 1) and (
+                        (now - self.last_time).total_seconds() >=
+                        self.reset_after):
+    
+                    # Enough time has passed to reset the counter
+                    self.count = 1
+    
+                # Set the value of last_time to track the last hit
+                self.last_time = now
+
+            if self.count > self.threshold:
+                # Raise the overflow exception
+
+                raise OverflowError(
+                    f'Breaker threshold broken ({value} > {self.threshold})')
+
+    @validator('reset_after')
+    def v_reset(cls, v, field, values):
+        'Reset must follow Jitter specification.'
+
+        return jitter_str_to_float(v, field.name)
 
     @validator('threshold')
     def v_thresh(cls, t):
