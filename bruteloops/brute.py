@@ -244,15 +244,15 @@ class BruteForcer:
                 # Call breakers
                 for b in self.config.breakers:
                     b.check(output.exception, log=self.log)
-                    if not handled:
-                        handled = True
+                    if not breaker_handled:
+                        breaker_handled = True
 
                 # Pass to regular exception handlers
                 for eh in self.config.exception_handlers:
                     if eh.exception_class == type(output.exception):
                         eh.handler(output.exception)
-                        if not handled:
-                            handled = True
+                        if not exception_handled:
+                            exception_handled = True
 
                 if breaker_handled or exception_handled:
     

@@ -269,7 +269,7 @@ class Outputs(BaseModel):
     __root__: List[Output]
     'Root type for the Outputs object.'
 
-class Breaker(BaseModel):
+class Breaker(BaseModel, validate_assignment=True):
     '''Breakers behave like circuit breakers: when tripped, they will end
     a brute force attack by throwing a `BreakerTrippedError`. Breakers become
     tripped when an exception class that is included in `exception_classes`
