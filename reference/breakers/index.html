@@ -1,0 +1,1962 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.3.9">
+    
+    
+      
+        <title>Breakers - BruteLoops Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.1d29e8d0.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.cbb835fc.min.css">
+        
+      
+      
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="none" data-md-color-accent="none">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#the-two-types-of-breakers" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="BruteLoops Documentation" class="md-header__button md-logo" aria-label="BruteLoops Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            BruteLoops Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Breakers
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="BruteLoops Documentation" class="md-nav__button md-logo" aria-label="BruteLoops Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    BruteLoops Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        BruteLoops Docs
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/" class="md-nav__link">
+        Concepts
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        Reference
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../package-documentation/" class="md-nav__link">
+        Package Documentation
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../complete_examples/" class="md-nav__link">
+        Complete Attack Examples
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#the-two-types-of-breakers" class="md-nav__link">
+    The Two Types of Breakers
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    Examples
+  </a>
+  
+    <nav class="md-nav" aria-label="Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#standard-breaker-configuration" class="md-nav__link">
+    Standard Breaker Configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#threshold-breaker-configuration" class="md-nav__link">
+    Threshold Breaker Configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#complete-configuration-example" class="md-nav__link">
+    Complete Configuration Example
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#standard-breaker" class="md-nav__link">
+    Standard Breaker
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bruteloops.models.Breaker" class="md-nav__link">
+    bruteloops.models.Breaker
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bruteloops.models.Breaker.exception_classes" class="md-nav__link">
+    exception_classes
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bruteloops.models.Breaker.trip_class" class="md-nav__link">
+    trip_class
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bruteloops.models.Breaker.trip_msg" class="md-nav__link">
+    trip_msg
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bruteloops.models.Breaker.callback" class="md-nav__link">
+    callback()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bruteloops.models.Breaker.check" class="md-nav__link">
+    check()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bruteloops.models.Breaker.trip" class="md-nav__link">
+    trip()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#threshold-breaker" class="md-nav__link">
+    Threshold Breaker
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bruteloops.models.ThresholdBreaker" class="md-nav__link">
+    bruteloops.models.ThresholdBreaker
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bruteloops.models.ThresholdBreaker.count" class="md-nav__link">
+    count
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bruteloops.models.ThresholdBreaker.last_time" class="md-nav__link">
+    last_time
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bruteloops.models.ThresholdBreaker.reset_after" class="md-nav__link">
+    reset_after
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bruteloops.models.ThresholdBreaker.threshold" class="md-nav__link">
+    threshold
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bruteloops.models.ThresholdBreaker.__setattr__" class="md-nav__link">
+    __setattr__()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bruteloops.models.ThresholdBreaker.callback" class="md-nav__link">
+    callback()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bruteloops.models.ThresholdBreaker.reset" class="md-nav__link">
+    reset()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bruteloops.models.ThresholdBreaker.v_reset" class="md-nav__link">
+    v_reset()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bruteloops.models.ThresholdBreaker.v_thresh" class="md-nav__link">
+    v_thresh()
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+
+
+  <h1>Breakers</h1>
+
+<p>Breakers provide a method of terminating an attack when an exception
+is raised. They intend to behave like circuit breakers, breaking only
+when some condition manifests.</p>
+<h2 id="the-two-types-of-breakers">The Two Types of Breakers</h2>
+<p>BruteLoops offers two types of breakers:</p>
+<ul>
+<li><a href="#bruteloops.models.Breaker"><code>bruteloops.models.Breaker</code></a><ul>
+<li>The standard breaker.</li>
+<li>The control loop is immediately terminated when exceptions handled by
+  this class are raised.</li>
+</ul>
+</li>
+<li><a href="#bruteloops.models.ThresholdBreaker"><code>bruteloops.models.ThresholdBreaker</code></a><ul>
+<li>Inherits from the standard breaker.</li>
+<li>Allows for a configurable number of exceptions to be raised before
+  becoming tripped and terminating the control loop.</li>
+<li>It's also possible to configure a reset specification for this type
+  of breaker.<ul>
+<li>This means that a number of matching exceptions must be raised
+  within a window of time before the control loop is terminated.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="examples">Examples</h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul>
+<li><a href="/pkg-docs/models/#bruteloops.models.Config"><code>bruteloops.models.Config</code></a>
+  accepts a list of one or more breakers.</li>
+<li>A blend of
+  <a href="#bruteloops.models.Breaker"><code>bruteloops.models.Breaker</code></a> and
+  <a href="#bruteloops.models.ThresholdBreaker"><code>bruteloops.models.ThresholdBreaker</code></a>
+  can be provided.</li>
+<li>Custom exception classes can be provided so long as they inherit from
+  <code>Exception</code> or <code>BaseException</code>.</li>
+</ul>
+</div>
+<h3 id="standard-breaker-configuration">Standard Breaker Configuration</h3>
+<p>A standard breaker always raises <code>bruteloops.errors.BreakerTrippedError</code>
+when a handled exception class is raised during attack execution.</p>
+<p>This configuration would result in the breaker being thrown after the
+first <code>ConnectionError</code> is raised.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">import</span> <span class="nn">bruteloops</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">breakers</span> <span class="o">=</span> <span class="p">[</span><span class="n">bruteloops</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Breaker</span><span class="p">(</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">exception_classes</span><span class="o">=</span><span class="p">[</span><span class="ne">ConnectionError</span><span class="p">])</span>
+</code></pre></div>
+<h3 id="threshold-breaker-configuration">Threshold Breaker Configuration</h3>
+<p>Configure a breaker that would reset the count after 10 minutes
+with no <code>ConnectionError</code>s being raised.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">import</span> <span class="nn">bruteloops</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">breakers</span> <span class="o">=</span> <span class="p">[</span><span class="n">bruteloops</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">ThresholdBreaker</span><span class="p">(</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="n">threshold</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="n">exception_classes</span><span class="o">=</span><span class="p">[</span><span class="ne">ConnectionError</span><span class="p">],</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="n">reset_spec</span><span class="o">=</span><span class="s1">&#39;10m&#39;</span><span class="p">)]</span>
+</code></pre></div>
+<h3 id="complete-configuration-example">Complete Configuration Example</h3>
+<p>This example produces a working
+<a href="/pkg-docs/models/#bruteloops.models.Config"><code>bruteloops.models.Config</code></a>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<ul>
+<li>This example <em>does not</em> represent a well-considered attack
+  configuration.</li>
+<li>This example is naive. It does not raise the custom
+  <code>LockoutException</code> class and the callback always returns <code>True</code>.</li>
+</ul>
+</div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">import</span> <span class="nn">bruteloops</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="k">class</span> <span class="nc">LockoutException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="k">pass</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="n">breakers</span> <span class="o">=</span> <span class="p">[</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    <span class="n">bruteloops</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">ThresholdBreaker</span><span class="p">(</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>        <span class="n">exception_classes</span><span class="o">=</span><span class="p">[</span><span class="n">LockoutException</span><span class="p">],</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>        <span class="n">threshold</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>        <span class="n">reset_spec</span><span class="o">=</span><span class="s1">&#39;5m&#39;</span><span class="p">),</span>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>    <span class="n">bruteloops</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">ThresholdBreaker</span><span class="p">(</span>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>        <span class="n">exception_classes</span><span class="o">=</span><span class="p">[</span><span class="ne">ConnectionError</span><span class="p">],</span>
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>        <span class="n">threshold</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>        <span class="n">reset_spec</span><span class="o">=</span><span class="s1">&#39;20m&#39;</span><span class="p">)]</span>
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>
+<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="n">config</span> <span class="o">=</span> <span class="n">bruteloops</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Config</span><span class="p">(</span>
+<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>    <span class="n">db_file</span><span class="o">=</span><span class="s1">&#39;/tmp/test.db&#39;</span><span class="p">,</span>
+<a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>    <span class="n">breakers</span><span class="o">=</span><span class="n">breakers</span><span class="p">,</span>
+<a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>    <span class="n">authentication_callback</span><span class="o">=</span><span class="k">lambda</span> <span class="n">username</span><span class="p">,</span><span class="n">password</span><span class="p">:</span> <span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h2 id="standard-breaker">Standard Breaker</h2>
+
+
+<div class="doc doc-object doc-class">
+
+
+<a id="bruteloops.models.Breaker"></a>
+  <div class="doc doc-contents first">
+      <p class="doc doc-class-bases">
+        Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
+
+  
+      <p>Breakers behave like circuit breakers: when tripped, they will end
+a brute force attack by throwing a <code>BreakerTrippedError</code>. Breakers become
+tripped when an exception class that is included in <code>exception_classes</code>
+for the breaker is raised during a brute force attack.</p>
+
+
+        <details class="quote">
+          <summary>Source code in <code>bruteloops/models.py</code></summary>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-272">272</a></span>
+<span class="normal"><a href="#__codelineno-0-273">273</a></span>
+<span class="normal"><a href="#__codelineno-0-274">274</a></span>
+<span class="normal"><a href="#__codelineno-0-275">275</a></span>
+<span class="normal"><a href="#__codelineno-0-276">276</a></span>
+<span class="normal"><a href="#__codelineno-0-277">277</a></span>
+<span class="normal"><a href="#__codelineno-0-278">278</a></span>
+<span class="normal"><a href="#__codelineno-0-279">279</a></span>
+<span class="normal"><a href="#__codelineno-0-280">280</a></span>
+<span class="normal"><a href="#__codelineno-0-281">281</a></span>
+<span class="normal"><a href="#__codelineno-0-282">282</a></span>
+<span class="normal"><a href="#__codelineno-0-283">283</a></span>
+<span class="normal"><a href="#__codelineno-0-284">284</a></span>
+<span class="normal"><a href="#__codelineno-0-285">285</a></span>
+<span class="normal"><a href="#__codelineno-0-286">286</a></span>
+<span class="normal"><a href="#__codelineno-0-287">287</a></span>
+<span class="normal"><a href="#__codelineno-0-288">288</a></span>
+<span class="normal"><a href="#__codelineno-0-289">289</a></span>
+<span class="normal"><a href="#__codelineno-0-290">290</a></span>
+<span class="normal"><a href="#__codelineno-0-291">291</a></span>
+<span class="normal"><a href="#__codelineno-0-292">292</a></span>
+<span class="normal"><a href="#__codelineno-0-293">293</a></span>
+<span class="normal"><a href="#__codelineno-0-294">294</a></span>
+<span class="normal"><a href="#__codelineno-0-295">295</a></span>
+<span class="normal"><a href="#__codelineno-0-296">296</a></span>
+<span class="normal"><a href="#__codelineno-0-297">297</a></span>
+<span class="normal"><a href="#__codelineno-0-298">298</a></span>
+<span class="normal"><a href="#__codelineno-0-299">299</a></span>
+<span class="normal"><a href="#__codelineno-0-300">300</a></span>
+<span class="normal"><a href="#__codelineno-0-301">301</a></span>
+<span class="normal"><a href="#__codelineno-0-302">302</a></span>
+<span class="normal"><a href="#__codelineno-0-303">303</a></span>
+<span class="normal"><a href="#__codelineno-0-304">304</a></span>
+<span class="normal"><a href="#__codelineno-0-305">305</a></span>
+<span class="normal"><a href="#__codelineno-0-306">306</a></span>
+<span class="normal"><a href="#__codelineno-0-307">307</a></span>
+<span class="normal"><a href="#__codelineno-0-308">308</a></span>
+<span class="normal"><a href="#__codelineno-0-309">309</a></span>
+<span class="normal"><a href="#__codelineno-0-310">310</a></span>
+<span class="normal"><a href="#__codelineno-0-311">311</a></span>
+<span class="normal"><a href="#__codelineno-0-312">312</a></span>
+<span class="normal"><a href="#__codelineno-0-313">313</a></span>
+<span class="normal"><a href="#__codelineno-0-314">314</a></span>
+<span class="normal"><a href="#__codelineno-0-315">315</a></span>
+<span class="normal"><a href="#__codelineno-0-316">316</a></span>
+<span class="normal"><a href="#__codelineno-0-317">317</a></span>
+<span class="normal"><a href="#__codelineno-0-318">318</a></span>
+<span class="normal"><a href="#__codelineno-0-319">319</a></span>
+<span class="normal"><a href="#__codelineno-0-320">320</a></span>
+<span class="normal"><a href="#__codelineno-0-321">321</a></span>
+<span class="normal"><a href="#__codelineno-0-322">322</a></span>
+<span class="normal"><a href="#__codelineno-0-323">323</a></span>
+<span class="normal"><a href="#__codelineno-0-324">324</a></span>
+<span class="normal"><a href="#__codelineno-0-325">325</a></span>
+<span class="normal"><a href="#__codelineno-0-326">326</a></span>
+<span class="normal"><a href="#__codelineno-0-327">327</a></span>
+<span class="normal"><a href="#__codelineno-0-328">328</a></span>
+<span class="normal"><a href="#__codelineno-0-329">329</a></span>
+<span class="normal"><a href="#__codelineno-0-330">330</a></span>
+<span class="normal"><a href="#__codelineno-0-331">331</a></span>
+<span class="normal"><a href="#__codelineno-0-332">332</a></span>
+<span class="normal"><a href="#__codelineno-0-333">333</a></span>
+<span class="normal"><a href="#__codelineno-0-334">334</a></span>
+<span class="normal"><a href="#__codelineno-0-335">335</a></span>
+<span class="normal"><a href="#__codelineno-0-336">336</a></span>
+<span class="normal"><a href="#__codelineno-0-337">337</a></span>
+<span class="normal"><a href="#__codelineno-0-338">338</a></span>
+<span class="normal"><a href="#__codelineno-0-339">339</a></span>
+<span class="normal"><a href="#__codelineno-0-340">340</a></span>
+<span class="normal"><a href="#__codelineno-0-341">341</a></span>
+<span class="normal"><a href="#__codelineno-0-342">342</a></span>
+<span class="normal"><a href="#__codelineno-0-343">343</a></span>
+<span class="normal"><a href="#__codelineno-0-344">344</a></span>
+<span class="normal"><a href="#__codelineno-0-345">345</a></span>
+<span class="normal"><a href="#__codelineno-0-346">346</a></span>
+<span class="normal"><a href="#__codelineno-0-347">347</a></span>
+<span class="normal"><a href="#__codelineno-0-348">348</a></span>
+<span class="normal"><a href="#__codelineno-0-349">349</a></span>
+<span class="normal"><a href="#__codelineno-0-350">350</a></span>
+<span class="normal"><a href="#__codelineno-0-351">351</a></span>
+<span class="normal"><a href="#__codelineno-0-352">352</a></span>
+<span class="normal"><a href="#__codelineno-0-353">353</a></span>
+<span class="normal"><a href="#__codelineno-0-354">354</a></span>
+<span class="normal"><a href="#__codelineno-0-355">355</a></span>
+<span class="normal"><a href="#__codelineno-0-356">356</a></span>
+<span class="normal"><a href="#__codelineno-0-357">357</a></span>
+<span class="normal"><a href="#__codelineno-0-358">358</a></span>
+<span class="normal"><a href="#__codelineno-0-359">359</a></span>
+<span class="normal"><a href="#__codelineno-0-360">360</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-272" name="__codelineno-0-272"></a><span class="k">class</span> <span class="nc">Breaker</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<a id="__codelineno-0-273" name="__codelineno-0-273"></a>    <span class="sd">&#39;&#39;&#39;Breakers behave like circuit breakers: when tripped, they will end</span>
+<a id="__codelineno-0-274" name="__codelineno-0-274"></a><span class="sd">    a brute force attack by throwing a `BreakerTrippedError`. Breakers become</span>
+<a id="__codelineno-0-275" name="__codelineno-0-275"></a><span class="sd">    tripped when an exception class that is included in `exception_classes`</span>
+<a id="__codelineno-0-276" name="__codelineno-0-276"></a><span class="sd">    for the breaker is raised during a brute force attack.</span>
+<a id="__codelineno-0-277" name="__codelineno-0-277"></a><span class="sd">    &#39;&#39;&#39;</span>
+<a id="__codelineno-0-278" name="__codelineno-0-278"></a>
+<a id="__codelineno-0-279" name="__codelineno-0-279"></a>    <span class="n">exception_classes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="ne">Exception</span><span class="p">]]</span>
+<a id="__codelineno-0-280" name="__codelineno-0-280"></a>    <span class="s1">&#39;Exception classes the breaker will act on.&#39;</span>
+<a id="__codelineno-0-281" name="__codelineno-0-281"></a>
+<a id="__codelineno-0-282" name="__codelineno-0-282"></a>    <span class="n">trip_class</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="ne">Exception</span><span class="p">]</span> <span class="o">=</span> <span class="n">BreakerTrippedError</span>
+<a id="__codelineno-0-283" name="__codelineno-0-283"></a>    <span class="s1">&#39;Exception classes the Breaker.check will act on.&#39;</span>
+<a id="__codelineno-0-284" name="__codelineno-0-284"></a>
+<a id="__codelineno-0-285" name="__codelineno-0-285"></a>    <span class="n">trip_msg</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;Breaker tripped&#39;</span>
+<a id="__codelineno-0-286" name="__codelineno-0-286"></a>    <span class="s1">&#39;Default message tripped by Breaker.check.&#39;</span>
+<a id="__codelineno-0-287" name="__codelineno-0-287"></a>
+<a id="__codelineno-0-288" name="__codelineno-0-288"></a>    <span class="k">def</span> <span class="nf">callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span><span class="ne">Exception</span><span class="p">,</span> <span class="n">log</span><span class="p">:</span><span class="n">Logger</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<a id="__codelineno-0-289" name="__codelineno-0-289"></a>        <span class="sd">&#39;&#39;&#39;Callback executed by Breaker.check.</span>
+<a id="__codelineno-0-290" name="__codelineno-0-290"></a>
+<a id="__codelineno-0-291" name="__codelineno-0-291"></a><span class="sd">        Args:</span>
+<a id="__codelineno-0-292" name="__codelineno-0-292"></a><span class="sd">          e: Exception instance received by Breaker.check.</span>
+<a id="__codelineno-0-293" name="__codelineno-0-293"></a>
+<a id="__codelineno-0-294" name="__codelineno-0-294"></a><span class="sd">        Returns:</span>
+<a id="__codelineno-0-295" name="__codelineno-0-295"></a><span class="sd">          Boolean value determining if check should call</span>
+<a id="__codelineno-0-296" name="__codelineno-0-296"></a><span class="sd">            Breaker.trip.</span>
+<a id="__codelineno-0-297" name="__codelineno-0-297"></a>
+<a id="__codelineno-0-298" name="__codelineno-0-298"></a><span class="sd">        Notes:</span>
+<a id="__codelineno-0-299" name="__codelineno-0-299"></a><span class="sd">          - Override this method in subclasses.</span>
+<a id="__codelineno-0-300" name="__codelineno-0-300"></a><span class="sd">          - The default variation of this method will always</span>
+<a id="__codelineno-0-301" name="__codelineno-0-301"></a><span class="sd">            return True.</span>
+<a id="__codelineno-0-302" name="__codelineno-0-302"></a><span class="sd">        &#39;&#39;&#39;</span>
+<a id="__codelineno-0-303" name="__codelineno-0-303"></a>
+<a id="__codelineno-0-304" name="__codelineno-0-304"></a>        <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-305" name="__codelineno-0-305"></a>
+<a id="__codelineno-0-306" name="__codelineno-0-306"></a>    <span class="nd">@check_exceptions</span><span class="p">(</span><span class="s1">&#39;e&#39;</span><span class="p">,</span> <span class="s1">&#39;trip_class&#39;</span><span class="p">)</span>
+<a id="__codelineno-0-307" name="__codelineno-0-307"></a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span><span class="ne">Exception</span><span class="p">,</span> <span class="n">trip_class</span><span class="p">:</span><span class="ne">Exception</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-308" name="__codelineno-0-308"></a>            <span class="n">trip_msg</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">log</span><span class="p">:</span><span class="n">Logger</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<a id="__codelineno-0-309" name="__codelineno-0-309"></a>        <span class="sd">&#39;&#39;&#39;Check an exception and determine if the breaker should be</span>
+<a id="__codelineno-0-310" name="__codelineno-0-310"></a><span class="sd">        tripped.</span>
+<a id="__codelineno-0-311" name="__codelineno-0-311"></a>
+<a id="__codelineno-0-312" name="__codelineno-0-312"></a><span class="sd">        Args:</span>
+<a id="__codelineno-0-313" name="__codelineno-0-313"></a><span class="sd">          e: Exception to check.</span>
+<a id="__codelineno-0-314" name="__codelineno-0-314"></a><span class="sd">          trip_class: Exception class that will be tripped should</span>
+<a id="__codelineno-0-315" name="__codelineno-0-315"></a><span class="sd">            the breaker be engaged. Otherwise self.trip_class is</span>
+<a id="__codelineno-0-316" name="__codelineno-0-316"></a><span class="sd">            used.</span>
+<a id="__codelineno-0-317" name="__codelineno-0-317"></a><span class="sd">          trip_msg: Message that will be passed to the raised</span>
+<a id="__codelineno-0-318" name="__codelineno-0-318"></a><span class="sd">            exception. Otherwise self.trip_msg is used.</span>
+<a id="__codelineno-0-319" name="__codelineno-0-319"></a><span class="sd">          log: Logger to send log messages.</span>
+<a id="__codelineno-0-320" name="__codelineno-0-320"></a>
+<a id="__codelineno-0-321" name="__codelineno-0-321"></a><span class="sd">        Returns:</span>
+<a id="__codelineno-0-322" name="__codelineno-0-322"></a><span class="sd">          Boolean indicating if the exception was handled by the</span>
+<a id="__codelineno-0-323" name="__codelineno-0-323"></a><span class="sd">          breaker.</span>
+<a id="__codelineno-0-324" name="__codelineno-0-324"></a>
+<a id="__codelineno-0-325" name="__codelineno-0-325"></a><span class="sd">        Notes:</span>
+<a id="__codelineno-0-326" name="__codelineno-0-326"></a><span class="sd">          - Raises type specified by trip_class or self.trip_class when</span>
+<a id="__codelineno-0-327" name="__codelineno-0-327"></a><span class="sd">            callback returns a non-None value.</span>
+<a id="__codelineno-0-328" name="__codelineno-0-328"></a><span class="sd">          - callback signature: f(e:Exception) -&gt; bool</span>
+<a id="__codelineno-0-329" name="__codelineno-0-329"></a><span class="sd">          - trip signature:</span>
+<a id="__codelineno-0-330" name="__codelineno-0-330"></a><span class="sd">            trip(e:Exception, msg:str, exception_class:Exception)</span>
+<a id="__codelineno-0-331" name="__codelineno-0-331"></a><span class="sd">        &#39;&#39;&#39;</span>
+<a id="__codelineno-0-332" name="__codelineno-0-332"></a>
+<a id="__codelineno-0-333" name="__codelineno-0-333"></a>        <span class="k">if</span> <span class="n">log</span><span class="p">:</span> <span class="n">log</span><span class="o">.</span><span class="n">module</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> checked: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<a id="__codelineno-0-334" name="__codelineno-0-334"></a>
+<a id="__codelineno-0-335" name="__codelineno-0-335"></a>        <span class="n">will_handle</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exception_classes</span><span class="p">))</span>
+<a id="__codelineno-0-336" name="__codelineno-0-336"></a>
+<a id="__codelineno-0-337" name="__codelineno-0-337"></a>        <span class="k">if</span> <span class="n">will_handle</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">):</span>
+<a id="__codelineno-0-338" name="__codelineno-0-338"></a>
+<a id="__codelineno-0-339" name="__codelineno-0-339"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">trip</span><span class="p">(</span>
+<a id="__codelineno-0-340" name="__codelineno-0-340"></a>                <span class="n">e</span> <span class="o">=</span> <span class="n">e</span><span class="p">,</span>
+<a id="__codelineno-0-341" name="__codelineno-0-341"></a>                <span class="n">msg</span> <span class="o">=</span>
+<a id="__codelineno-0-342" name="__codelineno-0-342"></a>                    <span class="n">trip_msg</span> <span class="k">if</span> <span class="n">trip_msg</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">trip_msg</span><span class="p">,</span>
+<a id="__codelineno-0-343" name="__codelineno-0-343"></a>                <span class="n">exception_class</span> <span class="o">=</span>
+<a id="__codelineno-0-344" name="__codelineno-0-344"></a>                    <span class="n">trip_class</span> <span class="k">if</span> <span class="n">trip_class</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">trip_class</span>
+<a id="__codelineno-0-345" name="__codelineno-0-345"></a>            <span class="p">)</span>
+<a id="__codelineno-0-346" name="__codelineno-0-346"></a>
+<a id="__codelineno-0-347" name="__codelineno-0-347"></a>        <span class="k">return</span> <span class="n">will_handle</span>
+<a id="__codelineno-0-348" name="__codelineno-0-348"></a>
+<a id="__codelineno-0-349" name="__codelineno-0-349"></a>    <span class="nd">@check_exceptions</span><span class="p">(</span><span class="s1">&#39;exception_class&#39;</span><span class="p">)</span>
+<a id="__codelineno-0-350" name="__codelineno-0-350"></a>    <span class="k">def</span> <span class="nf">trip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exception_class</span><span class="p">:</span><span class="ne">Exception</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<a id="__codelineno-0-351" name="__codelineno-0-351"></a>        <span class="sd">&#39;&#39;&#39;Raise a BreakerTrippedError while using e as the string</span>
+<a id="__codelineno-0-352" name="__codelineno-0-352"></a><span class="sd">        message.</span>
+<a id="__codelineno-0-353" name="__codelineno-0-353"></a>
+<a id="__codelineno-0-354" name="__codelineno-0-354"></a><span class="sd">        Args:</span>
+<a id="__codelineno-0-355" name="__codelineno-0-355"></a><span class="sd">            exception_class: Exception class to raise.</span>
+<a id="__codelineno-0-356" name="__codelineno-0-356"></a><span class="sd">        &#39;&#39;&#39;</span>
+<a id="__codelineno-0-357" name="__codelineno-0-357"></a>
+<a id="__codelineno-0-358" name="__codelineno-0-358"></a>        <span class="k">raise</span> <span class="p">(</span><span class="n">exception_class</span> <span class="k">if</span> <span class="n">exception_class</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">trip_class</span><span class="p">)(</span>
+<a id="__codelineno-0-359" name="__codelineno-0-359"></a>            <span class="n">msg</span> <span class="k">if</span> <span class="n">msg</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_msg</span>
+<a id="__codelineno-0-360" name="__codelineno-0-360"></a>        <span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+        </details>
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h2 id="bruteloops.models.Breaker.exception_classes" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">exception_classes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="ne">Exception</span><span class="p">]]</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+  </span>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Exception classes the breaker will act on.</p>
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h2 id="bruteloops.models.Breaker.trip_class" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">trip_class</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="ne">Exception</span><span class="p">]</span> <span class="o">=</span> <span class="n">BreakerTrippedError</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+  </span>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Exception classes the Breaker.check will act on.</p>
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h2 id="bruteloops.models.Breaker.trip_msg" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">trip_msg</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;Breaker tripped&#39;</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+  </span>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Default message tripped by Breaker.check.</p>
+  </div>
+
+</div>
+
+
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="bruteloops.models.Breaker.callback" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">callback</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Callback executed by Breaker.check.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>e</code></td>
+          <td>
+                <code>Exception</code>
+          </td>
+          <td><p>Exception instance received by Breaker.check.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>bool</code>
+          </td>
+          <td><p>Boolean value determining if check should call
+Breaker.trip.</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+<details class="notes">
+  <summary>Notes</summary>
+  <ul>
+<li>Override this method in subclasses.</li>
+<li>The default variation of this method will always
+  return True.</li>
+</ul>
+</details>
+      <details class="quote">
+        <summary>Source code in <code>bruteloops/models.py</code></summary>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-288">288</a></span>
+<span class="normal"><a href="#__codelineno-0-289">289</a></span>
+<span class="normal"><a href="#__codelineno-0-290">290</a></span>
+<span class="normal"><a href="#__codelineno-0-291">291</a></span>
+<span class="normal"><a href="#__codelineno-0-292">292</a></span>
+<span class="normal"><a href="#__codelineno-0-293">293</a></span>
+<span class="normal"><a href="#__codelineno-0-294">294</a></span>
+<span class="normal"><a href="#__codelineno-0-295">295</a></span>
+<span class="normal"><a href="#__codelineno-0-296">296</a></span>
+<span class="normal"><a href="#__codelineno-0-297">297</a></span>
+<span class="normal"><a href="#__codelineno-0-298">298</a></span>
+<span class="normal"><a href="#__codelineno-0-299">299</a></span>
+<span class="normal"><a href="#__codelineno-0-300">300</a></span>
+<span class="normal"><a href="#__codelineno-0-301">301</a></span>
+<span class="normal"><a href="#__codelineno-0-302">302</a></span>
+<span class="normal"><a href="#__codelineno-0-303">303</a></span>
+<span class="normal"><a href="#__codelineno-0-304">304</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-288" name="__codelineno-0-288"></a><span class="k">def</span> <span class="nf">callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span><span class="ne">Exception</span><span class="p">,</span> <span class="n">log</span><span class="p">:</span><span class="n">Logger</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<a id="__codelineno-0-289" name="__codelineno-0-289"></a>    <span class="sd">&#39;&#39;&#39;Callback executed by Breaker.check.</span>
+<a id="__codelineno-0-290" name="__codelineno-0-290"></a>
+<a id="__codelineno-0-291" name="__codelineno-0-291"></a><span class="sd">    Args:</span>
+<a id="__codelineno-0-292" name="__codelineno-0-292"></a><span class="sd">      e: Exception instance received by Breaker.check.</span>
+<a id="__codelineno-0-293" name="__codelineno-0-293"></a>
+<a id="__codelineno-0-294" name="__codelineno-0-294"></a><span class="sd">    Returns:</span>
+<a id="__codelineno-0-295" name="__codelineno-0-295"></a><span class="sd">      Boolean value determining if check should call</span>
+<a id="__codelineno-0-296" name="__codelineno-0-296"></a><span class="sd">        Breaker.trip.</span>
+<a id="__codelineno-0-297" name="__codelineno-0-297"></a>
+<a id="__codelineno-0-298" name="__codelineno-0-298"></a><span class="sd">    Notes:</span>
+<a id="__codelineno-0-299" name="__codelineno-0-299"></a><span class="sd">      - Override this method in subclasses.</span>
+<a id="__codelineno-0-300" name="__codelineno-0-300"></a><span class="sd">      - The default variation of this method will always</span>
+<a id="__codelineno-0-301" name="__codelineno-0-301"></a><span class="sd">        return True.</span>
+<a id="__codelineno-0-302" name="__codelineno-0-302"></a><span class="sd">    &#39;&#39;&#39;</span>
+<a id="__codelineno-0-303" name="__codelineno-0-303"></a>
+<a id="__codelineno-0-304" name="__codelineno-0-304"></a>    <span class="k">return</span> <span class="kc">True</span>
+</code></pre></div></td></tr></table></div>
+      </details>
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="bruteloops.models.Breaker.check" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">check</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">trip_class</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">trip_msg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Check an exception and determine if the breaker should be
+tripped.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>e</code></td>
+          <td>
+                <code>Exception</code>
+          </td>
+          <td><p>Exception to check.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>trip_class</code></td>
+          <td>
+                <code>Exception</code>
+          </td>
+          <td><p>Exception class that will be tripped should
+the breaker be engaged. Otherwise self.trip_class is
+used.</p></td>
+          <td>
+                <code>None</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>trip_msg</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td><p>Message that will be passed to the raised
+exception. Otherwise self.trip_msg is used.</p></td>
+          <td>
+                <code>None</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>log</code></td>
+          <td>
+                <code><span title="logging.Logger">Logger</span></code>
+          </td>
+          <td><p>Logger to send log messages.</p></td>
+          <td>
+                <code>None</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>bool</code>
+          </td>
+          <td><p>Boolean indicating if the exception was handled by the</p></td>
+        </tr>
+        <tr>
+          <td>
+                <code>bool</code>
+          </td>
+          <td><p>breaker.</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+<details class="notes">
+  <summary>Notes</summary>
+  <ul>
+<li>Raises type specified by trip_class or self.trip_class when
+  callback returns a non-None value.</li>
+<li>callback signature: f(e:Exception) -&gt; bool</li>
+<li>trip signature:
+  trip(e:Exception, msg:str, exception_class:Exception)</li>
+</ul>
+</details>
+      <details class="quote">
+        <summary>Source code in <code>bruteloops/models.py</code></summary>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-306">306</a></span>
+<span class="normal"><a href="#__codelineno-0-307">307</a></span>
+<span class="normal"><a href="#__codelineno-0-308">308</a></span>
+<span class="normal"><a href="#__codelineno-0-309">309</a></span>
+<span class="normal"><a href="#__codelineno-0-310">310</a></span>
+<span class="normal"><a href="#__codelineno-0-311">311</a></span>
+<span class="normal"><a href="#__codelineno-0-312">312</a></span>
+<span class="normal"><a href="#__codelineno-0-313">313</a></span>
+<span class="normal"><a href="#__codelineno-0-314">314</a></span>
+<span class="normal"><a href="#__codelineno-0-315">315</a></span>
+<span class="normal"><a href="#__codelineno-0-316">316</a></span>
+<span class="normal"><a href="#__codelineno-0-317">317</a></span>
+<span class="normal"><a href="#__codelineno-0-318">318</a></span>
+<span class="normal"><a href="#__codelineno-0-319">319</a></span>
+<span class="normal"><a href="#__codelineno-0-320">320</a></span>
+<span class="normal"><a href="#__codelineno-0-321">321</a></span>
+<span class="normal"><a href="#__codelineno-0-322">322</a></span>
+<span class="normal"><a href="#__codelineno-0-323">323</a></span>
+<span class="normal"><a href="#__codelineno-0-324">324</a></span>
+<span class="normal"><a href="#__codelineno-0-325">325</a></span>
+<span class="normal"><a href="#__codelineno-0-326">326</a></span>
+<span class="normal"><a href="#__codelineno-0-327">327</a></span>
+<span class="normal"><a href="#__codelineno-0-328">328</a></span>
+<span class="normal"><a href="#__codelineno-0-329">329</a></span>
+<span class="normal"><a href="#__codelineno-0-330">330</a></span>
+<span class="normal"><a href="#__codelineno-0-331">331</a></span>
+<span class="normal"><a href="#__codelineno-0-332">332</a></span>
+<span class="normal"><a href="#__codelineno-0-333">333</a></span>
+<span class="normal"><a href="#__codelineno-0-334">334</a></span>
+<span class="normal"><a href="#__codelineno-0-335">335</a></span>
+<span class="normal"><a href="#__codelineno-0-336">336</a></span>
+<span class="normal"><a href="#__codelineno-0-337">337</a></span>
+<span class="normal"><a href="#__codelineno-0-338">338</a></span>
+<span class="normal"><a href="#__codelineno-0-339">339</a></span>
+<span class="normal"><a href="#__codelineno-0-340">340</a></span>
+<span class="normal"><a href="#__codelineno-0-341">341</a></span>
+<span class="normal"><a href="#__codelineno-0-342">342</a></span>
+<span class="normal"><a href="#__codelineno-0-343">343</a></span>
+<span class="normal"><a href="#__codelineno-0-344">344</a></span>
+<span class="normal"><a href="#__codelineno-0-345">345</a></span>
+<span class="normal"><a href="#__codelineno-0-346">346</a></span>
+<span class="normal"><a href="#__codelineno-0-347">347</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-306" name="__codelineno-0-306"></a><span class="nd">@check_exceptions</span><span class="p">(</span><span class="s1">&#39;e&#39;</span><span class="p">,</span> <span class="s1">&#39;trip_class&#39;</span><span class="p">)</span>
+<a id="__codelineno-0-307" name="__codelineno-0-307"></a><span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span><span class="ne">Exception</span><span class="p">,</span> <span class="n">trip_class</span><span class="p">:</span><span class="ne">Exception</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-308" name="__codelineno-0-308"></a>        <span class="n">trip_msg</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">log</span><span class="p">:</span><span class="n">Logger</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<a id="__codelineno-0-309" name="__codelineno-0-309"></a>    <span class="sd">&#39;&#39;&#39;Check an exception and determine if the breaker should be</span>
+<a id="__codelineno-0-310" name="__codelineno-0-310"></a><span class="sd">    tripped.</span>
+<a id="__codelineno-0-311" name="__codelineno-0-311"></a>
+<a id="__codelineno-0-312" name="__codelineno-0-312"></a><span class="sd">    Args:</span>
+<a id="__codelineno-0-313" name="__codelineno-0-313"></a><span class="sd">      e: Exception to check.</span>
+<a id="__codelineno-0-314" name="__codelineno-0-314"></a><span class="sd">      trip_class: Exception class that will be tripped should</span>
+<a id="__codelineno-0-315" name="__codelineno-0-315"></a><span class="sd">        the breaker be engaged. Otherwise self.trip_class is</span>
+<a id="__codelineno-0-316" name="__codelineno-0-316"></a><span class="sd">        used.</span>
+<a id="__codelineno-0-317" name="__codelineno-0-317"></a><span class="sd">      trip_msg: Message that will be passed to the raised</span>
+<a id="__codelineno-0-318" name="__codelineno-0-318"></a><span class="sd">        exception. Otherwise self.trip_msg is used.</span>
+<a id="__codelineno-0-319" name="__codelineno-0-319"></a><span class="sd">      log: Logger to send log messages.</span>
+<a id="__codelineno-0-320" name="__codelineno-0-320"></a>
+<a id="__codelineno-0-321" name="__codelineno-0-321"></a><span class="sd">    Returns:</span>
+<a id="__codelineno-0-322" name="__codelineno-0-322"></a><span class="sd">      Boolean indicating if the exception was handled by the</span>
+<a id="__codelineno-0-323" name="__codelineno-0-323"></a><span class="sd">      breaker.</span>
+<a id="__codelineno-0-324" name="__codelineno-0-324"></a>
+<a id="__codelineno-0-325" name="__codelineno-0-325"></a><span class="sd">    Notes:</span>
+<a id="__codelineno-0-326" name="__codelineno-0-326"></a><span class="sd">      - Raises type specified by trip_class or self.trip_class when</span>
+<a id="__codelineno-0-327" name="__codelineno-0-327"></a><span class="sd">        callback returns a non-None value.</span>
+<a id="__codelineno-0-328" name="__codelineno-0-328"></a><span class="sd">      - callback signature: f(e:Exception) -&gt; bool</span>
+<a id="__codelineno-0-329" name="__codelineno-0-329"></a><span class="sd">      - trip signature:</span>
+<a id="__codelineno-0-330" name="__codelineno-0-330"></a><span class="sd">        trip(e:Exception, msg:str, exception_class:Exception)</span>
+<a id="__codelineno-0-331" name="__codelineno-0-331"></a><span class="sd">    &#39;&#39;&#39;</span>
+<a id="__codelineno-0-332" name="__codelineno-0-332"></a>
+<a id="__codelineno-0-333" name="__codelineno-0-333"></a>    <span class="k">if</span> <span class="n">log</span><span class="p">:</span> <span class="n">log</span><span class="o">.</span><span class="n">module</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> checked: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<a id="__codelineno-0-334" name="__codelineno-0-334"></a>
+<a id="__codelineno-0-335" name="__codelineno-0-335"></a>    <span class="n">will_handle</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exception_classes</span><span class="p">))</span>
+<a id="__codelineno-0-336" name="__codelineno-0-336"></a>
+<a id="__codelineno-0-337" name="__codelineno-0-337"></a>    <span class="k">if</span> <span class="n">will_handle</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">):</span>
+<a id="__codelineno-0-338" name="__codelineno-0-338"></a>
+<a id="__codelineno-0-339" name="__codelineno-0-339"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">trip</span><span class="p">(</span>
+<a id="__codelineno-0-340" name="__codelineno-0-340"></a>            <span class="n">e</span> <span class="o">=</span> <span class="n">e</span><span class="p">,</span>
+<a id="__codelineno-0-341" name="__codelineno-0-341"></a>            <span class="n">msg</span> <span class="o">=</span>
+<a id="__codelineno-0-342" name="__codelineno-0-342"></a>                <span class="n">trip_msg</span> <span class="k">if</span> <span class="n">trip_msg</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">trip_msg</span><span class="p">,</span>
+<a id="__codelineno-0-343" name="__codelineno-0-343"></a>            <span class="n">exception_class</span> <span class="o">=</span>
+<a id="__codelineno-0-344" name="__codelineno-0-344"></a>                <span class="n">trip_class</span> <span class="k">if</span> <span class="n">trip_class</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">trip_class</span>
+<a id="__codelineno-0-345" name="__codelineno-0-345"></a>        <span class="p">)</span>
+<a id="__codelineno-0-346" name="__codelineno-0-346"></a>
+<a id="__codelineno-0-347" name="__codelineno-0-347"></a>    <span class="k">return</span> <span class="n">will_handle</span>
+</code></pre></div></td></tr></table></div>
+      </details>
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="bruteloops.models.Breaker.trip" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">trip</span><span class="p">(</span><span class="n">msg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exception_class</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Raise a BreakerTrippedError while using e as the string
+message.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>exception_class</code></td>
+          <td>
+                <code>Exception</code>
+          </td>
+          <td><p>Exception class to raise.</p></td>
+          <td>
+                <code>None</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+      <details class="quote">
+        <summary>Source code in <code>bruteloops/models.py</code></summary>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-349">349</a></span>
+<span class="normal"><a href="#__codelineno-0-350">350</a></span>
+<span class="normal"><a href="#__codelineno-0-351">351</a></span>
+<span class="normal"><a href="#__codelineno-0-352">352</a></span>
+<span class="normal"><a href="#__codelineno-0-353">353</a></span>
+<span class="normal"><a href="#__codelineno-0-354">354</a></span>
+<span class="normal"><a href="#__codelineno-0-355">355</a></span>
+<span class="normal"><a href="#__codelineno-0-356">356</a></span>
+<span class="normal"><a href="#__codelineno-0-357">357</a></span>
+<span class="normal"><a href="#__codelineno-0-358">358</a></span>
+<span class="normal"><a href="#__codelineno-0-359">359</a></span>
+<span class="normal"><a href="#__codelineno-0-360">360</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-349" name="__codelineno-0-349"></a><span class="nd">@check_exceptions</span><span class="p">(</span><span class="s1">&#39;exception_class&#39;</span><span class="p">)</span>
+<a id="__codelineno-0-350" name="__codelineno-0-350"></a><span class="k">def</span> <span class="nf">trip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exception_class</span><span class="p">:</span><span class="ne">Exception</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<a id="__codelineno-0-351" name="__codelineno-0-351"></a>    <span class="sd">&#39;&#39;&#39;Raise a BreakerTrippedError while using e as the string</span>
+<a id="__codelineno-0-352" name="__codelineno-0-352"></a><span class="sd">    message.</span>
+<a id="__codelineno-0-353" name="__codelineno-0-353"></a>
+<a id="__codelineno-0-354" name="__codelineno-0-354"></a><span class="sd">    Args:</span>
+<a id="__codelineno-0-355" name="__codelineno-0-355"></a><span class="sd">        exception_class: Exception class to raise.</span>
+<a id="__codelineno-0-356" name="__codelineno-0-356"></a><span class="sd">    &#39;&#39;&#39;</span>
+<a id="__codelineno-0-357" name="__codelineno-0-357"></a>
+<a id="__codelineno-0-358" name="__codelineno-0-358"></a>    <span class="k">raise</span> <span class="p">(</span><span class="n">exception_class</span> <span class="k">if</span> <span class="n">exception_class</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">trip_class</span><span class="p">)(</span>
+<a id="__codelineno-0-359" name="__codelineno-0-359"></a>        <span class="n">msg</span> <span class="k">if</span> <span class="n">msg</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_msg</span>
+<a id="__codelineno-0-360" name="__codelineno-0-360"></a>    <span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+      </details>
+  </div>
+
+</div>
+
+
+
+  </div>
+
+  </div>
+
+</div><hr />
+<h2 id="threshold-breaker">Threshold Breaker</h2>
+
+
+<div class="doc doc-object doc-class">
+
+
+<a id="bruteloops.models.ThresholdBreaker"></a>
+  <div class="doc doc-contents first">
+      <p class="doc doc-class-bases">
+        Bases: <code><a class="autorefs autorefs-internal" title="bruteloops.models.Breaker" href="#bruteloops.models.Breaker">Breaker</a></code></p>
+
+  
+      <p>A breaker that throws only when an event has occurred more
+than "threshold" times.</p>
+<p>Set the <code>reset_spec</code> attribute to a string conforming to the
+jitter timing specification to allow the threshold to timeout
+after a given period of time.</p>
+
+
+        <details class="quote">
+          <summary>Source code in <code>bruteloops/models.py</code></summary>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-411">411</a></span>
+<span class="normal"><a href="#__codelineno-0-412">412</a></span>
+<span class="normal"><a href="#__codelineno-0-413">413</a></span>
+<span class="normal"><a href="#__codelineno-0-414">414</a></span>
+<span class="normal"><a href="#__codelineno-0-415">415</a></span>
+<span class="normal"><a href="#__codelineno-0-416">416</a></span>
+<span class="normal"><a href="#__codelineno-0-417">417</a></span>
+<span class="normal"><a href="#__codelineno-0-418">418</a></span>
+<span class="normal"><a href="#__codelineno-0-419">419</a></span>
+<span class="normal"><a href="#__codelineno-0-420">420</a></span>
+<span class="normal"><a href="#__codelineno-0-421">421</a></span>
+<span class="normal"><a href="#__codelineno-0-422">422</a></span>
+<span class="normal"><a href="#__codelineno-0-423">423</a></span>
+<span class="normal"><a href="#__codelineno-0-424">424</a></span>
+<span class="normal"><a href="#__codelineno-0-425">425</a></span>
+<span class="normal"><a href="#__codelineno-0-426">426</a></span>
+<span class="normal"><a href="#__codelineno-0-427">427</a></span>
+<span class="normal"><a href="#__codelineno-0-428">428</a></span>
+<span class="normal"><a href="#__codelineno-0-429">429</a></span>
+<span class="normal"><a href="#__codelineno-0-430">430</a></span>
+<span class="normal"><a href="#__codelineno-0-431">431</a></span>
+<span class="normal"><a href="#__codelineno-0-432">432</a></span>
+<span class="normal"><a href="#__codelineno-0-433">433</a></span>
+<span class="normal"><a href="#__codelineno-0-434">434</a></span>
+<span class="normal"><a href="#__codelineno-0-435">435</a></span>
+<span class="normal"><a href="#__codelineno-0-436">436</a></span>
+<span class="normal"><a href="#__codelineno-0-437">437</a></span>
+<span class="normal"><a href="#__codelineno-0-438">438</a></span>
+<span class="normal"><a href="#__codelineno-0-439">439</a></span>
+<span class="normal"><a href="#__codelineno-0-440">440</a></span>
+<span class="normal"><a href="#__codelineno-0-441">441</a></span>
+<span class="normal"><a href="#__codelineno-0-442">442</a></span>
+<span class="normal"><a href="#__codelineno-0-443">443</a></span>
+<span class="normal"><a href="#__codelineno-0-444">444</a></span>
+<span class="normal"><a href="#__codelineno-0-445">445</a></span>
+<span class="normal"><a href="#__codelineno-0-446">446</a></span>
+<span class="normal"><a href="#__codelineno-0-447">447</a></span>
+<span class="normal"><a href="#__codelineno-0-448">448</a></span>
+<span class="normal"><a href="#__codelineno-0-449">449</a></span>
+<span class="normal"><a href="#__codelineno-0-450">450</a></span>
+<span class="normal"><a href="#__codelineno-0-451">451</a></span>
+<span class="normal"><a href="#__codelineno-0-452">452</a></span>
+<span class="normal"><a href="#__codelineno-0-453">453</a></span>
+<span class="normal"><a href="#__codelineno-0-454">454</a></span>
+<span class="normal"><a href="#__codelineno-0-455">455</a></span>
+<span class="normal"><a href="#__codelineno-0-456">456</a></span>
+<span class="normal"><a href="#__codelineno-0-457">457</a></span>
+<span class="normal"><a href="#__codelineno-0-458">458</a></span>
+<span class="normal"><a href="#__codelineno-0-459">459</a></span>
+<span class="normal"><a href="#__codelineno-0-460">460</a></span>
+<span class="normal"><a href="#__codelineno-0-461">461</a></span>
+<span class="normal"><a href="#__codelineno-0-462">462</a></span>
+<span class="normal"><a href="#__codelineno-0-463">463</a></span>
+<span class="normal"><a href="#__codelineno-0-464">464</a></span>
+<span class="normal"><a href="#__codelineno-0-465">465</a></span>
+<span class="normal"><a href="#__codelineno-0-466">466</a></span>
+<span class="normal"><a href="#__codelineno-0-467">467</a></span>
+<span class="normal"><a href="#__codelineno-0-468">468</a></span>
+<span class="normal"><a href="#__codelineno-0-469">469</a></span>
+<span class="normal"><a href="#__codelineno-0-470">470</a></span>
+<span class="normal"><a href="#__codelineno-0-471">471</a></span>
+<span class="normal"><a href="#__codelineno-0-472">472</a></span>
+<span class="normal"><a href="#__codelineno-0-473">473</a></span>
+<span class="normal"><a href="#__codelineno-0-474">474</a></span>
+<span class="normal"><a href="#__codelineno-0-475">475</a></span>
+<span class="normal"><a href="#__codelineno-0-476">476</a></span>
+<span class="normal"><a href="#__codelineno-0-477">477</a></span>
+<span class="normal"><a href="#__codelineno-0-478">478</a></span>
+<span class="normal"><a href="#__codelineno-0-479">479</a></span>
+<span class="normal"><a href="#__codelineno-0-480">480</a></span>
+<span class="normal"><a href="#__codelineno-0-481">481</a></span>
+<span class="normal"><a href="#__codelineno-0-482">482</a></span>
+<span class="normal"><a href="#__codelineno-0-483">483</a></span>
+<span class="normal"><a href="#__codelineno-0-484">484</a></span>
+<span class="normal"><a href="#__codelineno-0-485">485</a></span>
+<span class="normal"><a href="#__codelineno-0-486">486</a></span>
+<span class="normal"><a href="#__codelineno-0-487">487</a></span>
+<span class="normal"><a href="#__codelineno-0-488">488</a></span>
+<span class="normal"><a href="#__codelineno-0-489">489</a></span>
+<span class="normal"><a href="#__codelineno-0-490">490</a></span>
+<span class="normal"><a href="#__codelineno-0-491">491</a></span>
+<span class="normal"><a href="#__codelineno-0-492">492</a></span>
+<span class="normal"><a href="#__codelineno-0-493">493</a></span>
+<span class="normal"><a href="#__codelineno-0-494">494</a></span>
+<span class="normal"><a href="#__codelineno-0-495">495</a></span>
+<span class="normal"><a href="#__codelineno-0-496">496</a></span>
+<span class="normal"><a href="#__codelineno-0-497">497</a></span>
+<span class="normal"><a href="#__codelineno-0-498">498</a></span>
+<span class="normal"><a href="#__codelineno-0-499">499</a></span>
+<span class="normal"><a href="#__codelineno-0-500">500</a></span>
+<span class="normal"><a href="#__codelineno-0-501">501</a></span>
+<span class="normal"><a href="#__codelineno-0-502">502</a></span>
+<span class="normal"><a href="#__codelineno-0-503">503</a></span>
+<span class="normal"><a href="#__codelineno-0-504">504</a></span>
+<span class="normal"><a href="#__codelineno-0-505">505</a></span>
+<span class="normal"><a href="#__codelineno-0-506">506</a></span>
+<span class="normal"><a href="#__codelineno-0-507">507</a></span>
+<span class="normal"><a href="#__codelineno-0-508">508</a></span>
+<span class="normal"><a href="#__codelineno-0-509">509</a></span>
+<span class="normal"><a href="#__codelineno-0-510">510</a></span>
+<span class="normal"><a href="#__codelineno-0-511">511</a></span>
+<span class="normal"><a href="#__codelineno-0-512">512</a></span>
+<span class="normal"><a href="#__codelineno-0-513">513</a></span>
+<span class="normal"><a href="#__codelineno-0-514">514</a></span>
+<span class="normal"><a href="#__codelineno-0-515">515</a></span>
+<span class="normal"><a href="#__codelineno-0-516">516</a></span>
+<span class="normal"><a href="#__codelineno-0-517">517</a></span>
+<span class="normal"><a href="#__codelineno-0-518">518</a></span>
+<span class="normal"><a href="#__codelineno-0-519">519</a></span>
+<span class="normal"><a href="#__codelineno-0-520">520</a></span>
+<span class="normal"><a href="#__codelineno-0-521">521</a></span>
+<span class="normal"><a href="#__codelineno-0-522">522</a></span>
+<span class="normal"><a href="#__codelineno-0-523">523</a></span>
+<span class="normal"><a href="#__codelineno-0-524">524</a></span>
+<span class="normal"><a href="#__codelineno-0-525">525</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-411" name="__codelineno-0-411"></a><span class="k">class</span> <span class="nc">ThresholdBreaker</span><span class="p">(</span><span class="n">Breaker</span><span class="p">,</span> <span class="n">validate_assignment</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<a id="__codelineno-0-412" name="__codelineno-0-412"></a>    <span class="sd">&#39;&#39;&#39;A breaker that throws only when an event has occurred more</span>
+<a id="__codelineno-0-413" name="__codelineno-0-413"></a><span class="sd">    than &quot;threshold&quot; times.</span>
+<a id="__codelineno-0-414" name="__codelineno-0-414"></a>
+<a id="__codelineno-0-415" name="__codelineno-0-415"></a><span class="sd">    Set the `reset_spec` attribute to a string conforming to the</span>
+<a id="__codelineno-0-416" name="__codelineno-0-416"></a><span class="sd">    jitter timing specification to allow the threshold to timeout</span>
+<a id="__codelineno-0-417" name="__codelineno-0-417"></a><span class="sd">    after a given period of time.</span>
+<a id="__codelineno-0-418" name="__codelineno-0-418"></a><span class="sd">    &#39;&#39;&#39;</span>
+<a id="__codelineno-0-419" name="__codelineno-0-419"></a>
+<a id="__codelineno-0-420" name="__codelineno-0-420"></a>    <span class="n">threshold</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">gt</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<a id="__codelineno-0-421" name="__codelineno-0-421"></a>    <span class="p">(</span><span class="s1">&#39;Maximum number of times the breaker can be handled before &#39;</span>
+<a id="__codelineno-0-422" name="__codelineno-0-422"></a>    <span class="s1">&#39;throwing an exception.&#39;</span><span class="p">)</span>
+<a id="__codelineno-0-423" name="__codelineno-0-423"></a>
+<a id="__codelineno-0-424" name="__codelineno-0-424"></a>    <span class="n">reset_after</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">regex</span><span class="o">=</span><span class="n">JITTER_RE</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="s1">&#39;reset_spec&#39;</span><span class="p">)</span>
+<a id="__codelineno-0-425" name="__codelineno-0-425"></a>    <span class="p">(</span><span class="s1">&#39;Reset threshold counter after this period of time. Format &#39;</span>
+<a id="__codelineno-0-426" name="__codelineno-0-426"></a>     <span class="s1">&#39;follows the same specification as Jitter. Value is converted to &#39;</span>
+<a id="__codelineno-0-427" name="__codelineno-0-427"></a>     <span class="s1">&#39;an integer representing the number of seconds upon validation.&#39;</span><span class="p">)</span>
+<a id="__codelineno-0-428" name="__codelineno-0-428"></a>
+<a id="__codelineno-0-429" name="__codelineno-0-429"></a>    <span class="n">last_time</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span> <span class="o">=</span> <span class="kc">None</span>
+<a id="__codelineno-0-430" name="__codelineno-0-430"></a>    <span class="s1">&#39;The last time that count was incremented.&#39;</span>
+<a id="__codelineno-0-431" name="__codelineno-0-431"></a>
+<a id="__codelineno-0-432" name="__codelineno-0-432"></a>    <span class="n">count</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">gt</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+<a id="__codelineno-0-433" name="__codelineno-0-433"></a>    <span class="s1">&#39;Count of times handle has been called.&#39;</span>
+<a id="__codelineno-0-434" name="__codelineno-0-434"></a>
+<a id="__codelineno-0-435" name="__codelineno-0-435"></a>    <span class="k">def</span> <span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="n">Any</span><span class="p">):</span>
+<a id="__codelineno-0-436" name="__codelineno-0-436"></a>        <span class="sd">&#39;&#39;&#39;Override such that additional checks/modifications are</span>
+<a id="__codelineno-0-437" name="__codelineno-0-437"></a><span class="sd">        performed when the count attribute is incremented.</span>
+<a id="__codelineno-0-438" name="__codelineno-0-438"></a>
+<a id="__codelineno-0-439" name="__codelineno-0-439"></a><span class="sd">        Args:</span>
+<a id="__codelineno-0-440" name="__codelineno-0-440"></a><span class="sd">          name: Name of the attribute to set.</span>
+<a id="__codelineno-0-441" name="__codelineno-0-441"></a><span class="sd">          value: Value that is set to the attribute.</span>
+<a id="__codelineno-0-442" name="__codelineno-0-442"></a>
+<a id="__codelineno-0-443" name="__codelineno-0-443"></a><span class="sd">        Raises:</span>
+<a id="__codelineno-0-444" name="__codelineno-0-444"></a><span class="sd">          OverflowError: when `self.count` &gt; `self.threshold`</span>
+<a id="__codelineno-0-445" name="__codelineno-0-445"></a>
+<a id="__codelineno-0-446" name="__codelineno-0-446"></a><span class="sd">        Notes:</span>
+<a id="__codelineno-0-447" name="__codelineno-0-447"></a><span class="sd">          - Time-based resets are managed here.</span>
+<a id="__codelineno-0-448" name="__codelineno-0-448"></a><span class="sd">        &#39;&#39;&#39;</span>
+<a id="__codelineno-0-449" name="__codelineno-0-449"></a>
+<a id="__codelineno-0-450" name="__codelineno-0-450"></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+<a id="__codelineno-0-451" name="__codelineno-0-451"></a>
+<a id="__codelineno-0-452" name="__codelineno-0-452"></a>        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;count&#39;</span><span class="p">:</span>
+<a id="__codelineno-0-453" name="__codelineno-0-453"></a>
+<a id="__codelineno-0-454" name="__codelineno-0-454"></a>            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reset_after</span><span class="p">:</span>
+<a id="__codelineno-0-455" name="__codelineno-0-455"></a>
+<a id="__codelineno-0-456" name="__codelineno-0-456"></a>                <span class="c1"># Take the current time</span>
+<a id="__codelineno-0-457" name="__codelineno-0-457"></a>                <span class="n">now</span> <span class="o">=</span> <span class="n">BruteTime</span><span class="o">.</span><span class="n">current_time</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s1">&#39;datetime&#39;</span><span class="p">)</span>
+<a id="__codelineno-0-458" name="__codelineno-0-458"></a>
+<a id="__codelineno-0-459" name="__codelineno-0-459"></a>                <span class="c1"># Check if we should reset the breaker</span>
+<a id="__codelineno-0-460" name="__codelineno-0-460"></a>                  <span class="c1"># - Has to have been checked at least once before</span>
+<a id="__codelineno-0-461" name="__codelineno-0-461"></a>                  <span class="c1"># - Value should be greater than 1</span>
+<a id="__codelineno-0-462" name="__codelineno-0-462"></a>                  <span class="c1"># - delta between now and last time must be greater than</span>
+<a id="__codelineno-0-463" name="__codelineno-0-463"></a>                  <span class="c1">#   self.reset_after</span>
+<a id="__codelineno-0-464" name="__codelineno-0-464"></a>                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_time</span> <span class="ow">and</span> <span class="p">(</span><span class="n">value</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
+<a id="__codelineno-0-465" name="__codelineno-0-465"></a>                        <span class="p">(</span><span class="n">now</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_time</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="o">&gt;=</span>
+<a id="__codelineno-0-466" name="__codelineno-0-466"></a>                        <span class="bp">self</span><span class="o">.</span><span class="n">reset_after</span><span class="p">):</span>
+<a id="__codelineno-0-467" name="__codelineno-0-467"></a>
+<a id="__codelineno-0-468" name="__codelineno-0-468"></a>                    <span class="c1"># Enough time has passed to reset the counter</span>
+<a id="__codelineno-0-469" name="__codelineno-0-469"></a>                    <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">=</span> <span class="mi">1</span>
+<a id="__codelineno-0-470" name="__codelineno-0-470"></a>
+<a id="__codelineno-0-471" name="__codelineno-0-471"></a>                <span class="c1"># Set the value of last_time to track the last hit</span>
+<a id="__codelineno-0-472" name="__codelineno-0-472"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">last_time</span> <span class="o">=</span> <span class="n">now</span>
+<a id="__codelineno-0-473" name="__codelineno-0-473"></a>
+<a id="__codelineno-0-474" name="__codelineno-0-474"></a>            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span><span class="p">:</span>
+<a id="__codelineno-0-475" name="__codelineno-0-475"></a>                <span class="c1"># Raise the overflow exception</span>
+<a id="__codelineno-0-476" name="__codelineno-0-476"></a>
+<a id="__codelineno-0-477" name="__codelineno-0-477"></a>                <span class="k">raise</span> <span class="ne">OverflowError</span><span class="p">(</span>
+<a id="__codelineno-0-478" name="__codelineno-0-478"></a>                    <span class="sa">f</span><span class="s1">&#39;Breaker threshold broken (</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1"> &gt; </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">threshold</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+<a id="__codelineno-0-479" name="__codelineno-0-479"></a>
+<a id="__codelineno-0-480" name="__codelineno-0-480"></a>    <span class="nd">@validator</span><span class="p">(</span><span class="s1">&#39;reset_after&#39;</span><span class="p">)</span>
+<a id="__codelineno-0-481" name="__codelineno-0-481"></a>    <span class="k">def</span> <span class="nf">v_reset</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+<a id="__codelineno-0-482" name="__codelineno-0-482"></a>        <span class="s1">&#39;Reset must follow Jitter specification.&#39;</span>
+<a id="__codelineno-0-483" name="__codelineno-0-483"></a>
+<a id="__codelineno-0-484" name="__codelineno-0-484"></a>        <span class="k">return</span> <span class="n">jitter_str_to_float</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<a id="__codelineno-0-485" name="__codelineno-0-485"></a>
+<a id="__codelineno-0-486" name="__codelineno-0-486"></a>    <span class="nd">@validator</span><span class="p">(</span><span class="s1">&#39;threshold&#39;</span><span class="p">)</span>
+<a id="__codelineno-0-487" name="__codelineno-0-487"></a>    <span class="k">def</span> <span class="nf">v_thresh</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+<a id="__codelineno-0-488" name="__codelineno-0-488"></a>        <span class="s1">&#39;Threshold must be &gt;=1.&#39;</span>
+<a id="__codelineno-0-489" name="__codelineno-0-489"></a>
+<a id="__codelineno-0-490" name="__codelineno-0-490"></a>        <span class="k">if</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+<a id="__codelineno-0-491" name="__codelineno-0-491"></a>            <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span>
+<a id="__codelineno-0-492" name="__codelineno-0-492"></a>                <span class="sa">f</span><span class="s1">&#39;threshold must be greater &gt;=1, got </span><span class="si">{</span><span class="n">t</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<a id="__codelineno-0-493" name="__codelineno-0-493"></a>
+<a id="__codelineno-0-494" name="__codelineno-0-494"></a>        <span class="k">return</span> <span class="n">t</span>
+<a id="__codelineno-0-495" name="__codelineno-0-495"></a>
+<a id="__codelineno-0-496" name="__codelineno-0-496"></a>    <span class="k">def</span> <span class="nf">callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span><span class="ne">Exception</span><span class="p">,</span> <span class="n">log</span><span class="p">:</span><span class="n">Logger</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<a id="__codelineno-0-497" name="__codelineno-0-497"></a>        <span class="sd">&#39;&#39;&#39;Override the callback method to increment the count</span>
+<a id="__codelineno-0-498" name="__codelineno-0-498"></a><span class="sd">        attribute and handle when the threshold is crossed.</span>
+<a id="__codelineno-0-499" name="__codelineno-0-499"></a>
+<a id="__codelineno-0-500" name="__codelineno-0-500"></a><span class="sd">        Returns:</span>
+<a id="__codelineno-0-501" name="__codelineno-0-501"></a><span class="sd">            - True when the threshold has been crossed.</span>
+<a id="__codelineno-0-502" name="__codelineno-0-502"></a><span class="sd">            - False when count &lt; threshold.</span>
+<a id="__codelineno-0-503" name="__codelineno-0-503"></a><span class="sd">        &#39;&#39;&#39;</span>
+<a id="__codelineno-0-504" name="__codelineno-0-504"></a>
+<a id="__codelineno-0-505" name="__codelineno-0-505"></a>        <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-506" name="__codelineno-0-506"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+<a id="__codelineno-0-507" name="__codelineno-0-507"></a>            <span class="k">if</span> <span class="n">log</span><span class="p">:</span>
+<a id="__codelineno-0-508" name="__codelineno-0-508"></a>                <span class="n">log</span><span class="o">.</span><span class="n">module</span><span class="p">(</span>
+<a id="__codelineno-0-509" name="__codelineno-0-509"></a>                    <span class="s1">&#39;Threshold Breaker at: &#39;</span>
+<a id="__codelineno-0-510" name="__codelineno-0-510"></a>                    <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">count</span><span class="si">}</span><span class="s1"> of </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">threshold</span><span class="si">}</span><span class="s1">&#39;</span>
+<a id="__codelineno-0-511" name="__codelineno-0-511"></a>                <span class="p">)</span>
+<a id="__codelineno-0-512" name="__codelineno-0-512"></a>        <span class="k">except</span> <span class="ne">OverflowError</span><span class="p">:</span>
+<a id="__codelineno-0-513" name="__codelineno-0-513"></a>            <span class="k">if</span> <span class="n">log</span><span class="p">:</span> <span class="n">log</span><span class="o">.</span><span class="n">module</span><span class="p">(</span><span class="s1">&#39;Breaker threshold met.&#39;</span><span class="p">)</span>
+<a id="__codelineno-0-514" name="__codelineno-0-514"></a>            <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-515" name="__codelineno-0-515"></a>
+<a id="__codelineno-0-516" name="__codelineno-0-516"></a>        <span class="k">return</span> <span class="kc">False</span>
+<a id="__codelineno-0-517" name="__codelineno-0-517"></a>
+<a id="__codelineno-0-518" name="__codelineno-0-518"></a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">c</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<a id="__codelineno-0-519" name="__codelineno-0-519"></a>        <span class="sd">&#39;&#39;&#39;Reset the handle count to c.</span>
+<a id="__codelineno-0-520" name="__codelineno-0-520"></a>
+<a id="__codelineno-0-521" name="__codelineno-0-521"></a><span class="sd">        Args:</span>
+<a id="__codelineno-0-522" name="__codelineno-0-522"></a><span class="sd">            c: Value to set to handle_count.</span>
+<a id="__codelineno-0-523" name="__codelineno-0-523"></a><span class="sd">        &#39;&#39;&#39;</span>
+<a id="__codelineno-0-524" name="__codelineno-0-524"></a>
+<a id="__codelineno-0-525" name="__codelineno-0-525"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">=</span> <span class="n">c</span>
+</code></pre></div></td></tr></table></div>
+        </details>
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h2 id="bruteloops.models.ThresholdBreaker.count" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">count</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">gt</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+  </span>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Count of times handle has been called.</p>
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h2 id="bruteloops.models.ThresholdBreaker.last_time" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">last_time</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span> <span class="o">=</span> <span class="kc">None</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+  </span>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>The last time that count was incremented.</p>
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h2 id="bruteloops.models.ThresholdBreaker.reset_after" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">reset_after</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">regex</span><span class="o">=</span><span class="n">JITTER_RE</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="s1">&#39;reset_spec&#39;</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+  </span>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Reset threshold counter after this period of time. Format follows the same specification as Jitter. Value is converted to an integer representing the number of seconds upon validation.</p>
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h2 id="bruteloops.models.ThresholdBreaker.threshold" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">threshold</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">gt</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+  </span>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Maximum number of times the breaker can be handled before throwing an exception.</p>
+  </div>
+
+</div>
+
+
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="bruteloops.models.ThresholdBreaker.__setattr__" class="doc doc-heading">
+<code class="highlight language-python"><span class="fm">__setattr__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Override such that additional checks/modifications are
+performed when the count attribute is incremented.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>name</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td><p>Name of the attribute to set.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>value</code></td>
+          <td>
+                <code><span title="typing.Any">Any</span></code>
+          </td>
+          <td><p>Value that is set to the attribute.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Raises:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>OverflowError</code>
+          </td>
+          <td><p>when <code>self.count</code> &gt; <code>self.threshold</code></p></td>
+        </tr>
+    </tbody>
+  </table>
+
+<details class="notes">
+  <summary>Notes</summary>
+  <ul>
+<li>Time-based resets are managed here.</li>
+</ul>
+</details>
+      <details class="quote">
+        <summary>Source code in <code>bruteloops/models.py</code></summary>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-435">435</a></span>
+<span class="normal"><a href="#__codelineno-0-436">436</a></span>
+<span class="normal"><a href="#__codelineno-0-437">437</a></span>
+<span class="normal"><a href="#__codelineno-0-438">438</a></span>
+<span class="normal"><a href="#__codelineno-0-439">439</a></span>
+<span class="normal"><a href="#__codelineno-0-440">440</a></span>
+<span class="normal"><a href="#__codelineno-0-441">441</a></span>
+<span class="normal"><a href="#__codelineno-0-442">442</a></span>
+<span class="normal"><a href="#__codelineno-0-443">443</a></span>
+<span class="normal"><a href="#__codelineno-0-444">444</a></span>
+<span class="normal"><a href="#__codelineno-0-445">445</a></span>
+<span class="normal"><a href="#__codelineno-0-446">446</a></span>
+<span class="normal"><a href="#__codelineno-0-447">447</a></span>
+<span class="normal"><a href="#__codelineno-0-448">448</a></span>
+<span class="normal"><a href="#__codelineno-0-449">449</a></span>
+<span class="normal"><a href="#__codelineno-0-450">450</a></span>
+<span class="normal"><a href="#__codelineno-0-451">451</a></span>
+<span class="normal"><a href="#__codelineno-0-452">452</a></span>
+<span class="normal"><a href="#__codelineno-0-453">453</a></span>
+<span class="normal"><a href="#__codelineno-0-454">454</a></span>
+<span class="normal"><a href="#__codelineno-0-455">455</a></span>
+<span class="normal"><a href="#__codelineno-0-456">456</a></span>
+<span class="normal"><a href="#__codelineno-0-457">457</a></span>
+<span class="normal"><a href="#__codelineno-0-458">458</a></span>
+<span class="normal"><a href="#__codelineno-0-459">459</a></span>
+<span class="normal"><a href="#__codelineno-0-460">460</a></span>
+<span class="normal"><a href="#__codelineno-0-461">461</a></span>
+<span class="normal"><a href="#__codelineno-0-462">462</a></span>
+<span class="normal"><a href="#__codelineno-0-463">463</a></span>
+<span class="normal"><a href="#__codelineno-0-464">464</a></span>
+<span class="normal"><a href="#__codelineno-0-465">465</a></span>
+<span class="normal"><a href="#__codelineno-0-466">466</a></span>
+<span class="normal"><a href="#__codelineno-0-467">467</a></span>
+<span class="normal"><a href="#__codelineno-0-468">468</a></span>
+<span class="normal"><a href="#__codelineno-0-469">469</a></span>
+<span class="normal"><a href="#__codelineno-0-470">470</a></span>
+<span class="normal"><a href="#__codelineno-0-471">471</a></span>
+<span class="normal"><a href="#__codelineno-0-472">472</a></span>
+<span class="normal"><a href="#__codelineno-0-473">473</a></span>
+<span class="normal"><a href="#__codelineno-0-474">474</a></span>
+<span class="normal"><a href="#__codelineno-0-475">475</a></span>
+<span class="normal"><a href="#__codelineno-0-476">476</a></span>
+<span class="normal"><a href="#__codelineno-0-477">477</a></span>
+<span class="normal"><a href="#__codelineno-0-478">478</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-435" name="__codelineno-0-435"></a><span class="k">def</span> <span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="n">Any</span><span class="p">):</span>
+<a id="__codelineno-0-436" name="__codelineno-0-436"></a>    <span class="sd">&#39;&#39;&#39;Override such that additional checks/modifications are</span>
+<a id="__codelineno-0-437" name="__codelineno-0-437"></a><span class="sd">    performed when the count attribute is incremented.</span>
+<a id="__codelineno-0-438" name="__codelineno-0-438"></a>
+<a id="__codelineno-0-439" name="__codelineno-0-439"></a><span class="sd">    Args:</span>
+<a id="__codelineno-0-440" name="__codelineno-0-440"></a><span class="sd">      name: Name of the attribute to set.</span>
+<a id="__codelineno-0-441" name="__codelineno-0-441"></a><span class="sd">      value: Value that is set to the attribute.</span>
+<a id="__codelineno-0-442" name="__codelineno-0-442"></a>
+<a id="__codelineno-0-443" name="__codelineno-0-443"></a><span class="sd">    Raises:</span>
+<a id="__codelineno-0-444" name="__codelineno-0-444"></a><span class="sd">      OverflowError: when `self.count` &gt; `self.threshold`</span>
+<a id="__codelineno-0-445" name="__codelineno-0-445"></a>
+<a id="__codelineno-0-446" name="__codelineno-0-446"></a><span class="sd">    Notes:</span>
+<a id="__codelineno-0-447" name="__codelineno-0-447"></a><span class="sd">      - Time-based resets are managed here.</span>
+<a id="__codelineno-0-448" name="__codelineno-0-448"></a><span class="sd">    &#39;&#39;&#39;</span>
+<a id="__codelineno-0-449" name="__codelineno-0-449"></a>
+<a id="__codelineno-0-450" name="__codelineno-0-450"></a>    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+<a id="__codelineno-0-451" name="__codelineno-0-451"></a>
+<a id="__codelineno-0-452" name="__codelineno-0-452"></a>    <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;count&#39;</span><span class="p">:</span>
+<a id="__codelineno-0-453" name="__codelineno-0-453"></a>
+<a id="__codelineno-0-454" name="__codelineno-0-454"></a>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reset_after</span><span class="p">:</span>
+<a id="__codelineno-0-455" name="__codelineno-0-455"></a>
+<a id="__codelineno-0-456" name="__codelineno-0-456"></a>            <span class="c1"># Take the current time</span>
+<a id="__codelineno-0-457" name="__codelineno-0-457"></a>            <span class="n">now</span> <span class="o">=</span> <span class="n">BruteTime</span><span class="o">.</span><span class="n">current_time</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s1">&#39;datetime&#39;</span><span class="p">)</span>
+<a id="__codelineno-0-458" name="__codelineno-0-458"></a>
+<a id="__codelineno-0-459" name="__codelineno-0-459"></a>            <span class="c1"># Check if we should reset the breaker</span>
+<a id="__codelineno-0-460" name="__codelineno-0-460"></a>              <span class="c1"># - Has to have been checked at least once before</span>
+<a id="__codelineno-0-461" name="__codelineno-0-461"></a>              <span class="c1"># - Value should be greater than 1</span>
+<a id="__codelineno-0-462" name="__codelineno-0-462"></a>              <span class="c1"># - delta between now and last time must be greater than</span>
+<a id="__codelineno-0-463" name="__codelineno-0-463"></a>              <span class="c1">#   self.reset_after</span>
+<a id="__codelineno-0-464" name="__codelineno-0-464"></a>            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_time</span> <span class="ow">and</span> <span class="p">(</span><span class="n">value</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
+<a id="__codelineno-0-465" name="__codelineno-0-465"></a>                    <span class="p">(</span><span class="n">now</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_time</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="o">&gt;=</span>
+<a id="__codelineno-0-466" name="__codelineno-0-466"></a>                    <span class="bp">self</span><span class="o">.</span><span class="n">reset_after</span><span class="p">):</span>
+<a id="__codelineno-0-467" name="__codelineno-0-467"></a>
+<a id="__codelineno-0-468" name="__codelineno-0-468"></a>                <span class="c1"># Enough time has passed to reset the counter</span>
+<a id="__codelineno-0-469" name="__codelineno-0-469"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">=</span> <span class="mi">1</span>
+<a id="__codelineno-0-470" name="__codelineno-0-470"></a>
+<a id="__codelineno-0-471" name="__codelineno-0-471"></a>            <span class="c1"># Set the value of last_time to track the last hit</span>
+<a id="__codelineno-0-472" name="__codelineno-0-472"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">last_time</span> <span class="o">=</span> <span class="n">now</span>
+<a id="__codelineno-0-473" name="__codelineno-0-473"></a>
+<a id="__codelineno-0-474" name="__codelineno-0-474"></a>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span><span class="p">:</span>
+<a id="__codelineno-0-475" name="__codelineno-0-475"></a>            <span class="c1"># Raise the overflow exception</span>
+<a id="__codelineno-0-476" name="__codelineno-0-476"></a>
+<a id="__codelineno-0-477" name="__codelineno-0-477"></a>            <span class="k">raise</span> <span class="ne">OverflowError</span><span class="p">(</span>
+<a id="__codelineno-0-478" name="__codelineno-0-478"></a>                <span class="sa">f</span><span class="s1">&#39;Breaker threshold broken (</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1"> &gt; </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">threshold</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+      </details>
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="bruteloops.models.ThresholdBreaker.callback" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">callback</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Override the callback method to increment the count
+attribute and handle when the threshold is crossed.</p>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>bool</code>
+          </td>
+          <td><ul>
+<li>True when the threshold has been crossed.</li>
+</ul></td>
+        </tr>
+        <tr>
+          <td>
+                <code>bool</code>
+          </td>
+          <td><ul>
+<li>False when count &lt; threshold.</li>
+</ul></td>
+        </tr>
+    </tbody>
+  </table>
+
+      <details class="quote">
+        <summary>Source code in <code>bruteloops/models.py</code></summary>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-496">496</a></span>
+<span class="normal"><a href="#__codelineno-0-497">497</a></span>
+<span class="normal"><a href="#__codelineno-0-498">498</a></span>
+<span class="normal"><a href="#__codelineno-0-499">499</a></span>
+<span class="normal"><a href="#__codelineno-0-500">500</a></span>
+<span class="normal"><a href="#__codelineno-0-501">501</a></span>
+<span class="normal"><a href="#__codelineno-0-502">502</a></span>
+<span class="normal"><a href="#__codelineno-0-503">503</a></span>
+<span class="normal"><a href="#__codelineno-0-504">504</a></span>
+<span class="normal"><a href="#__codelineno-0-505">505</a></span>
+<span class="normal"><a href="#__codelineno-0-506">506</a></span>
+<span class="normal"><a href="#__codelineno-0-507">507</a></span>
+<span class="normal"><a href="#__codelineno-0-508">508</a></span>
+<span class="normal"><a href="#__codelineno-0-509">509</a></span>
+<span class="normal"><a href="#__codelineno-0-510">510</a></span>
+<span class="normal"><a href="#__codelineno-0-511">511</a></span>
+<span class="normal"><a href="#__codelineno-0-512">512</a></span>
+<span class="normal"><a href="#__codelineno-0-513">513</a></span>
+<span class="normal"><a href="#__codelineno-0-514">514</a></span>
+<span class="normal"><a href="#__codelineno-0-515">515</a></span>
+<span class="normal"><a href="#__codelineno-0-516">516</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-496" name="__codelineno-0-496"></a><span class="k">def</span> <span class="nf">callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span><span class="ne">Exception</span><span class="p">,</span> <span class="n">log</span><span class="p">:</span><span class="n">Logger</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<a id="__codelineno-0-497" name="__codelineno-0-497"></a>    <span class="sd">&#39;&#39;&#39;Override the callback method to increment the count</span>
+<a id="__codelineno-0-498" name="__codelineno-0-498"></a><span class="sd">    attribute and handle when the threshold is crossed.</span>
+<a id="__codelineno-0-499" name="__codelineno-0-499"></a>
+<a id="__codelineno-0-500" name="__codelineno-0-500"></a><span class="sd">    Returns:</span>
+<a id="__codelineno-0-501" name="__codelineno-0-501"></a><span class="sd">        - True when the threshold has been crossed.</span>
+<a id="__codelineno-0-502" name="__codelineno-0-502"></a><span class="sd">        - False when count &lt; threshold.</span>
+<a id="__codelineno-0-503" name="__codelineno-0-503"></a><span class="sd">    &#39;&#39;&#39;</span>
+<a id="__codelineno-0-504" name="__codelineno-0-504"></a>
+<a id="__codelineno-0-505" name="__codelineno-0-505"></a>    <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-506" name="__codelineno-0-506"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+<a id="__codelineno-0-507" name="__codelineno-0-507"></a>        <span class="k">if</span> <span class="n">log</span><span class="p">:</span>
+<a id="__codelineno-0-508" name="__codelineno-0-508"></a>            <span class="n">log</span><span class="o">.</span><span class="n">module</span><span class="p">(</span>
+<a id="__codelineno-0-509" name="__codelineno-0-509"></a>                <span class="s1">&#39;Threshold Breaker at: &#39;</span>
+<a id="__codelineno-0-510" name="__codelineno-0-510"></a>                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">count</span><span class="si">}</span><span class="s1"> of </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">threshold</span><span class="si">}</span><span class="s1">&#39;</span>
+<a id="__codelineno-0-511" name="__codelineno-0-511"></a>            <span class="p">)</span>
+<a id="__codelineno-0-512" name="__codelineno-0-512"></a>    <span class="k">except</span> <span class="ne">OverflowError</span><span class="p">:</span>
+<a id="__codelineno-0-513" name="__codelineno-0-513"></a>        <span class="k">if</span> <span class="n">log</span><span class="p">:</span> <span class="n">log</span><span class="o">.</span><span class="n">module</span><span class="p">(</span><span class="s1">&#39;Breaker threshold met.&#39;</span><span class="p">)</span>
+<a id="__codelineno-0-514" name="__codelineno-0-514"></a>        <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-515" name="__codelineno-0-515"></a>
+<a id="__codelineno-0-516" name="__codelineno-0-516"></a>    <span class="k">return</span> <span class="kc">False</span>
+</code></pre></div></td></tr></table></div>
+      </details>
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="bruteloops.models.ThresholdBreaker.reset" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">reset</span><span class="p">(</span><span class="n">c</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Reset the handle count to c.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>c</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td><p>Value to set to handle_count.</p></td>
+          <td>
+                <code>0</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+      <details class="quote">
+        <summary>Source code in <code>bruteloops/models.py</code></summary>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-518">518</a></span>
+<span class="normal"><a href="#__codelineno-0-519">519</a></span>
+<span class="normal"><a href="#__codelineno-0-520">520</a></span>
+<span class="normal"><a href="#__codelineno-0-521">521</a></span>
+<span class="normal"><a href="#__codelineno-0-522">522</a></span>
+<span class="normal"><a href="#__codelineno-0-523">523</a></span>
+<span class="normal"><a href="#__codelineno-0-524">524</a></span>
+<span class="normal"><a href="#__codelineno-0-525">525</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-518" name="__codelineno-0-518"></a><span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">c</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<a id="__codelineno-0-519" name="__codelineno-0-519"></a>    <span class="sd">&#39;&#39;&#39;Reset the handle count to c.</span>
+<a id="__codelineno-0-520" name="__codelineno-0-520"></a>
+<a id="__codelineno-0-521" name="__codelineno-0-521"></a><span class="sd">    Args:</span>
+<a id="__codelineno-0-522" name="__codelineno-0-522"></a><span class="sd">        c: Value to set to handle_count.</span>
+<a id="__codelineno-0-523" name="__codelineno-0-523"></a><span class="sd">    &#39;&#39;&#39;</span>
+<a id="__codelineno-0-524" name="__codelineno-0-524"></a>
+<a id="__codelineno-0-525" name="__codelineno-0-525"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">=</span> <span class="n">c</span>
+</code></pre></div></td></tr></table></div>
+      </details>
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="bruteloops.models.ThresholdBreaker.v_reset" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">v_reset</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Reset must follow Jitter specification.</p>
+
+      <details class="quote">
+        <summary>Source code in <code>bruteloops/models.py</code></summary>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-480">480</a></span>
+<span class="normal"><a href="#__codelineno-0-481">481</a></span>
+<span class="normal"><a href="#__codelineno-0-482">482</a></span>
+<span class="normal"><a href="#__codelineno-0-483">483</a></span>
+<span class="normal"><a href="#__codelineno-0-484">484</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-480" name="__codelineno-0-480"></a><span class="nd">@validator</span><span class="p">(</span><span class="s1">&#39;reset_after&#39;</span><span class="p">)</span>
+<a id="__codelineno-0-481" name="__codelineno-0-481"></a><span class="k">def</span> <span class="nf">v_reset</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+<a id="__codelineno-0-482" name="__codelineno-0-482"></a>    <span class="s1">&#39;Reset must follow Jitter specification.&#39;</span>
+<a id="__codelineno-0-483" name="__codelineno-0-483"></a>
+<a id="__codelineno-0-484" name="__codelineno-0-484"></a>    <span class="k">return</span> <span class="n">jitter_str_to_float</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+      </details>
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="bruteloops.models.ThresholdBreaker.v_thresh" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">v_thresh</span><span class="p">(</span><span class="n">t</span><span class="p">)</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Threshold must be &gt;=1.</p>
+
+      <details class="quote">
+        <summary>Source code in <code>bruteloops/models.py</code></summary>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-486">486</a></span>
+<span class="normal"><a href="#__codelineno-0-487">487</a></span>
+<span class="normal"><a href="#__codelineno-0-488">488</a></span>
+<span class="normal"><a href="#__codelineno-0-489">489</a></span>
+<span class="normal"><a href="#__codelineno-0-490">490</a></span>
+<span class="normal"><a href="#__codelineno-0-491">491</a></span>
+<span class="normal"><a href="#__codelineno-0-492">492</a></span>
+<span class="normal"><a href="#__codelineno-0-493">493</a></span>
+<span class="normal"><a href="#__codelineno-0-494">494</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-486" name="__codelineno-0-486"></a><span class="nd">@validator</span><span class="p">(</span><span class="s1">&#39;threshold&#39;</span><span class="p">)</span>
+<a id="__codelineno-0-487" name="__codelineno-0-487"></a><span class="k">def</span> <span class="nf">v_thresh</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+<a id="__codelineno-0-488" name="__codelineno-0-488"></a>    <span class="s1">&#39;Threshold must be &gt;=1.&#39;</span>
+<a id="__codelineno-0-489" name="__codelineno-0-489"></a>
+<a id="__codelineno-0-490" name="__codelineno-0-490"></a>    <span class="k">if</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+<a id="__codelineno-0-491" name="__codelineno-0-491"></a>        <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span>
+<a id="__codelineno-0-492" name="__codelineno-0-492"></a>            <span class="sa">f</span><span class="s1">&#39;threshold must be greater &gt;=1, got </span><span class="si">{</span><span class="n">t</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<a id="__codelineno-0-493" name="__codelineno-0-493"></a>
+<a id="__codelineno-0-494" name="__codelineno-0-494"></a>    <span class="k">return</span> <span class="n">t</span>
+</code></pre></div></td></tr></table></div>
+      </details>
+  </div>
+
+</div>
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+              
+            </article>
+            
+          </div>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.b97dbffb.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.6c7ad80a.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,555 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.3.9">
+    
+    
+      
+        <title>Concepts - BruteLoops Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.1d29e8d0.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.cbb835fc.min.css">
+        
+      
+      
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="none" data-md-color-accent="none">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#control-loop" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="BruteLoops Documentation" class="md-header__button md-logo" aria-label="BruteLoops Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            BruteLoops Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Concepts
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="BruteLoops Documentation" class="md-nav__button md-logo" aria-label="BruteLoops Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    BruteLoops Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        BruteLoops Docs
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Concepts
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Concepts
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#control-loop" class="md-nav__link">
+    Control Loop
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#authentication-callback" class="md-nav__link">
+    Authentication Callback
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-management" class="md-nav__link">
+    Data Management
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#breakers" class="md-nav__link">
+    Breakers
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/" class="md-nav__link">
+        Reference
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../package-documentation/" class="md-nav__link">
+        Package Documentation
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../complete_examples/" class="md-nav__link">
+        Complete Attack Examples
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#control-loop" class="md-nav__link">
+    Control Loop
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#authentication-callback" class="md-nav__link">
+    Authentication Callback
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-management" class="md-nav__link">
+    Data Management
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#breakers" class="md-nav__link">
+    Breakers
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+
+
+  <h1>Concepts</h1>
+
+<p>BruteLoops abstracts common logic found in password guessing
+utilties and implements it in a library, allowing it to be reused
+it in any Linux Python application.</p>
+<p>The following flowchart illustrates the classes and methods involved
+with generating a database and initiating an attack.</p>
+<ul>
+<li>The <a href="/pkg-docs/db_manager/#bruteloops.db_manager.Manager"><code>bruteloops.db_manager.Manager</code></a>
+  class provides comprehensive methods to create a database and
+  manage authentication data,
+  i.e. usernames and passwords.</li>
+<li>The <a href="/pkg-docs/brute/#bruteloops.brute.BruteForcer"><code>bruteloops.brute.BruteForcer</code></a>
+  class provides the <code>launch</code> method that initiates a perpetual
+  control loop that orchestrates credentials guesses until all
+  values are exhausted.</li>
+</ul>
+<pre class="mermaid"><code>flowchart
+db-manager("bruteloops.db_manager.Manager")
+db-file("SQLite File")
+brute-forcer("bruteloops.brute.BruteForcer.launch()")
+control-loop((("Control
+    Loop")))
+db-manager --&gt;|Creates/Populates| db-file
+brute-forcer --&gt;|Starts| control-loop
+control-loop --&gt;|Reads/Updates| db-file
+
+loop-note("
+    Orchestrates and guesses
+    credentials")
+loop-note -..-&gt; control-loop</code></pre>
+<p>Remaining sections of this document provide a high-level overview
+of key concepts implementers will need to understand to implement
+the API effectively.</p>
+<h3 id="control-loop">Control Loop</h3>
+<p>The control loop is responsible for orchestrating authentication
+guesses. It queries the SQLite database for credentials that can
+be guessed and sends them to an application-defined authentication
+callback for guessing. It's engaged by instantiating a
+<a href="/pkg-docs/brute/#bruteloops.brute.BruteForcer"><code>bruteloops.brute.BruteForcer</code></a>
+instance with a
+<a href="/pkg-docs/models/#bruteloops.models.Config"><code>bruteloops.models.Config</code></a>
+object and calling the <code>brute()</code> method.</p>
+<p>The diagram below illustrates high-level logic of the control loop
+during execution.</p>
+<pre class="mermaid"><code>flowchart
+
+target("Target Auth. Interface")
+
+wait-for-guessable-creds("Wait for guessable creds")
+get-guessable-creds("Query guessable creds")
+get-guessable-creds --&gt;|"Update
+    timestamps"| record-outcome
+guess-creds("Guess actionable creds")
+auth-callback("Execute Auth. Callback")
+record-outcome("Update DB")
+except{"
+    Exceptions
+    raised?"}
+record-outcome --&gt; except
+exit-loop("Exit Control Loop")
+except --&gt;|Yes| breakers
+
+subgraph except-handling["Exception Handling"]
+    breakers("Breakers")
+    standard-handlers("Standard Handlers")
+    breakers --&gt; breaker-trip
+    breaker-trip{"Breaker
+        tripped?"}
+    breaker-trip --&gt;|No| standard-handlers
+end
+
+except --&gt;|No| attack-finished
+attack-finished{"Attack
+    finished?"}
+attack-finished --&gt;|Yes| exit-loop
+attack-finished --&gt;|No| wait-for-guessable-creds
+breaker-trip --&gt;|Yes| exit-loop
+
+auth-callback --&gt;|Hits| target
+
+
+wait-for-guessable-creds --&gt; get-guessable-creds --&gt; guess-creds
+guess-creds ---&gt;|"
+    Send to
+    callback"| auth-callback
+auth-callback ---&gt;|"
+    Returns
+    outcome"| guess-creds
+guess-creds ---&gt;|"Update cred to
+    valid/invalid"| record-outcome</code></pre>
+<h3 id="authentication-callback">Authentication Callback</h3>
+<p>The authentication callback is a function defined by the implementing
+application. It's passed to the control loop at runtime. The code block
+below outlines the required function signature for authentication callbacks:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">def</span> <span class="nf">my_auth_callback</span><span class="p">(</span><span class="n">username</span><span class="p">:</span><span class="nb">str</span> <span class="n">password</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="sd">&#39;&#39;&#39;Contrived callback to illustrate function signature.</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="sd">    Args:</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="sd">      username: String username to guess.</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="sd">      password: String password to guess.</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="sd">    Returns:</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="sd">      Dictionary value conforming to `bruteloops.model.Output`</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="sd">    &#39;&#39;&#39;</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>    <span class="c1"># Must return a dictionary</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>    <span class="n">out</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">outcome</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>    <span class="c1"># ...guess the credential...</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>    <span class="k">if</span> <span class="n">guess</span><span class="o">.</span><span class="n">valid</span><span class="p">:</span> <span class="n">out</span><span class="p">[</span><span class="s1">&#39;outcome&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>    <span class="k">return</span> <span class="n">out</span>
+</code></pre></div>
+<p>Return value and arguments aside, there are no limitations applied to this
+function. The implementing application can be as creative as it needs to bo
+to guess a given credential.</p>
+<h3 id="data-management">Data Management</h3>
+<p>As mentioned previously, all data is stored and maintained in an SQLite database.
+BruteLoops provides classes and methods to support database interaction. See the
+following for additional information on this:</p>
+<ul>
+<li><a href="/reference/db_management/">Database Management Reference</a> for examples of support
+  components.</li>
+<li><a href="/pkg-docs/sql">SQL Documentation</a> for the database schema.</li>
+</ul>
+<h3 id="breakers">Breakers</h3>
+<p>Breakers behave like circuit breakers, providing a safety capability that will
+terminate an attack when undesirable conditions are observed. This capability is
+provided to avoid sweeping lockout events and denial of service conditions. See
+the following for more information on breakers:</p>
+<ul>
+<li><a href="/reference/breakers">Reference Documentation</a></li>
+<li>Relevant models:<ul>
+<li><a href="/pkg-docs/models/#bruteloops.models.Breaker"><code>bruteloops.models.Breaker</code></a></li>
+<li><a href="/pkg-docs/models/#bruteloops.models.ThresholdBreaker"><code>bruteloops.models.ThresholdBreaker</code></a></li>
+</ul>
+</li>
+</ul>
+
+              
+            </article>
+            
+          </div>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+    <nav class="md-footer__inner md-grid" aria-label="Footer" >
+      
+        
+        <a href=".." class="md-footer__link md-footer__link--prev" aria-label="Previous: BruteLoops Docs" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              BruteLoops Docs
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../reference/" class="md-footer__link md-footer__link--next" aria-label="Next: Reference" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Reference
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.b97dbffb.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.6c7ad80a.min.js"></script>
+      
+    
+  </body>
+</html>
