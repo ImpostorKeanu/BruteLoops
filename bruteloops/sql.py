@@ -9,28 +9,28 @@ class Username(Base):
     '''Tracks username values.
 
     Attributes:
-        id: Row ID.
-        value: String value.
-        recovered: Determines if a valid password has been
-          recovered for the username..
-        actionable: Determines if guesses should be made for a given
-          username, allowing implementers to disable invalid values
-          at execution time.
-        priority: Determines if the username should be prioritized
-          over other non-priority usernames.
-        last_time: Dictates the last time a password was guessed for
-          a username.
-        future_time: The next time a password can be guessed for a
-          username.
-        passwords: A relationship with password values established
-          via the `credentials` table.
-        credentals: A relationship established directly with the
-          `credentials` table.
+      id: Row ID.
+      value (str): String value.
+      recovered (bool): Determines if a valid password has been
+        recovered for the username..
+      actionable (bool): Determines if guesses should be made for a given
+        username, allowing implementers to disable invalid values
+        at execution time.
+      priority (bool): Determines if the username should be prioritized
+        over other non-priority usernames.
+      last_time (float): Dictates the last time a password was guessed for
+        a username.
+      future_time (float): The next time a password can be guessed for a
+        username.
+      passwords: A relationship with password values established
+        via the `credentials` table.
+      credentals: A relationship established directly with the
+        `credentials` table.
 
     Notes:
-        - For simplicity, timestamps are stored as float values.
-        - By default, timestamp values are -1, a value that clearly
-          indicates if the timestamp has been set by BruteLoops logic.
+      - For simplicity, timestamps are stored as float values.
+      - By default, timestamp values are -1, a value that clearly
+        indicates if the timestamp has been set by BruteLoops logic.
     '''
 
     __tablename__ = 'usernames'
@@ -76,17 +76,17 @@ class Password(Base):
     '''Tracks password values.
 
     Attributes:
-        id: Row ID.
-        value: String value.
-        priority: Determines if the password should be prioritized
-          over other non-priority passwords.
-        sprayable: Convenience attribute that determines if a given
-          password can be used in spray attacks.
-        usernames: A relationship established vai the `credentials`
-          table that provides access to all usernames associated with
-          the password.
-        credentials: A directly relationship to the `credentials`
-          table.
+      id: Row ID.
+      value (str): String value.
+      priority (bool): Determines if the password should be prioritized
+        over other non-priority passwords.
+      sprayable (bool): Convenience attribute that determines if a given
+        password can be used in spray attacks.
+      usernames: A relationship established vai the `credentials`
+        table that provides access to all usernames associated with
+        the password.
+      credentials: A directly relationship to the `credentials`
+        table.
     '''
 
     __tablename__ = 'passwords'
@@ -121,19 +121,19 @@ class Credential(Base):
     username/password values at the cost of query complexity.
 
     Attributes:
-        id: Row ID.
-        username_id: Foreign key to `usernames`.
-        password_id: Foreign key to `passwords`.
-        password: Relationship to the associated `Password` object.
-        username: Relationship to the `Username` object.
-        strict_credential: Relationship to the `strict_credentials`
-          table.
-        valid: Determines if the credential record is valid.
-        strict: Determines if the associate password should be used
-          in spray attacks.
-        guessed: Determines if a guess has been made for the
-          credential.
-        guess_time: Determines when the credential was guessed.
+      id: Row ID.
+      username_id (int): Foreign key to `usernames`.
+      password_id (int): Foreign key to `passwords`.
+      password: Relationship to the associated `Password` object.
+      username: Relationship to the `Username` object.
+      strict_credential: Relationship to the `strict_credentials`
+        table.
+      valid (bool): Determines if the credential record is valid.
+      strict (bool): Determines if the associate password should be used
+        in spray attacks.
+      guessed (bool): Determines if a guess has been made for the
+        credential.
+      guess_time (float): Determines when the credential was guessed.
     '''
 
     __tablename__ = 'credentials'
@@ -186,9 +186,9 @@ class StrictCredential(Base):
     and responds faster to queries/joins.
 
     Attributes:
-        id: Row ID.
-        credential_id: ID of the credential that is strict.
-        credential: Relationship to the `Credential` record.
+        id (int): Row ID.
+        credential_id (int): ID of the credential that is strict.
+        credential (int): Relationship to the `Credential` record.
 
     Notes:
       - Database-level cascade is used to remove records from this
@@ -217,9 +217,9 @@ class PriorityCredential(Base):
     fewer records and will respond quickly to queries.
 
     Attributes:
-        id: Row ID.
-        credential_id: ID of the associated credential.
-        credential: Relationship to the credential record.
+        id (int): Row ID.
+        credential_id (int): ID of the associated credential.
+        credential (int): Relationship to the credential record.
 
     Notes:
       - Database-level cascade is used to remove records from this
@@ -243,6 +243,12 @@ class PriorityCredential(Base):
 
 class Attack(Base):
     '''A table to track execution of BruteLoops attacks.
+
+    Attributes:
+      id (int): Id of the attack.
+      start_time (float): Start time of the attack.
+      end_time (float): End time of the attack.
+      complete (bool): Determines if the attack completed.
     '''
 
     __tablename__ = 'attacks'

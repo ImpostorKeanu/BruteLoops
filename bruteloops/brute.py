@@ -19,7 +19,7 @@ from time import sleep, time, gmtime, strftime
 from datetime import datetime, timedelta
 from random import shuffle
 from sys import exit
-from typing import List, Callable
+from typing import List, Callable, Any
 from types import FunctionType, MethodType
 from .models import Output, ExceptionHandler
 
@@ -50,7 +50,20 @@ def wrapped_callback(func:Callable[[str,str], dict], username:str,
 
     try:
 
-        return func(username, password)
+        out = func(username, password)
+
+        if isinstance(out, dict):
+
+            # ==========================================
+            # UPDATE WITH USERNAME/PASSWORD WHEN MISSING
+            # ==========================================
+
+            if not out.get('username', None):
+                out['username'] = username
+            if not out.get('password', None):
+                out['password'] = password
+
+        return out
 
     except Exception as e:
 
@@ -63,7 +76,7 @@ def wrapped_callback(func:Callable[[str,str], dict], username:str,
             exception=e
         )
 
-def peel_credential_ids(container):
+def peel_credential_ids(container: Any):
     '''For each element in the container, traverse the "credential"
     relationship and collect the ID value.
 
@@ -138,7 +151,7 @@ class BruteForcer:
         # REASSIGN DEFAULT SIGNAL HANDLER AND INITIALIZE A PROCESS POOL
         # =============================================================
 
-        original_sigint_handler = signal.signal(signal.SIGINT,signal.SIG_IGN)
+        signal.signal(signal.SIGINT, signal.SIG_IGN)
 
         if use_billiard:
 
@@ -153,7 +166,7 @@ class BruteForcer:
         ki_handler = None
         for eh in self.config.exception_handlers:
             if eh.exception_class == KeyboardInterrupt:
-                ki_handler = eh.exception_class
+                ki_handler = eh.handler
 
         if not ki_handler:
 
@@ -163,11 +176,15 @@ class BruteForcer:
 
             def handler(sig, exception):
 
-                print('SIGINT Captured -- Shutting down ' \
-                      'attack\n')
+                print('\nSIGINT Captured -- Shutting down attack\n')
                 self.shutdown(complete=False)
-                print('Exiting')
+                print('\nExiting\n')
                 exit(sig)
+
+            ki_handler = handler
+
+            self.log.general(f'Setting default exception handler for '
+                'KeyboardInterrupt')
 
             self.config.exception_handlers.append(
                 ExceptionHandler(
@@ -175,13 +192,11 @@ class BruteForcer:
                     handler = handler)
             )
 
-        else:
+        # =================================
+        # SET A USER-DEFINED SIGINT HANDLER
+        # =================================
 
-            # =================================
-            # SET A USER-DEFINED SIGINT HANDLER
-            # =================================
-
-            signal.signal(signal.SIGINT, ki_handler)
+        signal.signal(signal.SIGINT, ki_handler)
 
         # =================
         # HANDLE THE ATTACK
@@ -218,15 +233,41 @@ class BruteForcer:
         recovered = False
         for output in outputs:
 
-            # ==================
-            # IMPLEMENT BREAKERS
-            # ==================
+            # =====================================
+            # IMPLEMENT BREAKERS/EXCEPTION HANDLERS
+            # =====================================
 
             if output.exception is not None:
+
+                breaker_handled, exception_handled = False, False
 
                 # Call breakers
                 for b in self.config.breakers:
                     b.check(output.exception, log=self.log)
+                    if not handled:
+                        handled = True
+
+                # Pass to regular exception handlers
+                for eh in self.config.exception_handlers:
+                    if eh.exception_class == type(output.exception):
+                        eh.handler(output.exception)
+                        if not handled:
+                            handled = True
+
+                if breaker_handled or exception_handled:
+    
+                    msg = f'handled exception: {output.exception}'
+    
+                    if breaker_handled:
+                        msg = 'Breaker ' + msg
+                    else:
+                        msg = 'Exception Handler ' + msg
+    
+                    self.log.general(msg)
+    
+                else:
+    
+                    raise output.exception
 
             # ===============================
             # QUERY FOR THE TARGET CREDENTIAL
@@ -892,15 +933,12 @@ class BruteForcer:
                     self.log.general('Exiting due to breaker trip')
                     return
     
-                # Allow registered handlers to trigger
-                for eh in self.config.exception_handlers:
-                    if eh.exception_class == e:
-                        eh.handler(self)
-
                 # Raise to caller
                 self.log.general(
                     'Unhandled exception occurred. Shutting down attack '\
                     'and returning control to the caller.'
                 )
+
+                self.shutdown(complete=False)
 
                 raise e

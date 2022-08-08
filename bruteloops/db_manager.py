@@ -64,7 +64,8 @@ def check_container(
 
     return wrapper
 
-def scan_dictreader(container:csv.DictReader, as_credentials:bool) -> Tuple[str, str]:
+def scan_dictreader(container:csv.DictReader,
+        as_credentials:bool) -> Tuple[str, str]:
     '''Scan the container and find the username and password keys.
 
     Args:
@@ -78,8 +79,8 @@ def scan_dictreader(container:csv.DictReader, as_credentials:bool) -> Tuple[str,
     Notes:
       - This is a terribly stupid function.
       - Suspect I'd initially thought of searching all headers and
-      hitting on any that contained the "username" and "password"
-      strings.
+        hitting on any that contained the "username" and "password"
+        strings.
 
     Todo:
       - Remove this function and all references in future versions.
@@ -304,128 +305,9 @@ def chunk_container(container:Any, callback:Callable,
 class DBMixin:
     '''This class provides methods for managing SQLite databases
     supporting brute force attacks.
-
-    # Resource Records
-
-    Three (3) types of resources can be managed directly via this
-    mixin:
-
-    1. `usernames` - Representing accounts.
-    2. `passwords` - Passwords that are to be guessed for a username.
-    3. `credentials` - A unit consisting of both a `username` and a
-      password pair.
-
-    Additional records establishing relationships between usernames
-    and passwords are managed by this module as well, though they're
-    managed seamlessly at runtime. These records effectively join
-    these values to form `credentials`.
-
-    - `Credential` - Represents a relationship between a `username`
-      and a `password`.
-    - `StrictCredential` - Similar to a `Credential` but the
-      password is not sprayable. These records are maintained as an
-      efficient lookup table, thus minimizing query times during
-      attack execution.
-
-    The above association records are created when the `as_credentials`
-    flags are passed to various methods.
-
-    ## Methods for Creating Resource Records
-
-    There are individual methods for creating resource records:
-
-    - `insert_username_records`
-    - `insert_password_records`
-    - `insert_credential_records` (`as_credentials` set to `False`)
-
-    `insert_username_records` and `insert_password_records` have an
-    obvious purpose: they insert records into their respective
-    database table.
-
-    However, `insert_credential_records` deserves greater explanation.
-    This method:
-
-    - Accepts a container of delimited strings, e.g. `username:password`
-    - The string is broken out into individual username and password
-      record values and then inserted into the database.
-    - When the `as_credentials` argument is `False`, the values are
-      imported and treated as spray values, i.e. the passwords will
-      be tried for all usernames.
-    - When the `as_credentials` argument is set to `True`, they will be
-      be treated as `StrictCredentials`, i.e. the password will be
-      guessed for usernames which it has been expressly configured for.
-        - However, all other passwords will be guessed for the username
-          after all `StrictCredentials` have been exhausted.
-
-    ## Methods for Deleting Resource Records
-
-    The following methods follow the same semantics described above,
-    except they delete records from the database.
-
-    - `delete_username_records`
-    - `delete_password_records`
-    - `delete_credential_records`
-
-    ## Resource Management Methods
-
-    These methods compliment previously described methods by providing
-    logic to handle containers of various types:
-
-    _Methods:_
-
-    - `manage_values` - Inserts/deletes usernames and passwords.
-    - `manage_credentials` - Inserts/deletes credentials.
-
-    _Container Types:_
-
-    Management methods always accept a list of strings and a flag that
-    determines how values in the list should be treated, e.g. the
-    `is_file` flag indicates that each value points to a file of
-    values.
-
-    - When no `is_file` or `is_csv_file` flag is set, the values
-      are treated as the records to import.
-    - When `is_file` is `True`: values are file paths to newline
-      delimited files for opening.
-    - When `is_csv_file` is `True`: values are file paths to CSV
-      files for parsing. (`manage_credential_values` only)
-
-    ### Example: Usernames from a File, Passwords from List
-
-    _The Username File (`/tmp/usernames.txt`)_
-
-    ```
-    user1
-    user2
-    ```
-
-    _Calling the Method_
-
-    This would populate the database with:
-
-    - 2 usernames from file
-    - 3 spray passwords directly
-    - Produce a total of 6 credentials to guess
-      - `usernames*passwords=total_credentials`
-      - `2*3=6`
-
-    ```python
-    # Import the usernames from disk first
-    dbm.manage_values(
-        model='username',
-        container=['/tmp/usernames.txt'],
-        is_file=True,
-        associate_spray_values=False)
-
-    # Import passwords and associate them with all usernames
-    dbm.manage_values(
-        model='password',
-        container=['p1', 'p2', 'p3'],
-        associate_spray_values=True)
-    ```
     '''
 
-    def do_upsert(self, model, values:list,
+    def do_upsert(self, model:str, values:list,
             index_elements:List[str]=['value'],
             do_update_where:str=None, update_data:dict=None,
             logger:Logger=None):
@@ -505,7 +387,8 @@ class DBMixin:
             password.
           container: A list of string values.
           insert: Determines if values should be inserted (`True`) or
-            deleted (`False`).
+            deleted (`False`). The `is_flag` argument indicates if the
+            values within `container` should be treated as file paths.
           is_file: Indicates if container values point to string file
             paths. When `True`, each file will be accessed and
             imported to the database.
@@ -530,7 +413,7 @@ class DBMixin:
 
         # Derive the target method to call based on action
         method = ('insert' if insert else 'delete') + '_' + \
-                ('username' if model == sql.Username else 'password') + \
+                ('username' if model in (sql.Username,'username',) else 'password') + \
                 '_records'
         method = getattr(self, method)
 
@@ -733,11 +616,15 @@ class DBMixin:
         '''Manage credential values in the database.
 
         Args:
-          container: A list of string values to manage.
+          container: A list of string values to manage. The mutually
+            exclusive `is_file` and `is_csv_file` flags determine how
+            values within this container are managed.
           credential_delimiter: The sequenct to split credential
             records on.
           as_credentials: Determines if values being imported should
             be treated as strict credentials.
+          insert: Determines if values should be inserted (`True`) or
+            deleted (`False`).
           is_file: When `True`, treat each value in `container` as a
             path to a newline delimited file for processing.
           is_csv_file: When `True`, treat each value in `container` as
@@ -747,7 +634,7 @@ class DBMixin:
           logger: Logger for events.
 
         Raises:
-          - `Exception` when `is_file` and `is_csv_file` are set.
+          Exception: when `is_file` and `is_csv_file` are set.
 
         Notes:
           - `is_file` and `is_csv_file` are mutually exclusive.
@@ -879,9 +766,11 @@ class DBMixin:
                 # Associate the newly inserted values
                 if associate_spray_values:
 
-                    self.associate_spray_values(
-                        username_values=usernames,
-                        password_values=passwords)
+                    # Set spray values for new usernames
+                    self.associate_spray_values(username_values=usernames)
+
+                    # Set spray values for these passwords to all usernames
+                    self.associate_spray_values(password_values=passwords)
 
             else:
 
@@ -890,7 +779,7 @@ class DBMixin:
                     values = passwords)
     
                 # Free up memory
-                del(usernames)
+                usernames = list(credentials.keys())
                 del(passwords)
 
                 # Commit database changes
@@ -901,7 +790,7 @@ class DBMixin:
                 # ===============================
     
                 values = []
-                for username in list(credentials.keys()):
+                for username in usernames:
     
                     passwords = credentials[username]
                     del(credentials[username])
@@ -929,12 +818,18 @@ class DBMixin:
                 self.do_upsert(model = sql.Credential,
                     values = values,
                     index_elements=['username_id', 'password_id'])
+                
+                if associate_spray_values:
+
+                    # Associate all sprayable passwords back to the new
+                    # username values
+                    self.associate_spray_values(username_values=usernames)
 
         chunk_container(container = container,
             callback = _upsert_values,
             is_file = not is_dictreader and is_file)
 
-    def sync_lookup_tables(self, logger=None):
+    def sync_lookup_tables(self, logger:Logger=None):
         '''Update the sql.StrictCredential and sql.PriorityCredential tables
         with reference to the proper credential values.
 
@@ -1171,10 +1066,10 @@ class DBMixin:
         '''Prioritize or deprioritize database values.
 
         Args:
-            usernames: A list of string username values.
-            passwords: A list of string password values.
-            prioritize: Boolean determining if the values should be
-              prioritized or deprioritized.
+          usernames: A list of string username values.
+          passwords: A list of string password values.
+          prioritize: Boolean determining if the values should be
+            prioritized or deprioritized.
         '''
 
         if not usernames and not passwords:
@@ -1346,18 +1241,36 @@ class DBMixin:
         return self.get_credentials(strict=True)
 
 class Manager(DBMixin):
+    '''Default class used to interact with SQLite databases.
+    '''
 
-    def __init__(self, db_file):
+    def __init__(self, db_file:str):
+        '''Initialize a Manager object.
+
+        Args:
+          db_file: Path to the database file to manage.
+        '''
+
         self.session_maker = Session(db_file)
+        'Object that makes sessions for the database.'
+
         self.main_db_sess = self.session_maker.new()
+        'Primary session used to interact with the database.'
 
 def _fk_pragma_on_connect(dbapi_con, con_record):
     dbapi_con.execute('pragma foreign_keys=ON')
 
 class Session:
+    '''Session objects are used to create and manage database
+    sessions.
+    '''
 
-    def __init__(self, db_file, echo=False):
+    def __init__(self, db_file:str, echo:bool=False):
         '''Initialize a session object.
+
+        Args:
+          db_file: Path to the database file to manage.
+          echo: Passed to `sqlalchemy.create_engine`.
         '''
 
         # =====================
@@ -1365,9 +1278,7 @@ class Session:
         # =====================
 
         engine = create_engine('sqlite:///'+db_file, echo=echo)
-
         event.listen(engine, 'connect', _fk_pragma_on_connect)
-
         Session = sessionmaker()
         Session.configure(bind=engine)
 

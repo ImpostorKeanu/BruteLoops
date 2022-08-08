@@ -1,3 +1,7 @@
+'''This module defines Pydantic types that are used to enforce
+input validation for implementing programs.
+'''
+
 import inspect
 import datetime
 import time
@@ -36,7 +40,7 @@ def is_exception(t) -> bool:
         True when t is an Exception instance/subtype.
 
     Raises:
-        TypeError when t is not a subtype of Exception.
+        TypeError: when t is not a subtype of Exception.
     '''
 
     # Handle types, i.e. classes
@@ -63,8 +67,8 @@ def check_exceptions(*kwargs:List[str]):
         that kwarg is a known parameter.
 
         Raises:
-            - RuntimeError when kwarg is not a known function
-              parameter.
+          - RuntimeError when kwarg is not a known function
+            parameter.
         '''
 
         # Obtain the signature
@@ -87,7 +91,7 @@ def check_exceptions(*kwargs:List[str]):
             object.
 
             Raises:
-                - TypeError non-exceptions are supplied.
+              - TypeError non-exceptions are supplied.
             '''
 
             # Bind arguments to the signature
@@ -124,7 +128,7 @@ def jitter_str_to_float(s:str, field_name:str) -> float:
         from s.
 
     Raises:
-      ValueError when an improperly formatted s is supplied.
+      ValueError: when an improperly formatted s is supplied.
     '''
 
     match = JitterTime.validate_time(s)
@@ -137,14 +141,11 @@ def jitter_str_to_float(s:str, field_name:str) -> float:
 
     return JitterTime.conv_time_match(match.groupdict())
 
-class Jitter(BaseModel):
+class Jitter(BaseModel, extra=Extra.allow):
     '''Jitter objects are used to determine the amount of time to
     wait between authentication attempts and after the lockout
     threshold is met.
     '''
-
-    class Config:
-        extra = Extra.allow
 
     min: constr(regex=JITTER_RE)
     'Minimum period of time to sleep.'
@@ -217,7 +218,7 @@ class Blackout(BaseModel):
 
         return f'<Blackout(start="{start}" stop="{stop}")>'
 
-class ExceptionHandler(BaseModel):
+class ExceptionHandler(BaseModel, arbitrary_types_allowed=True):
     '''Instances are used to bind functions to an exception_class,
     allowing the control loop to handle arbitrary exceptions.
 
@@ -225,20 +226,14 @@ class ExceptionHandler(BaseModel):
         - Breakers are always engaged before exception handlers.
     '''
 
-    class Config:
-        arbitrary_types_allowed = True
-
     exception_class: Type[BaseException]
     'Exception class to handle.'
 
     handler: Callable[[BaseException], None]
     'Callback to apply to the exception.'
 
-class Output(BaseModel):
+class Output(BaseModel, arbitrary_types_allowed=True):
     '''Model that validates outputs from authentication callbacks.'''
-
-    class Config:
-        arbitrary_types_allowed = True
 
     outcome: GuessOutcome
     'Guess outcome.'
@@ -250,8 +245,8 @@ class Output(BaseModel):
     'Password that was guessed.'
 
     actionable: bool = True
-    'Determines if the username is still actionable, i.e. '
-    'removed/disabled from further guesses.'
+    ('Determines if the username is still actionable, i.e. '
+    'removed/disabled from further guesses.')
 
     events: List[str] = Field(default_factory=list)
     'Events to log.'
@@ -275,7 +270,10 @@ class Outputs(BaseModel):
     'Root type for the Outputs object.'
 
 class Breaker(BaseModel):
-    '''Base class all breakers can inherit from.
+    '''Breakers behave like circuit breakers: when tripped, they will end
+    a brute force attack by throwing a `BreakerTrippedError`. Breakers become
+    tripped when an exception class that is included in `exception_classes`
+    for the breaker is raised during a brute force attack.
     '''
 
     exception_classes: List[Type[Exception]]
@@ -291,47 +289,45 @@ class Breaker(BaseModel):
         '''Callback executed by Breaker.check.
 
         Args:
-            e: Exception instance received by Breaker.check.
+          e: Exception instance received by Breaker.check.
 
         Returns:
-            Boolean value determining if check should call
-              Breaker.trip.
+          Boolean value determining if check should call
+            Breaker.trip.
 
         Notes:
-            - Override this method in subclasses.
-            - The default variation of this method will always
-              return True.
+          - Override this method in subclasses.
+          - The default variation of this method will always
+            return True.
         '''
 
         return True
 
     @check_exceptions('e', 'trip_class')
     def check(self, e:Exception, trip_class:Exception=None,
-            trip_msg=None, log:Logger=None) -> bool:
+            trip_msg:str=None, log:Logger=None) -> bool:
         '''Check an exception and determine if the breaker should be
         tripped.
 
         Args:
-            e: Exception to check.
-            trip_class: Exception class that will be tripped should
-              the breaker be engaged. Otherwise self.trip_class is
-              used.
-            trip_msg: Message that will be passed to the raised
-              exception. Otherwise self.trip_msg is used.
-            log: Logger to send log messages.
-
-        Raises:
-            - Type specified by trip_class or self.trip_class when
-              callback returns a non-None value.
+          e: Exception to check.
+          trip_class: Exception class that will be tripped should
+            the breaker be engaged. Otherwise self.trip_class is
+            used.
+          trip_msg: Message that will be passed to the raised
+            exception. Otherwise self.trip_msg is used.
+          log: Logger to send log messages.
 
         Returns:
-            Boolean indicating if the exception was handled by the
-            breaker.
+          Boolean indicating if the exception was handled by the
+          breaker.
 
         Notes:
-            - callback signature: f(e:Exception) -> bool
-            - trip signature:
-              trip(e:Exception, msg:str, exception_class:Exception)
+          - Raises type specified by trip_class or self.trip_class when
+            callback returns a non-None value.
+          - callback signature: f(e:Exception) -> bool
+          - trip signature:
+            trip(e:Exception, msg:str, exception_class:Exception)
         '''
 
         if log: log.module(f'{type(self).__name__} checked: {e}')
@@ -376,26 +372,34 @@ class Callback(BaseModel):
     authentication_jitter: Jitter = None
     'Time to sleep before returning.'
 
-    def __call__(self, *args, **kwargs) -> Output:
+    def __call__(self, username:str, password:str, *args,
+            **kwargs) -> Output:
         '''Call the authentication callback.
 
         Returns:
             An Output instance.
         '''
 
-        output = self.callback(*args, **kwargs)
+        output = self.callback(username, password,
+            *args, **kwargs)
 
         # Handle bad return type
         if not isinstance(output, dict):
             raise ValueError(CALLBACK_ERR)
 
+        if not output.get('username', None):
+            output['username'] = username
+        if not output.get('password', None):
+            output['password'] = password
+
         try:
             # Validate the output
             output = Output(**output)
 
-        except:
+        except Exception as e:
+
             # Handle poorly formatted dict
-            raise ValueError(CALLBACK_ERR)
+            raise ValueError(CALLBACK_ERR + '({e})')
 
         if self.authentication_jitter:
 
@@ -404,36 +408,14 @@ class Callback(BaseModel):
 
         return output
 
-class ThresholdBreaker(Breaker):
+class ThresholdBreaker(Breaker, validate_assignment=True):
     '''A breaker that throws only when an event has occurred more
     than "threshold" times.
 
     Set the `reset_spec` attribute to a string conforming to the
     jitter timing specification to allow the threshold to timeout
     after a given period of time.
-
-    # Example
-
-    This could configure a breaker that would reset the count after
-    10 minutes of no `ConnectionErrors`.
-
-    ```python
-    breakers = [ThresholdBreaker(
-        threshold=5,
-        exception_classes=[ConnectionError],
-        reset_spec='10m')]
-
-    config = Config(
-        ...
-        breakers=breakers
-        ...)
-    ```
     '''
-
-    class Config:
-
-        validate_assignment = True
-        'Ensure that count is validated each time it\'s set.'
 
     threshold: int = Field(1, gt=0)
     ('Maximum number of times the breaker can be handled before '
@@ -459,7 +441,7 @@ class ThresholdBreaker(Breaker):
           value: Value that is set to the attribute.
 
         Raises:
-          OverflowError when `self.count` > `self.threshold`
+          OverflowError: when `self.count` > `self.threshold`
 
         Notes:
           - Time-based resets are managed here.
@@ -549,13 +531,10 @@ class Breakers(BaseModel):
     __root__: List[Union[Breaker,
         ThresholdBreaker]] = Field(default_factory=list)
 
-class Config(BaseModel):
+class Config(BaseModel, extra=Extra.allow):
     '''A model to support configuration of BruteLoops attacks. It provides
     all input validations and conversions such that only a dictionary
     value is required for initialization.'''
-
-    class Config:
-        extra = Extra.allow
 
     authentication_jitter: Jitter = None
     'Time to sleep between guesses for a given username.'
@@ -588,7 +567,7 @@ class Config(BaseModel):
     log_stderr: bool = False
     'Determines if logs should be sent to stderr.'
 
-    log_stdout: bool = False
+    log_stdout: bool = True
     'Determines if logs should be sent to stdout.'
 
     log_format: str = BLogging.LOG_FORMAT

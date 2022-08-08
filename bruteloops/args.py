@@ -116,6 +116,8 @@ BLACKOUT_WINDOW = (
 '17:00:00-09:00:00')
 
 gp = general_parser = argparse.ArgumentParser(add_help=False)
+('argparse.ArgumentParser for common attack arguments.')
+
 gg = general_group = gp.add_argument_group('General Parameters',
         'Options used to configure general attack parameters')
 gg.add_argument('--parallel-guess-count','-pgc',
@@ -150,6 +152,8 @@ resource for valid values: https://en.wikipedia.org/wiki/List_of_tz_database_tim
 '''
 
 timezone_parser = tz_p = argparse.ArgumentParser(add_help=False)
+('argparse.ArgumentParser object for the Timezone argument.')
+
 tz_p.add_argument('--timezone','-tz',
     action=TimezoneAction,
     required=False,
@@ -161,6 +165,8 @@ tz_p.add_argument('--timezone','-tz',
 
 stp = scheduling_tweaks_parser = argparse.ArgumentParser(
     add_help=False)
+('argparse.ArgumentParser object for tweaking guess scheduling.')
+
 stg = scheduling_tweaks_group = stp.add_argument_group(
     'Scheduling Tweak Parameters',
     'Options used to prioritize username or password values')
@@ -214,6 +220,8 @@ specified by the --auth-threshold argument. Default: %(default)s
 '''
 
 jp = jitter_parser = argparse.ArgumentParser(add_help=False)
+('argparse.ArgumentParser object providing jitter configurations.')
+
 jg = jitter_group = jp.add_argument_group('Jitter Parameters',
         JITTER_DESCRIPTION)
 jg.add_argument('--auth-jitter-min','-ajmin',
@@ -253,6 +261,8 @@ https://docs.python.org/3/library/logging.html#logrecord-attributes
 '''
 
 op = output_parser = argparse.ArgumentParser(add_help=False)
+('argparse.ArgumentParser object providing various output options.')
+
 og = output_group = op.add_argument_group('Output Parameters',
         'Options related to output and logging targets')
 og.add_argument('--log-file','-lf',
@@ -353,6 +363,8 @@ PRIORITIZE_VALUES = \
 '''
 
 ip = input_parser = argparse.ArgumentParser(add_help=False)
+('argparse.ArgumentParser object providing arguments for input options.')
+
 ug = username_group = ip.add_argument_group('Username Configurations',
         'Username value and file parameters')
 ug.add_argument('--usernames','-us',
@@ -415,6 +427,8 @@ al-delimiter" flag has no affect on these inputs.
 '''
 
 cp = credential_parser = argparse.ArgumentParser(add_help=False)
+('argparse.ArgumentParser object with arguments related to ingesting '
+'credential values')
 
 cg = credential_group = cp.add_argument_group(
         'Credential Configurations',
@@ -435,3 +449,4 @@ cg.add_argument('--csv-files',
 
 #bp = brute_parser = argparse.ArgumentParser(parents=[gp,jp,op,lp,ip,cp])
 bp = brute_parser = argparse.ArgumentParser(parents=[gp,jp,op,ip,cp])
+('Comprehensive argparse.ArgumentParser object with all key parent parsers.')

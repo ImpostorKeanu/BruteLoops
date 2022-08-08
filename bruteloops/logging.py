@@ -48,14 +48,14 @@ def lookup_log_level(level:str) -> int:
     '''Derive logging level from string name.
 
     Args:
-        level: Name of the level to reveal.
+      level: Name of the level to reveal.
 
     Returns:
-        `int` logging level.
+      `int` logging level.
 
     Raises:
-        bruteloops.errors.LoggingError when an invalid logginlevel
-          is provided.
+      bruteloops.errors.LoggingError: when an invalid logging level
+        is provided.
     '''
 
     for level_key, synonyms in SYNONYM_LOOKUP.items():
@@ -77,15 +77,15 @@ def init_handler(logger, klass, formatter, log_format=LOG_FORMAT,
     klass_args = klass_args if klass_args else list()
 
     handler = klass(*klass_args)
-    handler.setFormatter(formatter(log_format))
+    handler.setFormatter(formatter(fmt=log_format))
     logger.addHandler(handler)
 
-def do_log(level):
+def do_log(level:int):
     '''Decorator to simplify custom logging levels.
 
     Args:
-        level: The custom level to pass to the decorated
-            logging method.
+      level: The custom level to pass to the decorated
+        logging method.
     '''
 
     def decorator(f):
@@ -107,7 +107,7 @@ class BruteLogger(logging.Logger):
         '''Log sleep events.
 
         Args:
-            m: The string message to log.
+          m: The string message to log.
         '''
 
         pass
@@ -117,7 +117,7 @@ class BruteLogger(logging.Logger):
         '''Log valid credential events.
 
         Args:
-            m: The string message to log.
+          m: The string message to log.
         '''
 
         pass
@@ -127,7 +127,7 @@ class BruteLogger(logging.Logger):
         '''Log invalid credential events.
 
         Args:
-            m: The string message to log.
+          m: The string message to log.
         '''
 
         pass
@@ -137,7 +137,7 @@ class BruteLogger(logging.Logger):
         '''Log invalid username events.
 
         Args:
-            m: The string message to log.
+          m: The string message to log.
         '''
 
         pass
@@ -147,7 +147,7 @@ class BruteLogger(logging.Logger):
         '''Log credential events.
 
         Args:
-            m: The string message to log.
+          m: The string message to log.
         '''
 
         pass
@@ -157,7 +157,7 @@ class BruteLogger(logging.Logger):
         '''Log module events.
 
         Args:
-            m: The string message to log.
+          m: The string message to log.
         '''
 
         pass
@@ -167,7 +167,7 @@ class BruteLogger(logging.Logger):
         '''Log general events.
 
         Args:
-            m: The string message to log.
+          m: The string message to log.
         '''
 
         pass
