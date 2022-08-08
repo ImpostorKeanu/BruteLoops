@@ -1,0 +1,22 @@
+site_name: BruteLoops Documentation
+theme:
+  name: material
+plugins:
+  - mkdocstrings
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+nav:
+  - BruteLoops Docs: index.md
+  - Concepts: concepts.md
+  - Reference: reference.md
+  - Package Documentation: package-documentation.md
+  - Complete Attack Examples: complete_examples.md
