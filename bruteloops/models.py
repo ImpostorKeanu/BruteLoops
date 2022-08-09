@@ -401,10 +401,12 @@ class Callback(BaseModel):
             # Handle poorly formatted dict
             raise ValueError(CALLBACK_ERR + '({e})')
 
-        if self.authentication_jitter:
+        finally:
 
-            # Do authentication jitter
-            self.authentication_jitter.sleep()
+            if self.authentication_jitter:
+
+                # Do authentication jitter
+                self.authentication_jitter.sleep()
 
         return output
 
