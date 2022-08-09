@@ -254,7 +254,7 @@ LOG_LEVEL = \
 '''Determines the logging level. Default: %(default)s
 '''
 
-LOG_FORMAT = \
+LOG_FORMAT_HELP = \
 '''Logging format string. Default %(default)s . See this URL for
 information on the available attributes: 
 https://docs.python.org/3/library/logging.html#logrecord-attributes
@@ -275,7 +275,7 @@ og.add_argument('--log-stdout',
         dest='log_stdout')
 og.add_argument('--log-format',
         default=LOG_FORMAT,
-        help=LOG_FORMAT)
+        help=LOG_FORMAT_HELP)
 og.add_argument('--log-level',
         choices=('general',
             'valid-credentials',
