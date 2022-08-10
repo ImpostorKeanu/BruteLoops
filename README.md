@@ -47,6 +47,10 @@ lockout policies can be matched 1-to-1 using BruteLoop's parameters:
 - **Logging** - Each authentication event can optionally logged to disk.
   This information can be useful during red teams by providing customers
   with a detailed attack timeline that can be mapped back to logged events.
+- **Breakers** - Breakers behave like circuit breakers. An exception can
+  be raised *x* number of times before ending the attack loop. They can
+  reset after a given period of time as well, allowing for configurations
+  like "Exit after 6 ConnectionErrors occur".
 
 # Dependencies
 
