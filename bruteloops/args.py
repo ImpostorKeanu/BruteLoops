@@ -273,9 +273,9 @@ og.add_argument('--log-stdout',
         default=True,
         help=LOG_STDOUT,
         dest='log_stdout')
-og.add_argument('--log-format',
-        default=LOG_FORMAT,
-        help=LOG_FORMAT_HELP)
+#og.add_argument('--log-format',
+#        default=LOG_FORMAT,
+#        help=LOG_FORMAT_HELP)
 og.add_argument('--log-level',
         choices=('general',
             'valid-credentials',
