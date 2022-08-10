@@ -5,6 +5,7 @@ input validation for implementing programs.
 import inspect
 import datetime
 import time
+import re
 from .enums import *
 from .jitter import *
 from .brute_time import BruteTime
@@ -32,6 +33,7 @@ from functools import wraps
 from random import uniform
 
 EXCEPT_TYPES = (Exception, BaseException,)
+EJP = EMPTY_JITTER_PAT = re.compile('^(0(\.0+)?(s|m|h)|None)$')
 
 def is_exception(t) -> bool:
     '''Ensure t is an Exeception instance/subtype.
@@ -158,10 +160,12 @@ class Jitter(BaseModel, extra=Extra.allow):
 
         jt = jitter_str_to_float(v, field.name)
 
-        if field.name == 'max' and values['min'] > jt:
-            raise ValueError(
-                'Jitter minimum must be <= maximum. Got: '
-                f'{values["min"]} >= {jt} = True')
+        if field.name == 'max':
+            min = values.get('min')
+            if not min or (min > jt):
+                raise ValueError(
+                    'Jitter minimum must be <= maximum. Got: '
+                    f'{min} >= {jt}')
 
         return jt
 
@@ -369,7 +373,7 @@ class Callback(BaseModel):
     callback: Callable[[str, str], dict]
     'Callback to execute.'
 
-    authentication_jitter: Jitter = None
+    authentication_jitter: Union[Jitter, None] = None
     'Time to sleep before returning.'
 
     def __call__(self, username:str, password:str, *args,
@@ -611,7 +615,9 @@ class Config(BaseModel, extra=Extra.allow):
 
         return Callback(
             callback=v,
-            authentication_jitter=values['authentication_jitter'])
+            authentication_jitter=values.get(
+                'authentication_jitter',
+                None))
 
     @validator('timezone')
     def v_timezone(cls, tz):
@@ -629,6 +635,29 @@ class Config(BaseModel, extra=Extra.allow):
         return getattr(BLogging, v.name)
 
     def __init__(self, *args, **kwargs):
+
+        # ====================
+        # REMOVE EMPTY JITTERS
+        # ====================
+
+        for k in ('authentication_jitter', 'max_auth_jitter',):
+            jitter = kwargs.get(k)
+
+            if not jitter:
+                if k in kwargs:
+                    del(kwargs[k])
+                continue
+
+            min, max = jitter.get('min', ''), jitter.get('max','')
+
+            if (not min and not max) or \
+                    (EJP.match(min) and EJP.match(max)):
+                del(kwargs[k])
+                continue
+
+        # =====================
+        # FINISH INITIALIZATION
+        # =====================
 
         super().__init__(*args, **kwargs)
 
