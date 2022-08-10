@@ -253,7 +253,7 @@ def csv_split(s,delimiter=','):
 
     ind=s.find(delimiter)
     if ind == -1: return (None,None,)
-    return (s[:ind],s[ind+1:],)
+    return (s[:ind],s[ind+len(delimiter):],)
 
 @check_container
 def chunk_container(container:Any, callback:Callable,
